@@ -1,7 +1,7 @@
-# vibeeng
+# vibe-engineering
 
 Vibe engineering skills for [Claude Code](https://claude.com/claude-code).
-The repository is a Claude Code plugin named `vibeeng`, so every skill in it
+This repository is a Claude Code plugin named `vibeeng`, so every skill in it
 is called `vibeeng:<skill>`.
 
 ## Install
@@ -9,7 +9,7 @@ is called `vibeeng:<skill>`.
 In Claude Code:
 
 ```
-/plugin marketplace add gelonezi/vibeeng
+/plugin marketplace add gelonezi/vibe-engineering
 /plugin install vibeeng@vibeeng
 ```
 

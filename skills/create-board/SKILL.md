@@ -3,15 +3,16 @@ name: create-board
 description: Create a GitHub Projects board for iterative development (Draft, Backlog, Ready, In progress, In review, Done columns, plus iterations, estimates and views like Current iteration, Next iteration, Prioritized backlog, Roadmap, In review, My items). Use when the user wants to create, set up or bootstrap a GitHub project board, planner, kanban, sprint or iteration board, for their account, an organization, or a repository.
 ---
 
-# vibeeng:create-board
+# vibe-engineering:create-board
 
 Creates a GitHub Projects board by copying the public **Iterative development**
 template, then sets its visibility and, if asked, links it to a repository.
 The board is specified in [references/board-spec.md](references/board-spec.md).
 
-Every GitHub call goes through two scripts in `scripts/` next to this file.
-Run them with `bash <skill-dir>/scripts/<name>.sh`. Never guess IDs: get each
-one from a script's output.
+Every GitHub call goes through two scripts in the plugin's `scripts/` folder.
+Run them with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below
+shorten that to `bash scripts/<name>.sh`. Never guess IDs: get each one from a
+script's output.
 
 ## 1. Check GitHub access
 
@@ -104,7 +105,7 @@ Use this only after the user agrees to it in step 4.
 
 The template can be changed with environment variables:
 
-- `VIBEENG_TEMPLATE_OWNER` (default `gelonezi`)
-- `VIBEENG_TEMPLATE_TITLE` (default `Iterative development`)
-- `VIBEENG_TEMPLATE_NUMBER` (optional; looks the project up by number instead of by title)
+- `VIBE_ENGINEERING_TEMPLATE_OWNER` (default `gelonezi`)
+- `VIBE_ENGINEERING_TEMPLATE_TITLE` (default `Iterative development`)
+- `VIBE_ENGINEERING_TEMPLATE_NUMBER` (optional; looks the project up by number instead of by title)
 - `GH_HOST` (for GitHub Enterprise Server)

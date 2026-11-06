@@ -1,6 +1,6 @@
 # Board spec: "Iterative development"
 
-The board `vibeeng:create-board` produces. It follows GitHub's built-in
+The board `vibe-engineering:create-board` produces. It follows GitHub's built-in
 **Iterative development** template, as set up in the reference project
 (Planner, `https://github.com/orgs/se-oriente-solucoes/projects/1`).
 
@@ -29,8 +29,6 @@ Column limits are a view setting (board column menu → *Set limit*).
 | Size       | Single select | XS, S, M, L, XL                |
 | Estimate   | Number        | Summed in each column header   |
 | Iteration  | Iteration     | 2-week iterations              |
-| Start date | Date          |                                |
-| End date   | Date          |                                |
 
 The fallback build's Priority/Size colors and iteration length are best
 guesses. The template copy is the source of truth.
@@ -42,7 +40,7 @@ guesses. The template copy is the source of truth.
 | 1 | Current iteration   | Board   | `iteration:@current`  | Columns by Status, sum of Estimate      |
 | 2 | Next iteration      | Board   | `iteration:@next`     | Columns by Status                       |
 | 3 | Prioritized backlog | Board   | (none)                | Sort by Priority                        |
-| 4 | Roadmap             | Roadmap | (none)                | Dates from Iteration / Start / End date |
+| 4 | Roadmap             | Roadmap | (none)                | Dates from Iteration                    |
 | 5 | In review           | Table   | `status:"In review"`  |                                         |
 | 6 | My items            | Table   | `assignee:@me`        |                                         |
 

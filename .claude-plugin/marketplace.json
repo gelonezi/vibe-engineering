@@ -1,12 +1,12 @@
 {
-  "name": "vibeeng",
+  "name": "vibe-engineering",
   "owner": {
     "name": "gelonezi",
     "url": "https://github.com/gelonezi"
   },
   "plugins": [
     {
-      "name": "vibeeng",
+      "name": "vibe-engineering",
       "source": "./",
       "description": "Vibe engineering skills for Claude Code: project boards, planning and delivery workflows on GitHub."
     }

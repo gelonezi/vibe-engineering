@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Small wrapper around the GitHub Projects (v2) GraphQL API, used by the
-# vibeeng:create-board skill. Needs only the GitHub CLI (gh); no jq.
+# vibe-engineering skills. Needs only the GitHub CLI (gh); no jq.
 #
 # Usage: projects.sh <command> [args]
 #
@@ -16,17 +16,25 @@
 #   set-public <projectId> <true|false> Change visibility
 #   link <projectId> <repoId>           Link the project to a repository
 #   verify <projectId>                  JSON: views, fields, status options, iterations, repos
-#   build <ownerId> <title>             Fallback: create the board from scratch (see references/board-spec.md)
+#   build <ownerId> <title>             Fallback: create the board from scratch (see create-board's references/board-spec.md)
+#   board <link|name>                   The board the user named, by link or by name (any case, in your
+#                                       account and organizations): "<number>\t<id>\t<title>\t<url>"
+#   list <ownerLogin> [search]          Open projects of an owner: "<number>\t<id>\t<title>\t<url>"
+#   draft-create <projectId> <title> <bodyFile>
+#                                       Add a draft issue, body read from a file: "<itemId>"
+#   set-status <projectId> <itemId> <status>
+#                                       Set an item's Status by option name, prints the name read back
+#   item-status <itemId>                Print an item's current Status
 #
 # Template settings (environment variables):
-#   VIBEENG_TEMPLATE_OWNER   default: gelonezi
-#   VIBEENG_TEMPLATE_TITLE   default: Iterative development
-#   VIBEENG_TEMPLATE_NUMBER  optional; when set, used instead of the title lookup
+#   VIBE_ENGINEERING_TEMPLATE_OWNER   default: gelonezi
+#   VIBE_ENGINEERING_TEMPLATE_TITLE   default: Iterative development
+#   VIBE_ENGINEERING_TEMPLATE_NUMBER  optional; when set, used instead of the title lookup
 set -euo pipefail
 
-TEMPLATE_OWNER="${VIBEENG_TEMPLATE_OWNER:-gelonezi}"
-TEMPLATE_TITLE="${VIBEENG_TEMPLATE_TITLE:-Iterative development}"
-TEMPLATE_NUMBER="${VIBEENG_TEMPLATE_NUMBER:-}"
+TEMPLATE_OWNER="${VIBE_ENGINEERING_TEMPLATE_OWNER:-gelonezi}"
+TEMPLATE_TITLE="${VIBE_ENGINEERING_TEMPLATE_TITLE:-Iterative development}"
+TEMPLATE_NUMBER="${VIBE_ENGINEERING_TEMPLATE_NUMBER:-}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 gql() { gh api graphql "$@"; }
@@ -208,9 +216,7 @@ case "$cmd" in
         { name: "XL", color: RED,    description: "" }
       ] }) { clientMutationId } }'
 
-    step "Estimate field"   'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: NUMBER, name: "Estimate" })   { clientMutationId } }'
-    step "Start date field" 'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: DATE,   name: "Start date" }) { clientMutationId } }'
-    step "End date field"   'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: DATE,   name: "End date" })   { clientMutationId } }'
+    step "Estimate field" 'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: NUMBER, name: "Estimate" }) { clientMutationId } }'
 
     today="$(date +%Y-%m-%d)"
     step "Iteration field" "
@@ -220,8 +226,80 @@ case "$cmd" in
     echo "VIEWS	manual	This script does not create views: set them up by hand, see references/board-spec.md"
     ;;
 
+  board)
+    [ $# -eq 1 ] || die "usage: board <link|name>"
+    case "$1" in
+      *://*)
+        # https://github.com/orgs/<login>/projects/<n> or .../users/<login>/projects/<n>, with or without a view
+        case "$1" in
+          */orgs/*/projects/[0-9]*|*/users/*/projects/[0-9]*) ;;
+          *) die "not a link to a GitHub Projects board: $1" ;;
+        esac
+        login="$(printf '%s' "$1" | sed -E 's#.*/(orgs|users)/([^/]+)/projects/.*#\2#')"
+        number="$(printf '%s' "$1" | sed -E 's#.*/projects/([0-9]+).*#\1#')"
+        line="$(bash "$0" get "$login" "$number")"
+        IFS=$'\t' read -r id title _ url <<<"$line"
+        printf '%s\t%s\t%s\t%s\n' "$number" "$id" "$title" "$url"
+        ;;
+      *)
+        for login in "$(bash "$0" whoami)" $(bash "$0" orgs); do
+          bash "$0" list "$login" "$1" | awk -F'\t' -v t="$1" 'tolower($3) == tolower(t)' || true
+        done
+        ;;
+    esac
+    ;;
+
+  list)
+    [ $# -ge 1 ] && [ $# -le 2 ] || die "usage: list <ownerLogin> [search]"
+    gql -f login="$1" -f q="${2:-}" -f query='
+      query($login: String!, $q: String!) {
+        repositoryOwner(login: $login) {
+          ... on User         { projectsV2(first: 50, query: $q) { nodes { number id title url closed } } }
+          ... on Organization { projectsV2(first: 50, query: $q) { nodes { number id title url closed } } }
+        }
+      }' \
+      --jq '.data.repositoryOwner.projectsV2.nodes[]? | select(.closed | not) | [.number, .id, .title, .url] | @tsv'
+    ;;
+
+  draft-create)
+    [ $# -eq 3 ] || die "usage: draft-create <projectId> <title> <bodyFile>"
+    [ -f "$3" ] || die "body file not found: $3"
+    # -F body=@file reads the body from the file, so quotes and newlines survive.
+    gql -f p="$1" -f t="$2" -F body=@"$3" -f query='
+      mutation($p: ID!, $t: String!, $body: String) {
+        addProjectV2DraftIssue(input: { projectId: $p, title: $t, body: $body }) { projectItem { id } }
+      }' \
+      --jq '.data.addProjectV2DraftIssue.projectItem.id'
+    ;;
+
+  set-status)
+    [ $# -eq 3 ] || die "usage: set-status <projectId> <itemId> <status>"
+    status_line="$(gql -f p="$1" -f query='
+      query($p: ID!) {
+        node(id: $p) { ... on ProjectV2 { field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } } } }
+      }' \
+      --jq '.data.node.field | .id as $f | .options[] | [$f, .id, .name] | @tsv' \
+      | awk -F'\t' -v s="$3" '$3 == s { print $1 "\t" $2; exit }')"
+    [ -n "$status_line" ] || die "this board's Status field has no option named: $3"
+    IFS=$'\t' read -r status_field status_option <<<"$status_line"
+    gql -f p="$1" -f i="$2" -f f="$status_field" -f o="$status_option" -f query='
+      mutation($p: ID!, $i: ID!, $f: ID!, $o: String!) {
+        updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { singleSelectOptionId: $o } }) { clientMutationId }
+      }' >/dev/null
+    bash "$0" item-status "$2"
+    ;;
+
+  item-status)
+    [ $# -eq 1 ] || die "usage: item-status <itemId>"
+    gql -f i="$1" -f query='
+      query($i: ID!) {
+        node(id: $i) { ... on ProjectV2Item { fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } } } }
+      }' \
+      --jq '.data.node.fieldValueByName.name // ""'
+    ;;
+
   ""|-h|--help|help)
-    sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'
     ;;
 
   *)

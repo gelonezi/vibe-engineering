@@ -1,0 +1,12 @@
+{
+  "name": "vibeeng",
+  "version": "0.1.0",
+  "description": "Vibe engineering skills for Claude Code: project boards, planning and delivery workflows on GitHub.",
+  "author": {
+    "name": "gelonezi",
+    "url": "https://github.com/gelonezi"
+  },
+  "homepage": "https://github.com/gelonezi/vibeeng",
+  "repository": "https://github.com/gelonezi/vibeeng",
+  "keywords": ["github", "projects", "planning", "iterations", "kanban"]
+}

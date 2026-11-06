@@ -54,18 +54,11 @@ skills/
 
 ## Maintainers: the board template
 
-`vibe-engineering:create-board` copies the public project titled **Iterative
-development** in the `gelonezi` account. To publish or refresh it from the
-reference board (`se-oriente-solucoes`, project 1), run:
+`vibe-engineering:create-board` copies
+[project 4 in the `gelonezi` account](https://github.com/users/gelonezi/projects/4),
+which was made from GitHub's built-in **Iterative development** template, with a
+Draft column added. It's public, so keep it free of real work. Changes made there
+reach new boards only.
 
-```bash
-cd scripts
-src=$(bash projects.sh get se-oriente-solucoes 1 | cut -f1)
-owner=$(bash projects.sh owner gelonezi | cut -f1)
-new=$(bash projects.sh copy "$owner" "$src" "Iterative development")
-bash projects.sh set-public "$(echo "$new" | cut -f1)" true
-echo "$new"
-```
-
-Keep exactly one public project with that title in the account, or set
-`VIBE_ENGINEERING_TEMPLATE_NUMBER` to choose one.
+To copy a different project, set `VIBE_ENGINEERING_TEMPLATE_OWNER` and
+`VIBE_ENGINEERING_TEMPLATE_NUMBER`.

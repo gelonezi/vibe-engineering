@@ -28,13 +28,11 @@
 #
 # Template settings (environment variables):
 #   VIBE_ENGINEERING_TEMPLATE_OWNER   default: gelonezi
-#   VIBE_ENGINEERING_TEMPLATE_TITLE   default: Iterative development
-#   VIBE_ENGINEERING_TEMPLATE_NUMBER  optional; when set, used instead of the title lookup
+#   VIBE_ENGINEERING_TEMPLATE_NUMBER  default: 4
 set -euo pipefail
 
 TEMPLATE_OWNER="${VIBE_ENGINEERING_TEMPLATE_OWNER:-gelonezi}"
-TEMPLATE_TITLE="${VIBE_ENGINEERING_TEMPLATE_TITLE:-Iterative development}"
-TEMPLATE_NUMBER="${VIBE_ENGINEERING_TEMPLATE_NUMBER:-}"
+TEMPLATE_NUMBER="${VIBE_ENGINEERING_TEMPLATE_NUMBER:-4}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 gql() { gh api graphql "$@"; }
@@ -95,14 +93,7 @@ case "$cmd" in
     ;;
 
   template)
-    if [ -n "$TEMPLATE_NUMBER" ]; then
-      bash "$0" get "$TEMPLATE_OWNER" "$TEMPLATE_NUMBER"
-    else
-      match="$(bash "$0" find "$TEMPLATE_OWNER" "$TEMPLATE_TITLE" | awk -F'\t' '$3 == "true"' | head -n 1)"
-      [ -n "$match" ] || die "no public project titled '$TEMPLATE_TITLE' found for $TEMPLATE_OWNER"
-      IFS=$'\t' read -r number _ _ _ _ <<<"$match"
-      bash "$0" get "$TEMPLATE_OWNER" "$number"
-    fi
+    bash "$0" get "$TEMPLATE_OWNER" "$TEMPLATE_NUMBER"
     ;;
 
   copy)
@@ -299,7 +290,7 @@ case "$cmd" in
     ;;
 
   ""|-h|--help|help)
-    sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'
     ;;
 
   *)

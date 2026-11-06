@@ -1,11 +1,13 @@
 # Board spec: "Iterative development"
 
 The board `vibe-engineering:create-board` produces. It follows GitHub's built-in
-**Iterative development** template, as set up in the reference project
-(Planner, `https://github.com/orgs/se-oriente-solucoes/projects/1`).
+**Iterative development** template, plus a **Draft** column, which is where the
+vibe-engineering flow starts and which GitHub's template doesn't have.
 
-The normal path **copies the public template project**, so everything below
-comes across exactly as the template has it. This file is only needed for the
+The API can't copy GitHub's built-in template directly, so the normal path
+**copies the public template project**
+(`https://github.com/users/gelonezi/projects/4`), a project made from it.
+Everything below comes across exactly as that project has it. This file is only needed for the
 fallback build (template unreachable), and as the checklist for what to verify.
 
 ## Status field (board columns)

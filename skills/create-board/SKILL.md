@@ -5,8 +5,8 @@ description: Create a GitHub Projects board for iterative development (Draft, Ba
 
 # vibe-engineering:create-board
 
-Creates a GitHub Projects board by copying the public **Iterative development**
-template, then sets its visibility and, if asked, links it to a repository.
+Creates a GitHub Projects board by copying a public template project, then sets
+its visibility and, if asked, links it to a repository.
 The board is specified in [references/board-spec.md](references/board-spec.md).
 
 Every GitHub call goes through two scripts in the plugin's `scripts/` folder.
@@ -106,6 +106,5 @@ Use this only after the user agrees to it in step 4.
 The template can be changed with environment variables:
 
 - `VIBE_ENGINEERING_TEMPLATE_OWNER` (default `gelonezi`)
-- `VIBE_ENGINEERING_TEMPLATE_TITLE` (default `Iterative development`)
-- `VIBE_ENGINEERING_TEMPLATE_NUMBER` (optional; looks the project up by number instead of by title)
+- `VIBE_ENGINEERING_TEMPLATE_NUMBER` (default `4`)
 - `GH_HOST` (for GitHub Enterprise Server)

@@ -19,9 +19,12 @@ In Claude Code:
 |---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `vibe-engineering:create-board` | Creates a GitHub Projects board for iterative development (Draft → Done columns, iterations, estimates, six views) for your account, an organization, or a repository. |
 | `vibe-engineering:create-item`  | Helps you shape a new idea and adds it to the board as a Draft item. |
+| `vibe-engineering:help`         | Opens an illustrated page that explains the flow, every skill and the rules, and answers questions about them. |
+| `vibe-engineering:update`       | Updates the plugin to the latest published version and lists what changed. |
 
 The full flow, including the skills still to come, is in
-[docs/concept.md](docs/concept.md).
+[docs/concept.md](docs/concept.md). Ask `vibe-engineering:help` for the same
+thing as a page.
 
 ## Requirements
 
@@ -50,7 +53,17 @@ skills/
   <skill-name>/
     SKILL.md           instructions Claude follows
     references/        specs and docs the skill reads when needed
+    scripts/           helper scripts only this skill uses
+    assets/            files the skill shows the user, such as the help page
 ```
+
+## Maintainers: releasing a change
+
+1. Bump `version` in `.claude-plugin/plugin.json`. `vibe-engineering:update`
+   reports the installed and published commits, and tells the user how to force
+   a reinstall when a push didn't come with a bump.
+2. Keep `README.md`, `docs/concept.md` and `skills/help/assets/help.html` in
+   step: the help page is written by hand and says which skills exist.
 
 ## Maintainers: the board template
 

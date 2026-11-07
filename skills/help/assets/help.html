@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vibe-engineering help</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2128; --muted: #59636e; --line: #d9dee3;
+    --accent: #0969da; --accent-ink: #ffffff; --code-bg: #eef1f4; --shadow: 0 1px 2px rgba(20, 30, 40, .06);
+    --draft: #8b949e; --backlog: #2da44e; --ready: #0969da; --progress: #bf8700; --review: #8250df; --done: #e16f24;
+    --ok-bg: #dafbe1; --ok-ink: #116329; --soon-bg: #eef1f4; --soon-ink: #59636e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1117; --panel: #161b22; --ink: #e6edf3; --muted: #9da7b3; --line: #30363d;
+      --accent: #58a6ff; --accent-ink: #0d1117; --code-bg: #1f252d; --shadow: none;
+      --draft: #8b949e; --backlog: #3fb950; --ready: #58a6ff; --progress: #d29922; --review: #a371f7; --done: #db6d28;
+      --ok-bg: #12351f; --ok-ink: #56d364; --soon-bg: #1f252d; --soon-ink: #9da7b3;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace; font-size: .92em; }
+  code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0 0; }
+  pre code { background: none; padding: 0; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
+  header { padding: 56px 0 24px; }
+  header h1 { margin: 0; font-size: 2.4rem; letter-spacing: -.02em; }
+  header .tag { margin: 6px 0 0; font-size: 1.2rem; color: var(--muted); }
+  header .intro { margin-top: 18px; max-width: 70ch; font-size: 1.05rem; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  nav.toc a {
+    text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--panel); color: var(--ink); font-size: .92rem;
+  }
+  section { margin-top: 48px; }
+  section h2 { font-size: 1.55rem; margin: 0 0 6px; letter-spacing: -.01em; }
+  section > p.lead { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+
+  /* The flow across the board */
+  .flow { display: flex; align-items: stretch; }
+  .step { display: flex; align-items: stretch; flex: 1 1 0; min-width: 0; }
+  .step:last-child { flex: 0 1 auto; }
+  .col {
+    flex: 1 1 0; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c);
+    border-radius: 10px; padding: 10px 12px; box-shadow: var(--shadow);
+  }
+  .col b { display: block; font-size: .95rem; }
+  .col small { color: var(--muted); display: block; line-height: 1.35; margin-top: 2px; font-size: .8rem; }
+  .arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 92px; padding: 0 3px; }
+  .arrow code { font-size: .72rem; white-space: nowrap; }
+  .arrow svg { width: 100%; height: 14px; display: block; margin-top: 4px; }
+  .arrow svg line, .arrow svg polyline { stroke: var(--muted); stroke-width: 2; fill: none; }
+  .loop { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--review); background: var(--panel); border-radius: 0 8px 8px 0; }
+  @media (max-width: 1000px) {
+    .flow { flex-direction: column; }
+    .step { flex-direction: column; }
+    .step:last-child .col { flex: 1 1 auto; }
+    .arrow { flex: 0 0 auto; flex-direction: row; gap: 10px; padding: 6px 0 6px 20px; }
+    .arrow svg { width: 40px; height: 14px; margin: 0; }
+  }
+
+  /* Skill cards */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card header { padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card h3 { margin: 0; font-size: 1.05rem; }
+  .badge { font-size: .74rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .badge.ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .badge.soon { background: var(--soon-bg); color: var(--soon-ink); }
+  .card p { margin: 0; }
+  .card dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: .92rem; }
+  .card dt { color: var(--muted); }
+  .card dd { margin: 0; }
+  .card .ask { font-size: .9rem; color: var(--muted); margin-top: auto; }
+  .card .ask span { color: var(--ink); font-style: italic; }
+
+  /* Steps and rules */
+  ol.steps { padding-left: 0; list-style: none; counter-reset: s; display: grid; gap: 12px; }
+  ol.steps li { position: relative; padding: 14px 16px 14px 58px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  ol.steps li::before {
+    counter-increment: s; content: counter(s); position: absolute; left: 16px; top: 14px; width: 28px; height: 28px;
+    border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: grid; place-items: center;
+  }
+  ol.steps li b { display: block; margin-bottom: 2px; }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+  .rule { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .rule b { display: block; margin-bottom: 4px; }
+  .rule p { margin: 0; color: var(--muted); font-size: .95rem; }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: .92rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>vibe-engineering</h1>
+  <p class="tag">From a rough idea to merged code, one board item at a time.</p>
+  <p class="intro">A set of Claude Code skills that move your work across a GitHub Projects board. Each skill takes an item from one column to the next, and writes what it learned into the item, so the next skill can start from there.</p>
+  <nav class="toc">
+    <a href="#flow">The flow</a>
+    <a href="#skills">The skills</a>
+    <a href="#start">Getting started</a>
+    <a href="#rules">The rules</a>
+    <a href="#know">Good to know</a>
+  </nav>
+</header>
+
+<section id="flow">
+  <h2>The flow</h2>
+  <p class="lead">The board has six columns. A skill moves an item along each arrow, and the item carries everything the next skill needs.</p>
+  <div class="flow">
+    <div class="step">
+      <div class="col" style="--c: var(--draft)"><b>Draft</b><small>An idea, still growing</small></div>
+      <div class="arrow"><code>promote-backlog</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
+    </div>
+    <div class="step">
+      <div class="col" style="--c: var(--backlog)"><b>Backlog</b><small>Has a design</small></div>
+      <div class="arrow"><code>promote-ready</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
+    </div>
+    <div class="step">
+      <div class="col" style="--c: var(--ready)"><b>Ready</b><small>Has a spec</small></div>
+      <div class="arrow"><code>develop</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
+    </div>
+    <div class="step">
+      <div class="col" style="--c: var(--progress)"><b>In progress</b><small>On a branch</small></div>
+      <div class="arrow"><code>push</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
+    </div>
+    <div class="step">
+      <div class="col" style="--c: var(--review)"><b>In review</b><small>PR open</small></div>
+      <div class="arrow"><code>approve</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
+    </div>
+    <div class="step">
+      <div class="col" style="--c: var(--done)"><b>Done</b><small>Merged</small></div>
+    </div>
+  </div>
+  <p class="loop"><b>Before the board:</b> <code>create-board</code> makes the board, and <code>create-item</code> puts a new idea in Draft.
+  <b>Review fixes:</b> when a review leaves comments, <code>develop</code> takes the item back to In progress, and <code>push</code> updates the same PR.</p>
+</section>
+
+<section id="skills">
+  <h2>The skills</h2>
+  <p class="lead">Every skill is called <code>vibe-engineering:&lt;name&gt;</code>. You can type it as a slash command, or just ask in plain words.</p>
+  <div class="grid">
+
+    <article class="card">
+      <header><h3>create-board</h3><span class="badge ok">Available</span></header>
+      <p>Creates a GitHub Projects board for your account, an organization, or a repository, by copying a public template.</p>
+      <dl><dt>Gives you</dt><dd>Six columns, Priority, Size, Estimate, two-week iterations, and six views</dd></dl>
+      <p class="ask">Ask: <span>"Create a board for my repo acme/shop"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>create-item</h3><span class="badge ok">Available</span></header>
+      <p>Turns a new idea into a Draft item. It reads your software first, then asks about the gaps it finds, until you say the idea is right.</p>
+      <dl><dt>Picks up</dt><dd>Something you say, as rough as you like</dd><dt>Writes</dt><dd><code>## Idea</code></dd><dt>Ends in</dt><dd>Draft</dd></dl>
+      <p class="ask">Ask: <span>"I think we should track stock per warehouse. Board: Planner"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>promote-backlog</h3><span class="badge soon">Planned</span></header>
+      <p>Takes a Draft item, or lets you pick one from the Draft column, and works out a high-level design with you. The draft becomes a real issue.</p>
+      <dl><dt>Picks up</dt><dd>A Draft item</dd><dt>Writes</dt><dd><code>## High-level design</code></dd><dt>Ends in</dt><dd>Backlog</dd></dl>
+      <p class="ask">Ask: <span>"Promote the stock idea to the backlog"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>promote-ready</h3><span class="badge soon">Planned</span></header>
+      <p>Plans the implementation with spec-driven development, and splits the work until each item is one pull request's worth.</p>
+      <dl><dt>Picks up</dt><dd>A Backlog item with a design</dd><dt>Writes</dt><dd><code>## Spec</code>, Size, Estimate</dd><dt>Ends in</dt><dd>Ready</dd></dl>
+      <p class="ask">Ask: <span>"Get the stock item ready"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>develop</h3><span class="badge soon">Planned</span></header>
+      <p>Implements the item on a branch, following the destination repository's own rules and nothing but the item's text. Also takes an item back from review when there are comments to fix.</p>
+      <dl><dt>Picks up</dt><dd>A Ready item, or an In review item with comments</dd><dt>Writes</dt><dd>Code, and the Iteration</dd><dt>Ends in</dt><dd>In progress</dd></dl>
+      <p class="ask">Ask: <span>"Develop item #42"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>push</h3><span class="badge soon">Planned</span></header>
+      <p>Pushes the branch, opens the pull request with a description, and links it to the item.</p>
+      <dl><dt>Picks up</dt><dd>An In progress item</dd><dt>Writes</dt><dd>The branch and the PR</dd><dt>Ends in</dt><dd>In review</dd></dl>
+      <p class="ask">Ask: <span>"Push it"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>review</h3><span class="badge soon">Planned</span></header>
+      <p>Reviews the pull request and proposes inline comments in a checklist. You tick the ones to post, and the rest are discarded.</p>
+      <dl><dt>Picks up</dt><dd>An In review item, or a PR link</dd><dt>Writes</dt><dd>The comments you chose</dd><dt>Ends in</dt><dd>In review</dd></dl>
+      <p class="ask">Ask: <span>"Review PR 17"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>approve</h3><span class="badge soon">Planned</span></header>
+      <p>Shows the checks and any open threads, asks you to confirm, then merges and closes the item.</p>
+      <dl><dt>Picks up</dt><dd>An In review item</dd><dt>Writes</dt><dd>The merge</dd><dt>Ends in</dt><dd>Done</dd></dl>
+      <p class="ask">Ask: <span>"Approve and merge item #42"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>help</h3><span class="badge ok">Available</span></header>
+      <p>Opens this page, and answers questions about how the system works.</p>
+      <p class="ask">Ask: <span>"How does vibe-engineering work?"</span></p>
+    </article>
+
+    <article class="card">
+      <header><h3>update</h3><span class="badge ok">Available</span></header>
+      <p>Updates the plugin to the latest published version and lists what changed. New skills show up after you restart Claude Code.</p>
+      <p class="ask">Ask: <span>"Update vibe-engineering"</span></p>
+    </article>
+
+  </div>
+</section>
+
+<section id="start">
+  <h2>Getting started</h2>
+  <ol class="steps">
+    <li><b>Log in to GitHub with the project scope.</b> The skills use the <a href="https://cli.github.com/">GitHub CLI</a>.
+      <pre><code>gh auth login -s project</code></pre>
+      Already logged in? Add the scope with <code>gh auth refresh -s project</code>.</li>
+    <li><b>Install the plugin in Claude Code.</b>
+      <pre><code>/plugin marketplace add gelonezi/vibe-engineering
+/plugin install vibe-engineering@vibe-engineering</code></pre></li>
+    <li><b>Create a board.</b> Ask for one with <code>create-board</code>. An existing board works too, if it has the six columns above.</li>
+    <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you.</li>
+    <li><b>Start with an idea.</b> Say what you want in plain words, and <code>create-item</code> takes it from there.</li>
+  </ol>
+</section>
+
+<section id="rules">
+  <h2>The rules</h2>
+  <p class="lead">These keep the skills predictable. Each one is written into the skills themselves.</p>
+  <div class="rules">
+    <div class="rule"><b>One Ready item equals one pull request</b><p><code>promote-ready</code> splits the work until this is true.</p></div>
+    <div class="rule"><b>The item is the only context</b><p><code>develop</code> reads the item and the repository's own rules, and nothing else. What isn't in the item doesn't exist.</p></div>
+    <div class="rule"><b>Each skill owns one section</b><p>The item text has fixed sections, in order: <code>## Idea</code>, <code>## High-level design</code>, <code>## Spec</code>. A skill writes its own and never edits the others.</p></div>
+    <div class="rule"><b>Column and content must agree</b><p>An item in the wrong column, or missing an earlier section, stops the skill, which says so and asks before continuing.</p></div>
+    <div class="rule"><b>Set the status last, then check it</b><p>Board automations can move items too, so every skill reads the status back and reports any difference.</p></div>
+    <div class="rule"><b>You always name the board</b><p>By link or by name. There is no config file, so nothing can point at the wrong board.</p></div>
+  </div>
+</section>
+
+<section id="know">
+  <h2>Good to know</h2>
+  <div class="rules">
+    <div class="rule"><b>Draft column vs. draft issue</b><p><code>create-item</code> makes a GitHub draft issue, because an idea doesn't need a repository yet. <code>promote-backlog</code> turns it into a real issue, which is what a pull request can link to.</p></div>
+    <div class="rule"><b>You can't approve your own PR</b><p>GitHub blocks it. Working solo, <code>review</code> posts plain comments and <code>approve</code> merges without a formal approval. If branch protection requires one, the skill stops and tells you.</p></div>
+    <div class="rule"><b>Merging can't be undone</b><p><code>approve</code> shows the checks and any unresolved threads, and asks for your confirmation first.</p></div>
+    <div class="rule"><b>Items need an iteration to show up</b><p>The Current iteration and Next iteration views filter on it, so <code>develop</code> sets it when work starts.</p></div>
+    <div class="rule"><b>Splitting an item</b><p>When one item becomes several, the original stays as the parent and each child is a sub-issue carrying its own copy of the text. The parent closes when the last child is done.</p></div>
+    <div class="rule"><b>Text accumulates</b><p>Every section goes into the same item. GitHub stops at about 65,000 characters, so <code>promote-ready</code> warns before reaching it.</p></div>
+  </div>
+</section>
+
+<footer>
+  <a href="https://github.com/gelonezi/vibe-engineering">github.com/gelonezi/vibe-engineering</a> ·
+  the full design is in <code>docs/concept.md</code> ·
+  ask <code>vibe-engineering:update</code> for the latest version
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Store text with LF endings in the repository.
+* text=auto
+
+# Bash can't reliably run scripts with CRLF endings, so keep LF on every platform.
+*.sh text eol=lf

@@ -100,4 +100,6 @@ find. There is no config file.
 
 ## Status
 
-Built: `create-board`, `create-item`. The other six skills are not built yet.
+Built: `create-board` and `create-item`, plus two utilities outside the flow:
+`help`, which shows an illustrated page of this document, and `update`, which
+updates the installed plugin. The other six skills are not built yet.

@@ -21,8 +21,15 @@ MARKETPLACE="${PLUGIN#*@}"
 REPO="${VIBE_ENGINEERING_REPO:-gelonezi/vibe-engineering}"
 RECORD="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
 
-# First string value of a key in a one-line JSON result.
-json_field() { printf '%s' "$2" | sed -nE "s/.*\"$1\":\"([^\"]*)\".*/\1/p" | head -n 1; }
+# First string value of a key in a one-line JSON result. The value may contain
+# escaped quotes (the updater writes \"plugin\" in its message), so skip over
+# backslash pairs and then unescape \" and \\.
+json_field() {
+  printf '%s' "$2" \
+    | sed -nE "s/.*\"$1\":\"((\\\\.|[^\"\\\\])*)\".*/\1/p" \
+    | sed -E 's/\\(["\\])/\1/g' \
+    | head -n 1
+}
 
 # The commit the installed copy was built from, read from this plugin's block only.
 installed_sha() {

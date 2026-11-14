@@ -9,7 +9,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-beta-f0883e" alt="Status: beta">
-  <img src="https://img.shields.io/badge/version-0.2.2-5b4be6" alt="Version 0.2.2">
+  <img src="https://img.shields.io/badge/version-0.2.3-5b4be6" alt="Version 0.2.3">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b4be6" alt="MIT license"></a>
 </p>
 
@@ -128,11 +128,13 @@ software engineers.
 |---|---|---|
 | **Deliver** | A feature goes from idea to merged pull request on the board. | 🛠️ In progress |
 | **Assess** | A report of what your repository is missing to work well with agents. | 🗺️ Planned |
-| **Set up** | A project configured for agents: `CLAUDE.md`, rules, hooks and its own skills. | 🗺️ Planned |
-| **Start** | Repository templates that are set up correctly from day zero. | 🗺️ Planned |
+| **Set up** | A project configured for agents: `CLAUDE.md`, rules, hooks, its own skills, a recorded architecture and quality checks. | 🗺️ Planned |
+| **Start** | Repository templates that are set up correctly from day zero: a general one, .NET with Angular, TypeScript and Python. | 🗺️ Planned |
 | **Guide** | A guided path for people with no software engineering background. | 🗺️ Planned |
+| **Team** | Iteration planning, status reports and retrospectives for a team of people and agents. | 🗺️ Planned |
+| **Trust** | Tests and evals that keep the plugin itself reliable. | 🗺️ Planned |
 
-The full plan, with the order and the open questions, is in
+The full plan, with the order and the decisions behind it, is in
 [docs/roadmap.md](docs/roadmap.md).
 
 ## Requirements

@@ -1,21 +1,30 @@
 #!/usr/bin/env bash
-# Small wrapper around the GitHub Projects (v2) GraphQL API, used by the
-# vibe-engineering skills. Needs only the GitHub CLI (gh); no jq.
+# Small wrapper around GitHub Projects (v2), used by the vibe-engineering
+# skills. It uses the GitHub CLI's own "gh project" commands where they exist,
+# and the GraphQL API for the rest. Needs only gh; no jq.
 #
 # Usage: projects.sh <command> [args]
 #
 #   whoami                              Login of the authenticated user
 #   owner <login>                       "<id>\t<User|Organization>\t<login>"
+#   owners                              Where you can own a board, your account first:
+#                                       "<login>\t<User|Organization>\t<canCreateProjects>"
 #   orgs                                Organizations you belong to, one login per line
-#   repo <owner/name>                   "<repoId>\t<ownerId>\t<ownerLogin>\t<ownerType>\t<yourPermission>"
+#   repos <ownerLogin>                  The owner's repositories you can link a board to, most
+#                                       recently pushed first: "<owner/name>\t<yourPermission>"
+#   repo <owner/name|link>              "<repoId>\t<ownerId>\t<ownerLogin>\t<ownerType>\t<yourPermission>\t<owner/name>"
 #   find <ownerLogin> <title>           Projects with exactly this title:
 #                                       "<number>\t<id>\t<public>\t<closed>\t<url>"
 #   get <ownerLogin> <number>           "<id>\t<title>\t<public>\t<url>"
 #   template                            The default template: "<id>\t<title>\t<public>\t<url>"
-#   copy <ownerId> <projectId> <title>  Copy a project (no items): "<id>\t<number>\t<url>"
-#   set-public <projectId> <true|false> Change visibility
-#   link <projectId> <repoId>           Link the project to a repository
-#   verify <projectId>                  JSON: views, fields, status options, iterations, repos
+#   copy <ownerLogin> <title>           Copy the template (no items) to that owner: "<id>\t<number>\t<url>"
+#   set-public <ownerLogin> <number> <true|false>
+#                                       Change visibility, prints the value read back
+#   link <ownerLogin> <number> <owner/name>
+#                                       Link the project to a repository of the same owner, so it shows
+#                                       on the repo's Projects tab. Prints the repository. It can't set
+#                                       the project's "Default repository": GitHub has no API for that.
+#   verify <projectId>                  JSON: views, fields, status options, workflows, repos
 #   build <ownerId> <title>             Fallback: create the board from scratch (see create-board's references/board-spec.md)
 #   board <link|name>                   The board the user named, by link or by name (any case, in your
 #                                       account and organizations): "<number>\t<id>\t<title>\t<url>"
@@ -28,11 +37,11 @@
 #
 # Template settings (environment variables):
 #   VIBE_ENGINEERING_TEMPLATE_OWNER   default: gelonezi
-#   VIBE_ENGINEERING_TEMPLATE_NUMBER  default: 4
+#   VIBE_ENGINEERING_TEMPLATE_NUMBER  default: 6
 set -euo pipefail
 
 TEMPLATE_OWNER="${VIBE_ENGINEERING_TEMPLATE_OWNER:-gelonezi}"
-TEMPLATE_NUMBER="${VIBE_ENGINEERING_TEMPLATE_NUMBER:-4}"
+TEMPLATE_NUMBER="${VIBE_ENGINEERING_TEMPLATE_NUMBER:-6}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 gql() { gh api graphql "$@"; }
@@ -51,19 +60,38 @@ case "$cmd" in
       --jq '.data.repositoryOwner | if . == null then error("owner not found") else [.id, .__typename, .login] | @tsv end'
     ;;
 
+  owners)
+    gql -f query='query { viewer { login organizations(first: 100) { nodes { login viewerCanCreateProjects } } } }' \
+      --jq '.data.viewer | ([.login, "User", "true"] | @tsv), (.organizations.nodes[] | [.login, "Organization", (.viewerCanCreateProjects | tostring)] | @tsv)'
+    ;;
+
   orgs)
     gql -f query='query { viewer { organizations(first: 100) { nodes { login } } } }' \
       --jq '.data.viewer.organizations.nodes[].login'
     ;;
 
+  repos)
+    [ $# -eq 1 ] || die "usage: repos <ownerLogin>"
+    # Linking needs write access, so read-only repositories are left out.
+    gh repo list "$1" --no-archived --limit 50 --json nameWithOwner,viewerPermission \
+      --jq '.[] | select(.viewerPermission == "ADMIN" or .viewerPermission == "MAINTAIN" or .viewerPermission == "WRITE") | [.nameWithOwner, .viewerPermission] | @tsv'
+    ;;
+
   repo)
-    [ $# -eq 1 ] || die "usage: repo <owner/name>"
-    case "$1" in */*) ;; *) die "expected owner/name, got: $1" ;; esac
-    gql -f o="${1%%/*}" -f n="${1#*/}" -f query='
+    [ $# -eq 1 ] || die "usage: repo <owner/name|link>"
+    # Accepts owner/name, or a link to the repository or to any page inside it.
+    slug="$(printf '%s' "$1" | sed -E 's#^[a-z]+://[^/]+/##; s#^/+##; s#\.git$##')"
+    case "$slug" in
+      orgs/*|users/*) die "this is a link to an account or a board, not to a repository: $1" ;;
+      */*) ;;
+      *) die "expected owner/name or a repository link, got: $1" ;;
+    esac
+    repo_owner="${slug%%/*}"; repo_name="${slug#*/}"; repo_name="${repo_name%%/*}"
+    gql -f o="$repo_owner" -f n="$repo_name" -f query='
       query($o: String!, $n: String!) {
-        repository(owner: $o, name: $n) { id viewerPermission owner { id login __typename } }
+        repository(owner: $o, name: $n) { id nameWithOwner viewerPermission owner { id login __typename } }
       }' \
-      --jq '.data.repository | if . == null then error("repository not found") else [.id, .owner.id, .owner.login, .owner.__typename, .viewerPermission] | @tsv end'
+      --jq '.data.repository | if . == null then error("repository not found") else [.id, .owner.id, .owner.login, .owner.__typename, .viewerPermission, .nameWithOwner] | @tsv end'
     ;;
 
   find)
@@ -97,33 +125,23 @@ case "$cmd" in
     ;;
 
   copy)
-    [ $# -eq 3 ] || die "usage: copy <ownerId> <projectId> <title>"
-    gql -f owner="$1" -f project="$2" -f title="$3" -f query='
-      mutation($owner: ID!, $project: ID!, $title: String!) {
-        copyProjectV2(input: { ownerId: $owner, projectId: $project, title: $title, includeDraftIssues: false }) {
-          projectV2 { id number url }
-        }
-      }' \
-      --jq '.data.copyProjectV2.projectV2 | [.id, .number, .url] | @tsv'
+    [ $# -eq 2 ] || die "usage: copy <ownerLogin> <title>"
+    # Views, fields and workflows come with the copy. Items don't.
+    gh project copy "$TEMPLATE_NUMBER" --source-owner "$TEMPLATE_OWNER" --target-owner "$1" --title "$2" \
+      --format json --jq '[.id, .number, .url] | @tsv'
     ;;
 
   set-public)
-    [ $# -eq 2 ] || die "usage: set-public <projectId> <true|false>"
-    case "$2" in true|false) ;; *) die "visibility must be true or false" ;; esac
-    gql -f id="$1" -F public="$2" -f query='
-      mutation($id: ID!, $public: Boolean!) {
-        updateProjectV2(input: { projectId: $id, public: $public }) { projectV2 { public } }
-      }' \
-      --jq '.data.updateProjectV2.projectV2.public'
+    [ $# -eq 3 ] || die "usage: set-public <ownerLogin> <number> <true|false>"
+    case "$3" in true) visibility=PUBLIC ;; false) visibility=PRIVATE ;; *) die "visibility must be true or false" ;; esac
+    gh project edit "$2" --owner "$1" --visibility "$visibility" --format json --jq '.public'
     ;;
 
   link)
-    [ $# -eq 2 ] || die "usage: link <projectId> <repoId>"
-    gql -f p="$1" -f r="$2" -f query='
-      mutation($p: ID!, $r: ID!) {
-        linkProjectV2ToRepository(input: { projectId: $p, repositoryId: $r }) { repository { nameWithOwner } }
-      }' \
-      --jq '.data.linkProjectV2ToRepository.repository.nameWithOwner'
+    [ $# -eq 3 ] || die "usage: link <ownerLogin> <number> <owner/name>"
+    # gh prints nothing useful when it isn't on a terminal, so confirm here.
+    gh project link "$2" --owner "$1" --repo "$3" >/dev/null
+    echo "$3"
     ;;
 
   verify)
@@ -138,11 +156,9 @@ case "$cmd" in
               nodes {
                 ... on ProjectV2FieldCommon { name dataType }
                 ... on ProjectV2SingleSelectField { options { name color description } }
-                ... on ProjectV2IterationField {
-                  configuration { duration startDay iterations { title startDate duration } }
-                }
               }
             }
+            workflows(first: 20) { nodes { name enabled } }
             repositories(first: 10) { nodes { nameWithOwner } }
           }
         }
@@ -200,21 +216,18 @@ case "$cmd" in
 
     step "Size field" '
       mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: SINGLE_SELECT, name: "Size", singleSelectOptions: [
-        { name: "XS", color: BLUE,   description: "" },
-        { name: "S",  color: GREEN,  description: "" },
-        { name: "M",  color: YELLOW, description: "" },
-        { name: "L",  color: ORANGE, description: "" },
-        { name: "XL", color: RED,    description: "" }
+        { name: "XS", color: GREEN,  description: "" },
+        { name: "S",  color: PURPLE, description: "" },
+        { name: "M",  color: RED,    description: "" },
+        { name: "L",  color: YELLOW, description: "" },
+        { name: "XL", color: PINK,   description: "" }
       ] }) { clientMutationId } }'
 
     step "Estimate field" 'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: NUMBER, name: "Estimate" }) { clientMutationId } }'
+    step "Start date field" 'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: DATE, name: "Start date" }) { clientMutationId } }'
+    step "Target date field" 'mutation($p: ID!) { createProjectV2Field(input: { projectId: $p, dataType: DATE, name: "Target date" }) { clientMutationId } }'
 
-    today="$(date +%Y-%m-%d)"
-    step "Iteration field" "
-      mutation(\$p: ID!) { createProjectV2Field(input: { projectId: \$p, dataType: ITERATION, name: \"Iteration\",
-        iterationConfiguration: { startDate: \"$today\", duration: 14, iterations: [] } }) { clientMutationId } }"
-
-    echo "VIEWS	manual	This script does not create views: set them up by hand, see references/board-spec.md"
+    echo "VIEWS	manual	This script does not create views or workflows: set them up by hand, see references/board-spec.md"
     ;;
 
   board)
@@ -290,7 +303,8 @@ case "$cmd" in
     ;;
 
   ""|-h|--help|help)
-    sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'
+    # The comment block at the top of this file is the help text.
+    awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
     ;;
 
   *)

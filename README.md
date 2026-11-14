@@ -3,11 +3,11 @@
 ![Vibe Engineering. Stop prompting in circles. Start engineering with a plan.](docs/images/banner.jpg)
 
 **The engineering process for agent-first projects.** A
-[Claude Code](https://claude.com/claude-code) plugin that gives your AI agents
+[Claude Code](https://claude.ai/referral/tfCwEtgZHg) plugin that gives your AI agents
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.2.4](https://img.shields.io/badge/version-0.2.4-5b4be6)
+![Version 0.2.5](https://img.shields.io/badge/version-0.2.5-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -30,7 +30,7 @@ code, a reviewed pull request. Each step writes what it learned into the item,
 so the next one starts from real context instead of a fresh prompt.
 
 | Prompting in circles | Vibe Engineering |
-|---|---|
+| --- | --- |
 | Context lives in a chat that ends | Context lives in the board item, and every step adds to it |
 | Design happens by accident, in the middle of the code | A design and a spec come before the first line of code |
 | One big prompt, one big diff | One item, one small pull request |
@@ -75,7 +75,9 @@ engineering.**
    /plugin install vibe-engineering@vibe-engineering
    ```
 
-2. Create your board: *"Create a vibe-engineering board for my repo."*
+2. Create your board: *"Create a vibe-engineering board for my repo."* Claude
+   asks where it goes, from a list of your account, organizations and
+   repositories.
 3. Bring an idea: *"I think we should…"*
 
 Not sure where to start? Ask *"How does vibe-engineering work?"* for the
@@ -96,8 +98,8 @@ illustrated guide.
 ## Skills
 
 | Skill | What it does | Status |
-|---|---|---|
-| `create-board` | Sets up a GitHub Projects board for iterative development: six columns, iterations, estimates and views. | ✅ Available |
+| --- | --- | --- |
+| `create-board` | Sets up your GitHub Projects board from a ready-made template: six columns, priorities, estimates and five views. | ✅ Available |
 | `create-item` | Talks your idea through with you, using your codebase as context, and saves it as a Draft item. | ✅ Available |
 | `help` | Opens an illustrated guide to the flow, the skills and the rules. | ✅ Available |
 | `update` | Updates the plugin and lists what changed. | ✅ Available |
@@ -118,7 +120,7 @@ needs to run an agent-first project, including people who have never worked as
 software engineers.
 
 | Track | What it gives you | Status |
-|---|---|---|
+| --- | --- | --- |
 | **Deliver** | A feature goes from idea to merged pull request on the board. | 🛠️ In progress |
 | **Assess** | A report of what your repository is missing to work well with agents. | 🗺️ Planned |
 | **Set up** | A project configured for agents: `CLAUDE.md`, rules, hooks, its own skills, a recorded architecture and quality checks. | 🗺️ Planned |
@@ -132,7 +134,10 @@ The full plan, with the order and the decisions behind it, is in
 
 ## Requirements
 
-- [Claude Code](https://claude.com/claude-code)
+- [Claude Code](https://claude.ai/referral/tfCwEtgZHg)
+- Claude Code on your own computer for the board skills. Cloud sessions on
+  claude.ai can't reach GitHub Projects, so there `create-board` guides you
+  through copying the board by hand.
 - The [GitHub CLI](https://cli.github.com/), logged in with the `project` scope:
 
   ```bash
@@ -161,7 +166,7 @@ The full plan, with the order and the decisions behind it, is in
 
 ### Layout
 
-```
+```text
 .claude-plugin/
   plugin.json          plugin manifest: name, display name, description, icon
   marketplace.json     lets this repo be added as a plugin marketplace
@@ -208,14 +213,14 @@ keeps the icon from the first submission, so settle it before submitting.
 ### The board template
 
 `vibe-engineering:create-board` copies
-[project 4 in the `gelonezi` account](https://github.com/users/gelonezi/projects/4),
-which was made from GitHub's built-in **Iterative development** template, with a
-Draft column added. It's public, so keep it free of real work. Changes made there
-reach new boards only.
+[project 6 in the `gelonezi` account](https://github.com/users/gelonezi/projects/6),
+"Vibe Engineering - Default". It's public, so keep it free of real work. Changes
+made there reach new boards only. When it changes, update
+`skills/create-board/references/board-spec.md` to match.
 
 To copy a different project, set `VIBE_ENGINEERING_TEMPLATE_OWNER` and
 `VIBE_ENGINEERING_TEMPLATE_NUMBER`.
 
 ## License
 
-[MIT](LICENSE) © 2026 Rogerio Gelonezi
+[MIT](LICENSE) © 2026 Roger Gelonezi

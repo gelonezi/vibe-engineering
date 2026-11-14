@@ -46,7 +46,7 @@ Each track is a group of skills. Skill names are working names.
 
 The backbone. Every other track feeds it or prepares a project for it.
 
-- [x] `create-board`: the board, with six columns, iterations and views
+- [x] `create-board`: the board, copied from a template, with six columns and five views
 - [x] `create-item`: an idea, refined by conversation, saved as a Draft item
 - [ ] `promote-backlog`: the high-level design
 - [ ] `promote-ready`: the spec, the size, and splitting until one item is one PR

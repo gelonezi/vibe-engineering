@@ -8,6 +8,9 @@
 #   3  gh is not logged in
 #   4  token is missing the "project" scope (classic token / OAuth login)
 #   5  the Projects API rejected the token (fine-grained token without access, SSO, ...)
+#   6  this environment blocks GitHub's Projects API, whatever the token
+#      (Claude Code cloud sessions); STATUS=projects_unavailable
+#   7  the GitHub CLI is too old to have the "gh project" commands
 set -uo pipefail
 
 host="${GH_HOST:-github.com}"
@@ -25,6 +28,29 @@ if ! login="$(gh api user --hostname "$host" --jq .login 2>/dev/null)" || [ -z "
 fi
 echo "LOGIN=$login"
 echo "HOST=$host"
+
+# Live check, done first: can this session reach Projects at all? Some
+# environments refuse every GraphQL call, and no token change fixes that.
+probe_ok=true
+if ! probe_err="$(gh api graphql --hostname "$host" \
+      -f query='query { viewer { projectsV2(first: 1) { totalCount } } }' 2>&1 >/dev/null)"; then
+  probe_ok=false
+  probe_err="$(printf '%s' "$probe_err" | tr '\n' ' ')"
+  case "$probe_err" in
+    *"GraphQL is not available"*)
+      echo "STATUS=projects_unavailable"
+      echo "ERROR=$probe_err"
+      echo "FIX=This session can't reach GitHub Projects, and a new token won't change that. Use Claude Code on your own computer."
+      exit 6
+      ;;
+  esac
+fi
+
+if ! gh project --help >/dev/null 2>&1; then
+  echo "STATUS=gh_outdated"
+  echo "FIX=Update the GitHub CLI (https://cli.github.com/): this version has no 'gh project' commands."
+  exit 7
+fi
 
 # A token from GH_TOKEN / GITHUB_TOKEN wins over the stored login, and
 # `gh auth refresh` cannot change its scopes.
@@ -64,11 +90,9 @@ else
   echo "WARN=Token scopes cannot be read for this token type. It needs 'Projects: Read and write' (account or organization permission)."
 fi
 
-# Live check: can this token read Projects at all?
-if ! err="$(gh api graphql --hostname "$host" \
-      -f query='query { viewer { projectsV2(first: 1) { totalCount } } }' 2>&1 >/dev/null)"; then
+if [ "$probe_ok" != true ]; then
   echo "STATUS=projects_api_denied"
-  echo "ERROR=$(printf '%s' "$err" | tr '\n' ' ')"
+  echo "ERROR=$probe_err"
   echo "FIX=Give the token Projects read/write access (classic: 'project' scope; fine-grained: Projects permission), and authorize SSO for the organization if it uses SAML."
   exit 5
 fi

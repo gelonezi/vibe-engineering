@@ -179,7 +179,7 @@
     <article class="card">
       <header><h3>create-board</h3><span class="badge ok">Available</span></header>
       <p>Creates a GitHub Projects board for your account, an organization, or a repository, by copying a public template.</p>
-      <dl><dt>Gives you</dt><dd>Six columns, Priority, Size, Estimate, two-week iterations, and six views</dd></dl>
+      <dl><dt>Gives you</dt><dd>Six columns, Priority, Size, Estimate, and five views</dd></dl>
       <p class="ask">Ask: <span>"Create a board for my repo acme/shop"</span></p>
     </article>
 
@@ -207,7 +207,7 @@
     <article class="card">
       <header><h3>develop</h3><span class="badge soon">Planned</span></header>
       <p>Implements the item on a branch, following the destination repository's own rules and nothing but the item's text. Also takes an item back from review when there are comments to fix.</p>
-      <dl><dt>Picks up</dt><dd>A Ready item, or an In review item with comments</dd><dt>Writes</dt><dd>Code, and the Iteration</dd><dt>Ends in</dt><dd>In progress</dd></dl>
+      <dl><dt>Picks up</dt><dd>A Ready item, or an In review item with comments</dd><dt>Writes</dt><dd>Code on a branch</dd><dt>Ends in</dt><dd>In progress</dd></dl>
       <p class="ask">Ask: <span>"Develop item #42"</span></p>
     </article>
 
@@ -256,7 +256,7 @@
     <li><b>Install the plugin in Claude Code.</b>
       <pre><code>/plugin marketplace add gelonezi/vibe-engineering
 /plugin install vibe-engineering@vibe-engineering</code></pre></li>
-    <li><b>Create a board.</b> Ask for one with <code>create-board</code>. An existing board works too, if it has the six columns above.</li>
+    <li><b>Create a board.</b> Ask for one with <code>create-board</code>. It asks where the board goes, from a list of your account, organizations and repositories. An existing board works too, if it has the six columns above.</li>
     <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you.</li>
     <li><b>Start with an idea.</b> Say what you want in plain words, and <code>create-item</code> takes it from there.</li>
   </ol>
@@ -281,7 +281,7 @@
     <div class="rule"><b>Draft column vs. draft issue</b><p><code>create-item</code> makes a GitHub draft issue, because an idea doesn't need a repository yet. <code>promote-backlog</code> turns it into a real issue, which is what a pull request can link to.</p></div>
     <div class="rule"><b>You can't approve your own PR</b><p>GitHub blocks it. Working solo, <code>review</code> posts plain comments and <code>approve</code> merges without a formal approval. If branch protection requires one, the skill stops and tells you.</p></div>
     <div class="rule"><b>Merging can't be undone</b><p><code>approve</code> shows the checks and any unresolved threads, and asks for your confirmation first.</p></div>
-    <div class="rule"><b>Items need an iteration to show up</b><p>The Current iteration and Next iteration views filter on it, so <code>develop</code> sets it when work starts.</p></div>
+    <div class="rule"><b>Cloud sessions can't reach boards</b><p>On claude.ai, GitHub Projects is out of reach. There <code>create-board</code> sends you to Claude Code on your computer, or guides you through copying the board by hand. The other board skills need your computer for now.</p></div>
     <div class="rule"><b>Splitting an item</b><p>When one item becomes several, the original stays as the parent and each child is a sub-issue carrying its own copy of the text. The parent closes when the last child is done.</p></div>
     <div class="rule"><b>Text accumulates</b><p>Every section goes into the same item. GitHub stops at about 65,000 characters, so <code>promote-ready</code> warns before reaching it.</p></div>
   </div>

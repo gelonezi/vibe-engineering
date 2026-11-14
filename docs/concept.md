@@ -11,7 +11,7 @@ idea to merged code. Everything a later skill needs is saved in the item itself.
 | `create-item`     | A new idea                       | Draft       | `## Idea`                                     |
 | `promote-backlog` | Draft item, or picks from a list | Backlog     | `## High-level design`                        |
 | `promote-ready`   | Backlog item with an HLD         | Ready       | `## Spec`, Size, Estimate                     |
-| `develop`         | Ready item                       | In progress | Code on a branch, Iteration                   |
+| `develop`         | Ready item                       | In progress | Code on a branch                              |
 | `push`            | In progress item                 | In review   | Branch, PR with description, link to the item |
 | `review`          | In review item or PR link        | In review   | The inline comments the user selected         |
 | `approve`         | In review item                   | Done        | The merge                                     |
@@ -78,6 +78,25 @@ them.
 comment showing the file, line and proposed text. The user ticks what to post,
 edits the wording if needed, and asks to post. The rest are discarded.
 
+### The board is a copy of a public template
+
+`create-board` copies
+[project 6 in the `gelonezi` account](https://github.com/users/gelonezi/projects/6).
+On the user's computer the skill asks two things from lists it builds: the
+owner (their account or one of their organizations), and whether the board is
+for the whole account or linked to one repository. Then it makes the copy.
+
+In a cloud session it can't, so it offers two ways forward: continue in Claude
+Code on the user's computer and call the skill again there, or make the copy
+by hand with GitHub's *Make a copy*, guided step by step. The skill can't check
+a board made that way, so it gives the user a short checklist.
+
+### No iterations
+
+The board has no Iteration field. Work is pulled from Ready one item at a time,
+and the Roadmap view uses Start date and Target date. This removes a trap of
+iteration boards, where an item without an iteration doesn't show up.
+
 ### The user always names the board
 
 The user must tell each skill which board to use: its link, or its board, panel
@@ -93,8 +112,14 @@ find. There is no config file.
   approval, the skill stops and tells the user. It never works around it.
 - **Merging can't be undone.** `approve` shows the checks and any unresolved
   threads, and asks for confirmation before merging.
-- **Items need an Iteration to show up.** The Current iteration and Next
-  iteration views filter on it, so `develop` sets it.
+- **Cloud sessions can't reach boards.** In a Claude Code cloud session,
+  GitHub's Projects API is blocked and the session's GitHub access covers
+  single repositories only. A skill detects this in its access check and
+  says so, instead of suggesting a token fix that can't work.
+- **A board's default repository has no API.** `create-board` links the board
+  to the repository, so it shows on the repository's Projects tab, and tells
+  the user to pick the default repository in the board's settings. That
+  setting decides where new issues created from the board go.
 - **Automations compete with skills.** The API shows each automation's name and
   whether it's on, but not which column it moves items to.
 

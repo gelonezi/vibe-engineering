@@ -19,6 +19,12 @@ script's output.
 Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
 - `STATUS=ok`: continue.
+- `STATUS=projects_unavailable`: this session can't reach GitHub Projects at
+  all, which is the case in Claude Code cloud sessions, and a different token
+  wouldn't change it. Don't show the `FIX` line as a command and don't suggest
+  a token. Tell the user in one or two sentences, and ask them to run this
+  skill from Claude Code on their own computer. Don't try another route, such
+  as GitHub's REST API or an MCP server. Then stop.
 - Any other status: stop. Show the user the `FIX` line as a command they can
   run, explain it in one sentence, and offer to run the check again once
   they've done it. Don't try to work around it.

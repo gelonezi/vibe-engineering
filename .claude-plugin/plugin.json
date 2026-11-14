@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
   "displayName": "Vibe Engineering",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Stop prompting in circles. Start engineering with a plan. Vibe Engineering gives Claude a methodology for building software, not just generating code: every feature moves across your GitHub Projects board from idea to design, spec, code and merged PR, carrying its context from one step to the next. The result is a well-configured project with a clear architecture and consistent patterns, easy to read, maintain and evolve.",
   "author": {
     "name": "gelonezi",

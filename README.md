@@ -1,24 +1,19 @@
-<p align="center">
-  <img src="docs/images/banner.jpg" alt="Vibe Engineering. Stop prompting in circles. Start engineering with a plan." width="100%">
-</p>
+# Vibe Engineering
 
-<p align="center">
-  <strong>The engineering process for agent-first projects.</strong><br>
-  A <a href="https://claude.com/claude-code">Claude Code</a> plugin that gives your AI agents a workflow worth following.
-</p>
+![Vibe Engineering. Stop prompting in circles. Start engineering with a plan.](docs/images/banner.jpg)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/status-beta-f0883e" alt="Status: beta">
-  <img src="https://img.shields.io/badge/version-0.2.3-5b4be6" alt="Version 0.2.3">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b4be6" alt="MIT license"></a>
-</p>
+**The engineering process for agent-first projects.** A
+[Claude Code](https://claude.com/claude-code) plugin that gives your AI agents
+a workflow worth following.
 
-<p align="center">
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#skills">Skills</a> ·
-  <a href="#where-this-is-going">Roadmap</a>
-</p>
+![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
+![Version 0.2.4](https://img.shields.io/badge/version-0.2.4-5b4be6)
+[![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
+
+[Quick start](#quick-start) ·
+[How it works](#how-it-works) ·
+[Skills](#skills) ·
+[Roadmap](#where-this-is-going)
 
 ---
 
@@ -63,9 +58,7 @@ engineering.**
 
 ## How it works
 
-<p align="center">
-  <img src="docs/images/flow.png" alt="The flow: create-item puts an idea in Draft; promote-backlog, promote-ready, develop, push and approve move it through Backlog, Ready, In progress and In review to Done; review sends comments back to develop." width="100%">
-</p>
+![The flow: create-item puts an idea in Draft; promote-backlog, promote-ready, develop, push and approve move it through Backlog, Ready, In progress and In review to Done; review sends comments back to develop.](docs/images/flow.png)
 
 - **The board is the memory.** The item carries its own idea, design and spec.
 - **One Ready item is one pull request.** Planning splits the work until every

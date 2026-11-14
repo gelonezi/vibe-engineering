@@ -103,3 +103,7 @@ find. There is no config file.
 Built: `create-board` and `create-item`, plus two utilities outside the flow:
 `help`, which shows an illustrated page of this document, and `update`, which
 updates the installed plugin. The other six skills are not built yet.
+
+This document covers the delivery flow only. What comes after it, such as
+assessing a repository, setting a project up for agents and starting new
+repositories from templates, is in [roadmap.md](roadmap.md).

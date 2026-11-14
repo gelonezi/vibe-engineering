@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Vibe Engineering banner</title>
+<!-- README banner, 1280 x 640. Re-render with headless Chrome; see README, Maintainers. -->
+<style>
+  html, body { margin: 0; }
+  body {
+    width: 1280px; height: 640px; overflow: hidden; position: relative; color: #fff; font-family: "Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    background: linear-gradient(135deg, #5b4be6 0%, #3d31b8 46%, #1c1657 100%);
+  }
+  .grid {
+    position: absolute; inset: 0; background-size: 40px 40px;
+    background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  }
+  .glow { position: absolute; right: -140px; top: -200px; width: 820px; height: 820px; border-radius: 50%;
+           background: radial-gradient(circle, rgba(255,255,255,.16), transparent 62%); }
+  .text { position: absolute; left: 84px; top: 66px; }
+  .pill { display: inline-block; font-size: 18px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+           padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24); }
+  h1 { font-size: 96px; line-height: .98; margin: 24px 0 0; font-weight: 800; letter-spacing: -.028em; }
+  .tag { font-size: 35px; line-height: 1.28; margin-top: 26px; color: rgba(255,255,255,.86); }
+  .tag b { font-weight: 700; color: #fff; }
+  .mark { position: absolute; right: 70px; top: 104px; width: 470px; }
+  .stages { position: absolute; left: 84px; right: 84px; bottom: 54px; display: flex; align-items: center; gap: 14px;
+             font-size: 23px; font-weight: 600; }
+  .stage { display: flex; align-items: center; gap: 10px; padding: 9px 18px 10px; border-radius: 999px;
+            background: rgba(12,9,48,.42); border: 1px solid rgba(255,255,255,.16); }
+  .dot { width: 14px; height: 14px; border-radius: 50%; display: block; }
+  .sep { opacity: .6; }
+</style></head>
+<body>
+  <div class="grid"></div><div class="glow"></div>
+  <div class="text">
+    <span class="pill">Claude Code plugin &middot; beta</span>
+    <h1>Vibe<br>Engineering</h1>
+    <div class="tag">Stop prompting in circles.<br><b>Start engineering with a plan.</b></div>
+  </div>
+  <svg class="mark" viewBox="70 130 910 700" xmlns="http://www.w3.org/2000/svg">
+    <path d="M112 776 L196 776 L209 775 L222 774 L235 771 L247 767 L259 763 L270 757 L281 750 L291 743 L300 735 L309 726 L316 717 L323 707 L328 697 L332 686 L335 676 L337 666 L338 655 L338 645 L337 635 L335 626 L332 617 L328 609 L323 602 L318 595 L311 589 L305 585 L298 581 L290 578 L282 577 L275 576 L267 577 L259 578 L251 581 L244 585 L238 589 L231 595 L226 602 L221 609 L217 617 L214 626 L212 635 L211 645 L211 655 L212 666 L214 676 L217 686 L221 697 L227 707 L233 717 L240 726 L249 735 L258 743 L268 750 L279 757 L290 763 L302 767 L314 771 L327 774 L340 775 L353 776 L366 775 L379 774 L392 771 L404 767 L416 763 L428 757 L438 750 L448 743 L458 735 L466 726 L473 717 L480 707 L485 697 L489 686 L492 676 L494 666 L495 655 L495 645 L494 635 L492 626 L489 617 L485 609 L480 602 L475 595 L469 589 L462 585 L455 581 L447 578 L439 577 L432 576 L424 577 L416 578 L409 581 L401 585 L395 589 L389 595 L383 602 L378 609 L374 617 L371 626 L369 635 L368 645 L368 655 L369 666 L371 676 L374 686 L378 697 L384 707 L390 717 L397 726 L406 735 L415 743 L425 750 L436 757 L447 763 L459 767 L471 771 L484 774 L497 775 L510 776 H 612 V 636 H 732 V 496 H 852 V 360" fill="none" stroke="#fff" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="852" cy="258" r="104" fill="#f0883e"/>
+    <polyline points="804,261 840,298 902,224" fill="none" stroke="#fff" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="stages"><span class="stage"><i class="dot" style="background:#9aa4af"></i>Idea</span><span class="sep">&rarr;</span><span class="stage"><i class="dot" style="background:#3fb950"></i>Design</span><span class="sep">&rarr;</span><span class="stage"><i class="dot" style="background:#58a6ff"></i>Spec</span><span class="sep">&rarr;</span><span class="stage"><i class="dot" style="background:#e3b341"></i>Code</span><span class="sep">&rarr;</span><span class="stage"><i class="dot" style="background:#b392f0"></i>Review</span><span class="sep">&rarr;</span><span class="stage"><i class="dot" style="background:#f0883e"></i>Merged</span></div>
+</body></html>

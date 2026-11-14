@@ -1,5 +1,6 @@
 {
   "name": "vibe-engineering",
+  "description": "Vibe Engineering for Claude Code: a methodology that takes each feature from idea to merged PR on your GitHub Projects board.",
   "owner": {
     "name": "gelonezi",
     "url": "https://github.com/gelonezi"
@@ -7,8 +8,19 @@
   "plugins": [
     {
       "name": "vibe-engineering",
+      "displayName": "Vibe Engineering",
       "source": "./",
-      "description": "Vibe engineering skills for Claude Code: project boards, planning and delivery workflows on GitHub."
+      "description": "Stop prompting in circles. Start engineering with a plan. Vibe Engineering gives Claude a methodology for building software, not just generating code: every feature moves across your GitHub Projects board from idea to design, spec, code and merged PR, carrying its context from one step to the next. The result is a well-configured project with a clear architecture and consistent patterns, easy to read, maintain and evolve.",
+      "category": "Engineering",
+      "tags": [
+        "github-projects",
+        "planning",
+        "agents",
+        "workflow",
+        "methodology",
+        "spec-driven",
+        "vibe-coding"
+      ]
     }
   ]
 }

@@ -1,12 +1,28 @@
 {
   "name": "vibe-engineering",
-  "version": "0.2.1",
-  "description": "Vibe engineering skills for Claude Code: project boards, planning and delivery workflows on GitHub.",
+  "displayName": "Vibe Engineering",
+  "version": "0.2.2",
+  "description": "Stop prompting in circles. Start engineering with a plan. Vibe Engineering gives Claude a methodology for building software, not just generating code: every feature moves across your GitHub Projects board from idea to design, spec, code and merged PR, carrying its context from one step to the next. The result is a well-configured project with a clear architecture and consistent patterns, easy to read, maintain and evolve.",
   "author": {
     "name": "gelonezi",
     "url": "https://github.com/gelonezi"
   },
-  "homepage": "https://github.com/gelonezi/vibe-engineering",
+  "homepage": "https://gelonezi.com",
   "repository": "https://github.com/gelonezi/vibe-engineering",
-  "keywords": ["github", "projects", "planning", "iterations", "kanban"]
+  "documentationUrl": "https://github.com/gelonezi/vibe-engineering#readme",
+  "supportUrl": "https://github.com/gelonezi/vibe-engineering/issues",
+  "license": "MIT",
+  "icon": "./.claude-plugin/icon.png",
+  "keywords": [
+    "github",
+    "github-projects",
+    "planning",
+    "iterations",
+    "agents",
+    "workflow",
+    "methodology",
+    "spec-driven",
+    "pull-requests",
+    "vibe-coding"
+  ]
 }

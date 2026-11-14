@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>vibe-engineering help</title>
+<title>Vibe Engineering help</title>
 <style>
   :root {
     --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2128; --muted: #59636e; --line: #d9dee3;
-    --accent: #0969da; --accent-ink: #ffffff; --code-bg: #eef1f4; --shadow: 0 1px 2px rgba(20, 30, 40, .06);
+    --accent: #4a3fd0; --accent-ink: #ffffff; --code-bg: #eef1f4; --shadow: 0 1px 2px rgba(20, 30, 40, .06);
     --draft: #8b949e; --backlog: #2da44e; --ready: #0969da; --progress: #bf8700; --review: #8250df; --done: #e16f24;
     --ok-bg: #dafbe1; --ok-ink: #116329; --soon-bg: #eef1f4; --soon-ink: #59636e;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0d1117; --panel: #161b22; --ink: #e6edf3; --muted: #9da7b3; --line: #30363d;
-      --accent: #58a6ff; --accent-ink: #0d1117; --code-bg: #1f252d; --shadow: none;
+      --accent: #a59dff; --accent-ink: #0d1117; --code-bg: #1f252d; --shadow: none;
       --draft: #8b949e; --backlog: #3fb950; --ready: #58a6ff; --progress: #d29922; --review: #a371f7; --done: #db6d28;
       --ok-bg: #12351f; --ok-ink: #56d364; --soon-bg: #1f252d; --soon-ink: #9da7b3;
     }
@@ -32,8 +32,19 @@
   pre code { background: none; padding: 0; }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
   header { padding: 56px 0 24px; }
-  header h1 { margin: 0; font-size: 2.4rem; letter-spacing: -.02em; }
-  header .tag { margin: 6px 0 0; font-size: 1.2rem; color: var(--muted); }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .brand svg { width: 76px; height: 76px; border-radius: 18px; flex: none; }
+  header h1 { margin: 0; font-size: 2.4rem; letter-spacing: -.02em; line-height: 1.15; }
+  header h1 .beta { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; vertical-align: middle;
+    margin-left: 6px; padding: 3px 10px; border-radius: 999px; background: #f0883e; color: #1c1657; }
+  header .tag { margin: 4px 0 0; font-size: 1.2rem; color: var(--muted); }
+  header .tag b { color: var(--ink); }
+  @media (max-width: 520px) {
+    .brand { gap: 12px; align-items: flex-start; }
+    .brand svg { width: 56px; height: 56px; border-radius: 14px; }
+    header h1 { font-size: 1.8rem; }
+    header .tag { font-size: 1.05rem; }
+  }
   header .intro { margin-top: 18px; max-width: 70ch; font-size: 1.05rem; }
   nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
   nav.toc a {
@@ -104,15 +115,27 @@
 <div class="wrap">
 
 <header>
-  <h1>vibe-engineering</h1>
-  <p class="tag">From a rough idea to merged code, one board item at a time.</p>
-  <p class="intro">A set of Claude Code skills that move your work across a GitHub Projects board. Each skill takes an item from one column to the next, and writes what it learned into the item, so the next skill can start from there.</p>
+  <div class="brand">
+    <svg viewBox="0 0 1024 1024" role="img" aria-label="Vibe Engineering">
+      <defs><linearGradient id="vebg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b4be6"/><stop offset="1" stop-color="#1c1657"/></linearGradient></defs>
+      <rect width="1024" height="1024" fill="url(#vebg)"/>
+      <path d="M112 776 L196 776 L209 775 L222 774 L235 771 L247 767 L259 763 L270 757 L281 750 L291 743 L300 735 L309 726 L316 717 L323 707 L328 697 L332 686 L335 676 L337 666 L338 655 L338 645 L337 635 L335 626 L332 617 L328 609 L323 602 L318 595 L311 589 L305 585 L298 581 L290 578 L282 577 L275 576 L267 577 L259 578 L251 581 L244 585 L238 589 L231 595 L226 602 L221 609 L217 617 L214 626 L212 635 L211 645 L211 655 L212 666 L214 676 L217 686 L221 697 L227 707 L233 717 L240 726 L249 735 L258 743 L268 750 L279 757 L290 763 L302 767 L314 771 L327 774 L340 775 L353 776 L366 775 L379 774 L392 771 L404 767 L416 763 L428 757 L438 750 L448 743 L458 735 L466 726 L473 717 L480 707 L485 697 L489 686 L492 676 L494 666 L495 655 L495 645 L494 635 L492 626 L489 617 L485 609 L480 602 L475 595 L469 589 L462 585 L455 581 L447 578 L439 577 L432 576 L424 577 L416 578 L409 581 L401 585 L395 589 L389 595 L383 602 L378 609 L374 617 L371 626 L369 635 L368 645 L368 655 L369 666 L371 676 L374 686 L378 697 L384 707 L390 717 L397 726 L406 735 L415 743 L425 750 L436 757 L447 763 L459 767 L471 771 L484 774 L497 775 L510 776 H 612 V 636 H 732 V 496 H 852 V 360" fill="none" stroke="#fff" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="852" cy="258" r="104" fill="#f0883e"/>
+      <polyline points="804,261 840,298 902,224" fill="none" stroke="#fff" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>Vibe Engineering <span class="beta">Beta</span></h1>
+      <p class="tag">Stop prompting in circles. <b>Start engineering with a plan.</b></p>
+    </div>
+  </div>
+  <p class="intro">Vibe Engineering gives Claude a methodology for building software, not just generating code. Every feature lives as an item on your GitHub Projects board. Each skill moves it one column forward and writes what it learned into the item, so the next step starts from real context. The result is a well-configured project with a clear architecture and consistent patterns, easy to read, maintain and evolve.</p>
   <nav class="toc">
     <a href="#flow">The flow</a>
     <a href="#skills">The skills</a>
     <a href="#start">Getting started</a>
     <a href="#rules">The rules</a>
     <a href="#know">Good to know</a>
+    <a href="#next">What's coming</a>
   </nav>
 </header>
 
@@ -121,7 +144,7 @@
   <p class="lead">The board has six columns. A skill moves an item along each arrow, and the item carries everything the next skill needs.</p>
   <div class="flow">
     <div class="step">
-      <div class="col" style="--c: var(--draft)"><b>Draft</b><small>An idea, still growing</small></div>
+      <div class="col" style="--c: var(--draft)"><b>Draft</b><small>An idea</small></div>
       <div class="arrow"><code>promote-backlog</code><svg viewBox="0 0 100 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="92" y2="7"/><polyline points="86,2 92,7 86,12"/></svg></div>
     </div>
     <div class="step">
@@ -264,9 +287,21 @@
   </div>
 </section>
 
+<section id="next">
+  <h2>What's coming</h2>
+  <p class="lead">Vibe Engineering is in beta. Delivering features is the first track, and these come next. The full plan is in <code>docs/roadmap.md</code>.</p>
+  <div class="rules">
+    <div class="rule"><b>Assess</b><p>A report of what your repository is missing to work well with agents.</p></div>
+    <div class="rule"><b>Set up</b><p>A project configured for agents: <code>CLAUDE.md</code>, rules, hooks and its own skills.</p></div>
+    <div class="rule"><b>Start</b><p>Repository templates that are set up correctly from day zero.</p></div>
+    <div class="rule"><b>Guide</b><p>A guided path for people with no software engineering background.</p></div>
+  </div>
+</section>
+
 <footer>
   <a href="https://github.com/gelonezi/vibe-engineering">github.com/gelonezi/vibe-engineering</a> ·
   the full design is in <code>docs/concept.md</code> ·
+  the plan is in <code>docs/roadmap.md</code> ·
   ask <code>vibe-engineering:update</code> for the latest version
 </footer>
 

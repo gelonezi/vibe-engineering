@@ -5,8 +5,10 @@ description: Create a GitHub Projects board for the vibe-engineering flow (Draft
 
 # vibe-engineering:create-board
 
-Creates a GitHub Projects board by copying a public template project, then sets
-its visibility and, if asked, links it to a repository.
+Creates a GitHub Projects board by copying a public template project and, if
+asked, links it to a repository. The board is always created **private**.
+Don't ask about visibility and don't change it: the user can make the board
+public later, in its settings.
 The board is specified in [references/board-spec.md](references/board-spec.md).
 
 Every GitHub call goes through two scripts in the plugin's `scripts/` folder.
@@ -78,10 +80,9 @@ repository that isn't in the list, run `projects.sh repo` on it:
 - If the permission is `READ` or empty, warn that linking will probably fail
   (it needs write access), and ask whether to continue.
 
-## 3. Ask for the name and visibility
+## 3. Ask for the name
 
-- **Project name.** Suggest `Planner`, and use whatever the user picks.
-- **Visibility.** Private (the default) or public.
+Suggest `Planner`, and use whatever the user picks.
 
 Then check for a name clash with `bash scripts/projects.sh find <ownerLogin> "<name>"`.
 If it prints anything, a project with that exact name already exists. Show its
@@ -96,9 +97,7 @@ Don't create a duplicate without asking.
    It prints `<id>  <number>  <url>`. Views, fields and workflows come with
    the copy. Items don't. Never run `copy` a second time for the same board:
    it would create a duplicate.
-3. Set the visibility you agreed on. Copies start out private, so run this
-   only for public: `bash scripts/projects.sh set-public <ownerLogin> <number> true`.
-4. For a repository board:
+3. For a repository board:
    `bash scripts/projects.sh link <ownerLogin> <number> <owner/name>`.
    It prints the repository when the link is made. The board now shows on the
    repository's *Projects* tab.
@@ -120,7 +119,10 @@ options, the custom fields, the workflows, and the linked repository.
 Report in a few lines:
 
 - the board's URL, as a link
-- the owner, visibility, and linked repository (if any)
+- the owner and the linked repository (if any)
+- that the board is private, and that they can change this later under
+  **Visibility** in the board's settings. If `verify` shows `public` as true,
+  something changed it: say so
 - anything that doesn't match the spec, and what the user should do about it
 - for a repository board, the one step left for the user: open
   `<board url>/settings`, and under **Default repository** pick the
@@ -133,8 +135,8 @@ Use this only after the user agrees to it in step 4.
 1. Get the owner's ID with `bash scripts/projects.sh owner <ownerLogin>`, then
    run `bash scripts/projects.sh build <ownerId> "<name>"`. It creates the
    project and its fields, and prints one `OK` or `FAILED` line per step.
-2. Apply the visibility and repository link from step 4, with the number from
-   the `CREATED` line.
+2. Apply the repository link from step 4, with the number from the `CREATED`
+   line. A board built this way is private too.
 3. Show any `FAILED` steps, with the fix for each from the spec.
 4. The script doesn't create views or workflows. Give the user the manual
    steps in the spec's *Creating views by hand* section, or offer to walk them
@@ -171,8 +173,8 @@ Tell the user to:
 
 Say what will happen there, so they know what to expect: the skill asks where
 the board goes (their account or one of their organizations), whether it's for
-the whole account or linked to one repository, and its name and visibility,
-and then creates it. Then stop. Don't ask those questions here: the answers
+the whole account or linked to one repository, and its name, and then creates
+it as a private board. Then stop. Don't ask those questions here: the answers
 can't be carried to the other session.
 
 ### Make the copy themselves
@@ -204,14 +206,10 @@ account or for one repository. For one repository, give these steps:
 For a board for the whole account, say that nothing more is needed: items from
 any of the owner's repositories can be added to it.
 
-#### Make it public
-
-Offer this only if the user wants a public board. Copies start out private. In
-the board, open **⋯**, then **Settings**, and change **Visibility** in the
-*Danger zone*.
-
 #### Finish
 
+- Say that the copy is private, and that they can change this later under
+  **Visibility** in the board's settings.
 - Ask for the new board's link, and repeat it back so the user has it at hand
   for the other skills.
 - Say plainly that you can't check the board from this session, and give the

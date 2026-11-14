@@ -17,9 +17,8 @@
 #                                       "<number>\t<id>\t<public>\t<closed>\t<url>"
 #   get <ownerLogin> <number>           "<id>\t<title>\t<public>\t<url>"
 #   template                            The default template: "<id>\t<title>\t<public>\t<url>"
-#   copy <ownerLogin> <title>           Copy the template (no items) to that owner: "<id>\t<number>\t<url>"
-#   set-public <ownerLogin> <number> <true|false>
-#                                       Change visibility, prints the value read back
+#   copy <ownerLogin> <title>           Copy the template (no items) to that owner, as a private
+#                                       project: "<id>\t<number>\t<url>"
 #   link <ownerLogin> <number> <owner/name>
 #                                       Link the project to a repository of the same owner, so it shows
 #                                       on the repo's Projects tab. Prints the repository. It can't set
@@ -126,15 +125,9 @@ case "$cmd" in
 
   copy)
     [ $# -eq 2 ] || die "usage: copy <ownerLogin> <title>"
-    # Views, fields and workflows come with the copy. Items don't.
+    # Views, fields and workflows come with the copy. Items don't. Copies are private.
     gh project copy "$TEMPLATE_NUMBER" --source-owner "$TEMPLATE_OWNER" --target-owner "$1" --title "$2" \
       --format json --jq '[.id, .number, .url] | @tsv'
-    ;;
-
-  set-public)
-    [ $# -eq 3 ] || die "usage: set-public <ownerLogin> <number> <true|false>"
-    case "$3" in true) visibility=PUBLIC ;; false) visibility=PRIVATE ;; *) die "visibility must be true or false" ;; esac
-    gh project edit "$2" --owner "$1" --visibility "$visibility" --format json --jq '.public'
     ;;
 
   link)

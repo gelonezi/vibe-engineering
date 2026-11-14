@@ -85,6 +85,8 @@ edits the wording if needed, and asks to post. The rest are discarded.
 On the user's computer the skill asks two things from lists it builds: the
 owner (their account or one of their organizations), and whether the board is
 for the whole account or linked to one repository. Then it makes the copy.
+The board is always created private, and the user can make it public later in
+its settings.
 
 In a cloud session it can't, so it offers two ways forward: continue in Claude
 Code on the user's computer and call the skill again there, or make the copy

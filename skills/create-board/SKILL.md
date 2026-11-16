@@ -216,9 +216,9 @@ any of the owner's repositories can be added to it.
   checklist to check by eye: six columns in the order Draft, Backlog, Ready,
   In progress, In review, Done; and the views Backlog, Priority board, Team
   items, Roadmap and My items.
-- Say that the other board skills, starting with
-  `vibe-engineering:create-item`, also need Claude Code on their computer for
-  now.
+- Say that `vibe-engineering:create-item` can shape an idea in this session
+  and guide them through adding it by hand, and that it saves the item itself
+  in Claude Code on their computer.
 
 ## Settings
 

@@ -7,18 +7,24 @@ description: Refine a new feature idea through conversation, using the software'
 
 Helps the user turn a new idea into a Draft item on their board. The item is
 where every later skill starts, and the flow is described in
-[docs/concept.md](../../docs/concept.md).
+[docs/concept.md](../../docs/concept.md). The item is always a **draft
+issue**, which only people who can see the board can read. Never turn it into
+a repository issue, and never change the board's visibility.
 
 Every GitHub call goes through two scripts in the plugin's `scripts/` folder.
 Run them with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below
-shorten that to `bash scripts/<name>.sh`. Never guess IDs: get each one from a
-script's output.
+shorten that to `bash scripts/<name>.sh`. Never guess IDs, logins or numbers:
+get each one from a script's output.
 
 ## 1. Check GitHub access
 
 Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
-- `STATUS=ok`: continue.
+- `STATUS=ok`: continue with step 2, and keep `LOGIN`.
+- `STATUS=projects_unavailable`: this session can't reach GitHub Projects at
+  all, which is the case in Claude Code cloud sessions. Don't show the `FIX`
+  line and don't suggest a token. Go to
+  [In a cloud session](#in-a-cloud-session).
 - Any other status: stop. Show the user the `FIX` line as a command they can
   run, explain it in one sentence, and offer to run the check again once
   they've done it. Don't try to work around it.
@@ -31,15 +37,20 @@ project name. If they haven't, ask and wait. Never choose one yourself, whether
 from the current repository, an earlier run or the only board you can find.
 
 Run `bash scripts/projects.sh board "<what they told you>"`. It prints one line
-per match: `<number>  <id>  <title>  <url>`.
+per match: `<number>  <id>  <title>  <public>  <url>`.
 
 - **One match:** use it, and name it in your report.
 - **Several matches:** the same name exists under different owners. Show their
   URLs and ask which one.
 - **No match, or an error:** tell the user, and ask them to check the name or
   send the link. If they want to see their boards, run
-  `bash scripts/projects.sh list <ownerLogin>`. If they have none, offer
-  `vibe-engineering:create-board`.
+  `bash scripts/projects.sh list <LOGIN>`, or the same with the organization
+  they name. If they have none, offer `vibe-engineering:create-board`.
+
+If `<public>` is `true`, the board is public, and anyone on the internet will be
+able to read the idea. Tell the user that in one sentence and ask whether to
+continue. Don't offer to make the board private: that's their choice, in the
+board's settings.
 
 Keep the project's ID and URL for the next steps.
 
@@ -126,3 +137,61 @@ Report in a few lines:
   high-level design
 
 Draft issues have no number, so the user finds this item by its title.
+
+## In a cloud session
+
+Use this section only when step 1 reported `STATUS=projects_unavailable`.
+
+Tell the user, in one or two sentences, that this session can't read or write
+GitHub Projects boards, and that a different token wouldn't change it. Then ask
+which they prefer, with the AskUserQuestion tool if you have it:
+
+- **Continue in Claude Code on my computer** (recommended). The skill does
+  everything there, including saving the item.
+- **Shape the idea here, and add it to the board myself.** A few clicks at the
+  end, guided from here.
+
+Don't try any other route, such as GitHub's REST API or an MCP server: this
+session's GitHub access covers single repositories, not boards.
+
+### Continue in Claude Code on their computer
+
+Tell the user to:
+
+1. Open Claude Code on their computer. If the plugin isn't installed there:
+
+   ```
+   /plugin marketplace add gelonezi/vibe-engineering
+   /plugin install vibe-engineering@vibe-engineering
+   ```
+
+2. Call this skill again there: `/vibe-engineering:create-item`, or just tell
+   Claude the idea.
+
+Say what will happen there: the skill asks which board to use, reads the
+software, talks the idea through, shows the item for approval and saves it in
+Draft. Then stop. Don't start the conversation here: it can't be carried to
+the other session.
+
+### Shape the idea here
+
+Ask which board it's for, as in step 2, but don't look it up: keep the link or
+name the user gives. Then follow steps 3 and 4 as usual. The software can still
+be read here, from the repository in this session.
+
+When the user agrees with the title and body, give them these steps, with the
+board as a link if they gave one:
+
+1. Open the board, and find the **Draft** column.
+2. Click **+ Add item** at the bottom of the column, type the title, and press
+   **Enter**. This makes a draft issue, already in Draft.
+3. Open the new item, click **Edit** on its description, paste the body, and
+   click **Save**.
+
+Then give the body again in a code block, so it's easy to copy. Say plainly
+that you can't check the item from this session, and that the next skills need
+Claude Code on their computer for now.
+
+## Settings
+
+- `GH_HOST` (for GitHub Enterprise Server)

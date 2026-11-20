@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.2.5](https://img.shields.io/badge/version-0.2.5-5b4be6)
+![Version 0.2.6](https://img.shields.io/badge/version-0.2.6-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -113,6 +113,32 @@ illustrated guide.
 Every skill is called as `vibe-engineering:<skill>`, but you rarely need the
 name: describe what you want and Claude picks the skill.
 
+### create-board
+
+Asks where the board goes (your account or one of your organizations), whether
+it's for the whole account or linked to one repository, and its name. Then it
+copies the template board and checks the copy. The board is always created
+**private**: you can make it public later, in its settings.
+
+### create-item
+
+Turns an idea into a Draft item on your board:
+
+1. **You name the board.** Give its link or its name. Claude never picks one for
+   you. If the board is public, it tells you that anyone can read the idea, and
+   asks before going on.
+2. **Claude reads your software.** It looks at the docs and code of the current
+   repository, read-only, to understand what the idea touches.
+3. **You talk it through.** Claude asks one question at a time about the gaps
+   between your idea and how things work today, for as many rounds as it
+   takes. It stays on what you want and why, not on design or code.
+4. **You approve the item.** Claude shows the title and body, and saves nothing
+   until you agree.
+5. **It lands in Draft.** The item is a GitHub draft issue, with an `## Idea`
+   section holding your original words, the refined concept and any open
+   questions. It stays a draft issue, visible only to people who can see the
+   board, until `promote-backlog` turns it into a real issue.
+
 ## Where this is going
 
 Delivering features is the first track. The goal is bigger: everything a team
@@ -137,7 +163,8 @@ The full plan, with the order and the decisions behind it, is in
 - [Claude Code](https://claude.ai/referral/tfCwEtgZHg)
 - Claude Code on your own computer for the board skills. Cloud sessions on
   claude.ai can't reach GitHub Projects, so there `create-board` guides you
-  through copying the board by hand.
+  through copying the board by hand, and `create-item` shapes the idea with you
+  and guides you through adding it to the board yourself.
 - The [GitHub CLI](https://cli.github.com/), logged in with the `project` scope:
 
   ```bash

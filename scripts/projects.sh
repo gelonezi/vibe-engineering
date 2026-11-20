@@ -26,7 +26,7 @@
 #   verify <projectId>                  JSON: views, fields, status options, workflows, repos
 #   build <ownerId> <title>             Fallback: create the board from scratch (see create-board's references/board-spec.md)
 #   board <link|name>                   The board the user named, by link or by name (any case, in your
-#                                       account and organizations): "<number>\t<id>\t<title>\t<url>"
+#                                       account and organizations): "<number>\t<id>\t<title>\t<public>\t<url>"
 #   list <ownerLogin> [search]          Open projects of an owner: "<number>\t<id>\t<title>\t<url>"
 #   draft-create <projectId> <title> <bodyFile>
 #                                       Add a draft issue, body read from a file: "<itemId>"
@@ -235,12 +235,17 @@ case "$cmd" in
         login="$(printf '%s' "$1" | sed -E 's#.*/(orgs|users)/([^/]+)/projects/.*#\2#')"
         number="$(printf '%s' "$1" | sed -E 's#.*/projects/([0-9]+).*#\1#')"
         line="$(bash "$0" get "$login" "$number")"
-        IFS=$'\t' read -r id title _ url <<<"$line"
-        printf '%s\t%s\t%s\t%s\n' "$number" "$id" "$title" "$url"
+        IFS=$'\t' read -r id title public url <<<"$line"
+        printf '%s\t%s\t%s\t%s\t%s\n' "$number" "$id" "$title" "$public" "$url"
         ;;
       *)
         for login in "$(bash "$0" whoami)" $(bash "$0" orgs); do
-          bash "$0" list "$login" "$1" | awk -F'\t' -v t="$1" 'tolower($3) == tolower(t)' || true
+          bash "$0" list "$login" "$1" | awk -F'\t' -v t="$1" 'tolower($3) == tolower(t) { print $1 }' \
+            | while read -r number; do
+                line="$(bash "$0" get "$login" "$number")"
+                IFS=$'\t' read -r id title public url <<<"$line"
+                printf '%s\t%s\t%s\t%s\t%s\n' "$number" "$id" "$title" "$public" "$url"
+              done || true
         done
         ;;
     esac

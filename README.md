@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.2.5](https://img.shields.io/badge/version-0.2.5-5b4be6)
+![Version 0.2.6](https://img.shields.io/badge/version-0.2.6-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·

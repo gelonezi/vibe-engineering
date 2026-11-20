@@ -1,12 +1,12 @@
 ---
 name: update
-description: Update the installed vibe-engineering plugin to the latest published version and report what changed. Use when the user asks to update, upgrade, refresh or auto-update vibe-engineering or its skills, asks whether a newer version exists, or a skill behaves differently from its docs.
+description: Update the installed vibe-engineering plugin to the latest published version, report what changed, and check that its companion plugins (superpowers, code-review, claude-md-management, skill-creator) are installed. Use when the user asks to update, upgrade, refresh or auto-update vibe-engineering or its skills, asks whether a newer version exists, asks whether the setup or the companion plugins are complete, or a skill behaves differently from its docs.
 ---
 
 # vibe-engineering:update
 
-Updates this plugin from its marketplace, then compares the installed copy with
-what's published on GitHub.
+Updates this plugin from its marketplace, compares the installed copy with
+what's published on GitHub, then checks the companion plugins.
 
 Run `bash <skill-dir>/../../scripts/update.sh` and read its `KEY=value` lines.
 Don't run `claude plugin` commands yourself: the script runs them in the right
@@ -30,3 +30,18 @@ order and reports the result.
   state couldn't be compared, and report the update result alone.
 
 Keep it to a few lines, with the `MESSAGE` line only when it adds something.
+
+## Check the companion plugins
+
+This plugin works best with four others. Some skills hand part of their work to
+`superpowers`, `code-review` and `claude-md-management`, and `skill-creator` is
+there for the project's own skills. They are optional, and they aren't installed
+with this plugin, so check them here.
+
+Run `bash <skill-dir>/../../scripts/companions.sh` and read its `KEY=value` lines.
+
+- **`STATUS=ok`:** say nothing.
+- **`STATUS=missing`:** name each `COMPANION` that is `missing` or `disabled`, and
+  show its `FIX` line as a command the user can run. Say that the skills still
+  work without it, and do that part themselves. Run a `FIX` only if the user agrees.
+- **`STATUS=unknown`:** pass on the `MESSAGE` line in one sentence.

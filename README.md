@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-5b4be6)
+![Version 0.4.0](https://img.shields.io/badge/version-0.4.0-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -113,6 +113,24 @@ illustrated guide.
 Every skill is called as `vibe-engineering:<skill>`, but you rarely need the
 name: describe what you want and Claude picks the skill.
 
+### Companion plugins
+
+Vibe Engineering doesn't reinvent what other plugins already do well. It works
+best with four plugins from Anthropic's official marketplace, and the skills
+hand them part of the work:
+
+| Plugin | Used by | For |
+| --- | --- | --- |
+| `superpowers` | `promote-backlog`, `develop` | Choosing an approach with you, writing tests first, finding the cause of a failure, checking the work before calling it done, and weighing review comments. |
+| `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your `CLAUDE.md`. Its findings join the checklist, and you still pick what gets posted. |
+| `claude-md-management` | `develop` | Saving what was learned about your repository in `CLAUDE.md`, with your approval. |
+| `skill-creator` | No skill yet | Writing and checking your project's own skills, ready when you need it. |
+
+The board stays the memory: designs and specs go in the item, not in extra
+files. The companions are optional: if one is missing, the skill does that part
+itself. Ask *"update vibe-engineering"* to see which are missing, with the
+command that installs each one.
+
 ## Where this is going
 
 Delivering features is the first track. The goal is bigger: everything a team
@@ -148,6 +166,25 @@ The full plan, with the order and the decisions behind it, is in
 
   ```bash
   gh auth refresh -s project
+  ```
+
+- Optional, but recommended: the four [companion plugins](#companion-plugins).
+  Install them once:
+
+  ```bash
+  claude plugin install superpowers@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install code-review@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install claude-md-management@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install skill-creator@claude-plugins-official
   ```
 
 ## Learn more
@@ -197,6 +234,11 @@ skills/
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run `claude plugin validate . --strict` before pushing.
+5. The companion plugins are listed in two places that must agree: the default
+   list in `scripts/companions.sh` and the table above. They are optional on
+   purpose. A `dependencies` entry in `plugin.json` would install them
+   automatically, but Claude Code then refuses to load this plugin whenever one
+   is missing.
 
 ### Images and icon
 

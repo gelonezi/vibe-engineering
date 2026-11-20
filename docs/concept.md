@@ -93,6 +93,44 @@ Code on the user's computer and call the skill again there, or make the copy
 by hand with GitHub's *Make a copy*, guided step by step. The skill can't check
 a board made that way, so it gives the user a short checklist.
 
+### Companion plugins do what they already do well
+
+The plugin works best with four others from the official marketplace:
+`superpowers`, `code-review`, `claude-md-management` and `skill-creator`. A
+skill hands the first three a part of its step and keeps everything about the
+board for itself:
+
+- `promote-backlog` uses `superpowers:brainstorming` to choose the approach with
+  the user. The result goes in `## High-level design`, not in a file, and the
+  skill stops before `superpowers:writing-plans`, because the spec belongs to
+  `promote-ready`.
+- `develop` uses `superpowers:test-driven-development`,
+  `superpowers:systematic-debugging`,
+  `superpowers:verification-before-completion` and, for review fixes,
+  `superpowers:receiving-code-review`. Before committing it offers
+  `claude-md-management:revise-claude-md`, so what was learned ships in the same PR.
+- `review` runs `code-review:code-review` without `--comment`, adds its findings
+  to the checklist, and checks the PR against the spec itself.
+
+`create-item` and `promote-ready` hand nothing over. Brainstorming moves on to a
+design, which an idea must not have yet, and a written plan is far longer than an
+issue body allows.
+
+The companions are optional. Every hand-over says what to do when the companion
+isn't there, so a missing plugin makes a step less thorough but never stops it.
+`update` checks which ones are installed, with `scripts/companions.sh`, and
+gives the command that installs each missing one.
+
+Claude Code can install them automatically, through `dependencies` in
+`plugin.json`. That was tried and dropped, because a declared dependency is
+strict: Claude Code refuses to load this plugin while one is missing or turned
+off, which happens when the official marketplace isn't added or the plugin is
+turned on from claude.ai.
+
+No delivery skill uses `skill-creator` yet. It's recommended so that the user has
+it for their project's own skills, which the Set up track in
+[roadmap.md](roadmap.md) builds on.
+
 ### No iterations
 
 The board has no Iteration field. Work is pulled from Ready one item at a time,

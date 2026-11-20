@@ -119,7 +119,20 @@ diving into task-level specifications.
    - What API contracts, interfaces, or CLI flags are involved?
    - What are the architectural trade-offs, security implications, and error cases?
    - Are there open technical questions that must be resolved?
-3. **Format the HLD section:**
+3. **Choose the approach with the user:**
+   If `superpowers:brainstorming` is available, use it for this conversation. It
+   lays out the possible approaches with their trade-offs and has the user pick
+   one, which is what a high-level design needs. Two things change here, because
+   the board is the memory:
+   - The design goes in the item's `## High-level design` section (step 7), not
+     in a file under `docs/`.
+   - Stop once the user approves the design. Don't go on to
+     `superpowers:writing-plans`: the spec belongs to
+     `vibe-engineering:promote-ready`.
+
+   If it isn't available, lay out the approaches yourself, say which one you
+   would pick and why, and let the user choose.
+4. **Format the HLD section:**
    The HLD section starts with `## High-level design`, and any headings inside it
    start at `###`. Each skill owns one `##` section, and later skills find theirs
    by its heading, so a stray `##` would split the design in two.

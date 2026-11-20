@@ -52,14 +52,15 @@ board, never on the template.
   private. `skills/create-board/references/board-spec.md` describes the
   template and is what `verify` output is compared against, so keep it in step
   with project 6. `projects.sh build` is the from-scratch fallback.
-- **Companion plugins.** `plugin.json` declares `superpowers`, `code-review`,
-  `claude-md-management` and `skill-creator` as `dependencies`, and `marketplace.json` allows them
-  with `allowCrossMarketplaceDependenciesOn`. `promote-backlog`, `develop` and
-  `review` hand them part of a step. Every hand-over is written as "if it's
-  available, use it; otherwise do this yourself", and its output still goes
-  where the board flow says (the item's section, the review checklist). Keep the
-  list in step in `plugin.json`, `scripts/companions.sh`, `README.md` and
-  `docs/concept.md`. The decision is in `docs/concept.md`.
+- **Companion plugins are optional.** `promote-backlog`, `develop` and `review`
+  hand part of a step to `superpowers`, `code-review` and
+  `claude-md-management`; `skill-creator` is recommended too. Every hand-over is
+  written as "if it's available, use it; otherwise do this yourself", and its
+  output still goes where the board flow says (the item's section, the review
+  checklist). Don't add them to `dependencies` in `plugin.json`: Claude Code
+  then refuses to load the plugin when one is missing. `update` reports missing
+  ones through `scripts/companions.sh`. Keep the list in step there, in
+  `README.md` and in `docs/concept.md`.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

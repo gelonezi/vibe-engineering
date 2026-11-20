@@ -5,7 +5,6 @@
     "name": "gelonezi",
     "url": "https://github.com/gelonezi"
   },
-  "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
   "plugins": [
     {
       "name": "vibe-engineering",

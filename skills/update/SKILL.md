@@ -33,11 +33,10 @@ Keep it to a few lines, with the `MESSAGE` line only when it adds something.
 
 ## Check the companion plugins
 
-This plugin comes with four others. Some skills hand part of their work to
+This plugin works best with four others. Some skills hand part of their work to
 `superpowers`, `code-review` and `claude-md-management`, and `skill-creator` is
-there for the project's own skills. Claude Code installs them together with
-this plugin, but a copy turned on from claude.ai, or an older Claude Code, may not
-have them, or may have one turned off.
+there for the project's own skills. They are optional, and they aren't installed
+with this plugin, so check them here.
 
 Run `bash <skill-dir>/../../scripts/companions.sh` and read its `KEY=value` lines.
 

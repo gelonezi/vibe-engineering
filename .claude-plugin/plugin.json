@@ -12,12 +12,6 @@
   "documentationUrl": "https://github.com/gelonezi/vibe-engineering#readme",
   "supportUrl": "https://github.com/gelonezi/vibe-engineering/issues",
   "license": "MIT",
-  "dependencies": [
-    { "name": "superpowers", "marketplace": "claude-plugins-official" },
-    { "name": "code-review", "marketplace": "claude-plugins-official" },
-    { "name": "claude-md-management", "marketplace": "claude-plugins-official" },
-    { "name": "skill-creator", "marketplace": "claude-plugins-official" }
-  ],
   "icon": "./.claude-plugin/icon.png",
   "keywords": [
     "github",

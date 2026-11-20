@@ -256,7 +256,7 @@
     <li><b>Install the plugin in Claude Code.</b>
       <pre><code>/plugin marketplace add gelonezi/vibe-engineering
 /plugin install vibe-engineering@vibe-engineering</code></pre>
-      Four companion plugins come with it: <code>superpowers</code>, <code>code-review</code>, <code>claude-md-management</code> and <code>skill-creator</code>.</li>
+      It works best with four companion plugins: <code>superpowers</code>, <code>code-review</code>, <code>claude-md-management</code> and <code>skill-creator</code>. Ask <code>update</code> for the commands that install them.</li>
     <li><b>Create a board.</b> Ask for one with <code>create-board</code>. It asks where the board goes, from a list of your account, organizations and repositories. An existing board works too, if it has the six columns above.</li>
     <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you.</li>
     <li><b>Start with an idea.</b> Say what you want in plain words, and <code>create-item</code> takes it from there.</li>
@@ -283,7 +283,7 @@
     <div class="rule"><b>You can't approve your own PR</b><p>GitHub blocks it. Working solo, <code>review</code> posts plain comments and <code>approve</code> merges without a formal approval. If branch protection requires one, the skill stops and tells you.</p></div>
     <div class="rule"><b>Merging can't be undone</b><p><code>approve</code> shows the checks and any unresolved threads, and asks for your confirmation first.</p></div>
     <div class="rule"><b>Cloud sessions can't reach boards</b><p>On claude.ai, GitHub Projects is out of reach. There <code>create-board</code> sends you to Claude Code on your computer, or guides you through copying the board by hand. The other board skills need your computer for now.</p></div>
-    <div class="rule"><b>Companion plugins</b><p>Some skills hand part of their work to <code>superpowers</code>, <code>code-review</code> and <code>claude-md-management</code>, which are installed with this plugin. If Claude Code says a dependency is not installed, install it with <code>claude plugin install &lt;name&gt;@claude-plugins-official</code>. <code>update</code> tells you which are installed.</p></div>
+    <div class="rule"><b>Companion plugins</b><p>Some skills hand part of their work to <code>superpowers</code>, <code>code-review</code> and <code>claude-md-management</code>, when they are installed. They are optional: if one is missing, the skill does that part itself. <code>update</code> tells you which are missing and how to install them.</p></div>
     <div class="rule"><b>Splitting an item</b><p>When one item becomes several, the original stays as the parent and each child is a sub-issue carrying its own copy of the text. The parent closes when the last child is done.</p></div>
     <div class="rule"><b>Text accumulates</b><p>Every section goes into the same item. GitHub stops at about 65,000 characters, so <code>promote-ready</code> warns before reaching it.</p></div>
   </div>

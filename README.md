@@ -115,19 +115,21 @@ name: describe what you want and Claude picks the skill.
 
 ### Companion plugins
 
-Vibe Engineering doesn't reinvent what other plugins already do well. Four
-plugins from Anthropic's official marketplace are installed with it, and the
-skills hand them part of the work:
+Vibe Engineering doesn't reinvent what other plugins already do well. It works
+best with four plugins from Anthropic's official marketplace, and the skills
+hand them part of the work:
 
 | Plugin | Used by | For |
 | --- | --- | --- |
 | `superpowers` | `promote-backlog`, `develop` | Choosing an approach with you, writing tests first, finding the cause of a failure, checking the work before calling it done, and weighing review comments. |
 | `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your `CLAUDE.md`. Its findings join the checklist, and you still pick what gets posted. |
 | `claude-md-management` | `develop` | Saving what was learned about your repository in `CLAUDE.md`, with your approval. |
-| `skill-creator` | No skill yet | Writing and checking your project's own skills. It is installed so it's ready when you need it. |
+| `skill-creator` | No skill yet | Writing and checking your project's own skills, ready when you need it. |
 
 The board stays the memory: designs and specs go in the item, not in extra
-files. Ask *"update vibe-engineering"* to check that all four are installed.
+files. The companions are optional: if one is missing, the skill does that part
+itself. Ask *"update vibe-engineering"* to see which are missing, with the
+command that installs each one.
 
 ## Where this is going
 
@@ -166,11 +168,8 @@ The full plan, with the order and the decisions behind it, is in
   gh auth refresh -s project
   ```
 
-- The four [companion plugins](#companion-plugins). Claude Code installs them
-  for you with the plugin, from Anthropic's official marketplace, which Claude
-  Code normally has from the start. The plugin doesn't load without them. If
-  Claude Code says a dependency is not installed, or you turn the plugin on from
-  claude.ai, where you need to turn them on too, install them yourself:
+- Optional, but recommended: the four [companion plugins](#companion-plugins).
+  Install them once:
 
   ```bash
   claude plugin install superpowers@claude-plugins-official
@@ -206,10 +205,8 @@ The full plan, with the order and the decisions behind it, is in
 
 ```text
 .claude-plugin/
-  plugin.json          plugin manifest: name, display name, description, icon,
-                       and the companion plugins it depends on
-  marketplace.json     lets this repo be added as a plugin marketplace, and
-                       allows dependencies on the official marketplace
+  plugin.json          plugin manifest: name, display name, description, icon
+  marketplace.json     lets this repo be added as a plugin marketplace
   icon.png             plugin icon, 1024 px square
 docs/
   concept.md           how the delivery skills work together
@@ -237,11 +234,11 @@ skills/
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run `claude plugin validate . --strict` before pushing.
-5. The companion plugins are listed in three places that must agree:
-   `dependencies` in `plugin.json`, the default list in `scripts/companions.sh`,
-   and the table above. A dependency from another marketplace only installs
-   because `marketplace.json` names that marketplace in
-   `allowCrossMarketplaceDependenciesOn`.
+5. The companion plugins are listed in two places that must agree: the default
+   list in `scripts/companions.sh` and the table above. They are optional on
+   purpose. A `dependencies` entry in `plugin.json` would install them
+   automatically, but Claude Code then refuses to load this plugin whenever one
+   is missing.
 
 ### Images and icon
 

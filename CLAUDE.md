@@ -52,8 +52,8 @@ board, never on the template.
   private. `skills/create-board/references/board-spec.md` describes the
   template and is what `verify` output is compared against, so keep it in step
   with project 6. `projects.sh build` is the from-scratch fallback.
-- **Companion plugins.** `plugin.json` declares `superpowers`, `code-review` and
-  `claude-md-management` as `dependencies`, and `marketplace.json` allows them
+- **Companion plugins.** `plugin.json` declares `superpowers`, `code-review`,
+  `claude-md-management` and `skill-creator` as `dependencies`, and `marketplace.json` allows them
   with `allowCrossMarketplaceDependenciesOn`. `promote-backlog`, `develop` and
   `review` hand them part of a step. Every hand-over is written as "if it's
   available, use it; otherwise do this yourself", and its output still goes

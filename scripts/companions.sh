@@ -14,11 +14,11 @@
 #   2  can't tell: the Claude Code CLI (claude) isn't available here
 #
 # Settings (environment variables):
-#   VIBE_ENGINEERING_COMPANIONS             default: the three names below
+#   VIBE_ENGINEERING_COMPANIONS             default: the four names below
 #   VIBE_ENGINEERING_COMPANION_MARKETPLACE  default: claude-plugins-official
 set -uo pipefail
 
-COMPANIONS="${VIBE_ENGINEERING_COMPANIONS:-superpowers code-review claude-md-management}"
+COMPANIONS="${VIBE_ENGINEERING_COMPANIONS:-superpowers code-review claude-md-management skill-creator}"
 MARKETPLACE="${VIBE_ENGINEERING_COMPANION_MARKETPLACE:-claude-plugins-official}"
 
 if ! command -v claude >/dev/null 2>&1 || ! list="$(claude plugin list --json 2>/dev/null)"; then

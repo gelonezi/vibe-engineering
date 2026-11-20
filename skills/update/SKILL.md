@@ -1,6 +1,6 @@
 ---
 name: update
-description: Update the installed vibe-engineering plugin to the latest published version, report what changed, and check that its companion plugins (superpowers, code-review, claude-md-management) are installed. Use when the user asks to update, upgrade, refresh or auto-update vibe-engineering or its skills, asks whether a newer version exists, asks whether the setup or the companion plugins are complete, or a skill behaves differently from its docs.
+description: Update the installed vibe-engineering plugin to the latest published version, report what changed, and check that its companion plugins (superpowers, code-review, claude-md-management, skill-creator) are installed. Use when the user asks to update, upgrade, refresh or auto-update vibe-engineering or its skills, asks whether a newer version exists, asks whether the setup or the companion plugins are complete, or a skill behaves differently from its docs.
 ---
 
 # vibe-engineering:update
@@ -33,8 +33,9 @@ Keep it to a few lines, with the `MESSAGE` line only when it adds something.
 
 ## Check the companion plugins
 
-Some skills hand part of their work to three other plugins: `superpowers`,
-`code-review` and `claude-md-management`. Claude Code installs them together with
+This plugin comes with four others. Some skills hand part of their work to
+`superpowers`, `code-review` and `claude-md-management`, and `skill-creator` is
+there for the project's own skills. Claude Code installs them together with
 this plugin, but a copy turned on from claude.ai, or an older Claude Code, may not
 have them, or may have one turned off.
 

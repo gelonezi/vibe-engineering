@@ -115,7 +115,7 @@ name: describe what you want and Claude picks the skill.
 
 ### Companion plugins
 
-Vibe Engineering doesn't reinvent what other plugins already do well. Three
+Vibe Engineering doesn't reinvent what other plugins already do well. Four
 plugins from Anthropic's official marketplace are installed with it, and the
 skills hand them part of the work:
 
@@ -124,9 +124,10 @@ skills hand them part of the work:
 | `superpowers` | `promote-backlog`, `develop` | Choosing an approach with you, writing tests first, finding the cause of a failure, checking the work before calling it done, and weighing review comments. |
 | `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your `CLAUDE.md`. Its findings join the checklist, and you still pick what gets posted. |
 | `claude-md-management` | `develop` | Saving what was learned about your repository in `CLAUDE.md`, with your approval. |
+| `skill-creator` | No skill yet | Writing and checking your project's own skills. It is installed so it's ready when you need it. |
 
 The board stays the memory: designs and specs go in the item, not in extra
-files. Ask *"update vibe-engineering"* to check that all three are installed.
+files. Ask *"update vibe-engineering"* to check that all four are installed.
 
 ## Where this is going
 
@@ -165,7 +166,7 @@ The full plan, with the order and the decisions behind it, is in
   gh auth refresh -s project
   ```
 
-- The three [companion plugins](#companion-plugins). Claude Code installs them
+- The four [companion plugins](#companion-plugins). Claude Code installs them
   for you with the plugin, from Anthropic's official marketplace, which Claude
   Code normally has from the start. The plugin doesn't load without them. If
   Claude Code says a dependency is not installed, or you turn the plugin on from
@@ -181,6 +182,10 @@ The full plan, with the order and the decisions behind it, is in
 
   ```bash
   claude plugin install claude-md-management@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install skill-creator@claude-plugins-official
   ```
 
 ## Learn more

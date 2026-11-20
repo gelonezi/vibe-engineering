@@ -95,9 +95,10 @@ a board made that way, so it gives the user a short checklist.
 
 ### Companion plugins do what they already do well
 
-Three plugins are declared as dependencies, so Claude Code installs them with
-this one: `superpowers`, `code-review` and `claude-md-management`. A skill hands
-them a part of its step and keeps everything about the board for itself:
+Four plugins are declared as dependencies, so Claude Code installs them with
+this one: `superpowers`, `code-review`, `claude-md-management` and
+`skill-creator`. A skill hands the first three a part of its step and keeps
+everything about the board for itself:
 
 - `promote-backlog` uses `superpowers:brainstorming` to choose the approach with
   the user. The result goes in `## High-level design`, not in a file, and the
@@ -115,14 +116,17 @@ them a part of its step and keeps everything about the board for itself:
 design, which an idea must not have yet, and a written plan is far longer than an
 issue body allows.
 
-A declared dependency is strict: Claude Code installs the three with this plugin
+A declared dependency is strict: Claude Code installs the four with this plugin
 when the official marketplace is added, which it normally is, and refuses to load
 this plugin while one is missing or disabled. It then names the missing one and
 the command that installs it. A copy turned on from claude.ai needs them turned
 on there too. Every hand-over still says what to do when the companion isn't
 there, so the skills keep working if the dependencies are ever made optional.
-`update` checks which ones are installed, with `scripts/companions.sh`. `skill-creator` is not a dependency:
-it's a tool for working on this plugin, not for using it.
+`update` checks which ones are installed, with `scripts/companions.sh`.
+
+No delivery skill uses `skill-creator` yet. It's installed so that the user has
+it for their project's own skills, which the Set up track in
+[roadmap.md](roadmap.md) builds on.
 
 ### No iterations
 

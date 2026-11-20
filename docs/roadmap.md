@@ -34,7 +34,7 @@ Each track is a group of skills. Skill names are working names.
 
 | Track | What it gives you | Status |
 |---|---|---|
-| **1. Deliver** | A feature goes from idea to merged pull request on the board. | In progress |
+| **1. Deliver** | A feature goes from idea to merged pull request on the board. | Completed |
 | **2. Assess** | A report of what a repository is missing to work well with agents. | Planned |
 | **3. Set up** | A project configured for agents: instructions, rules, hooks, architecture, quality checks. | Planned |
 | **4. Start** | A new repository that is set up correctly from day zero. | Planned |
@@ -48,12 +48,12 @@ The backbone. Every other track feeds it or prepares a project for it.
 
 - [x] `create-board`: the board, copied from a template, with six columns and five views
 - [x] `create-item`: an idea, refined by conversation, saved as a Draft item
-- [ ] `promote-backlog`: the high-level design
-- [ ] `promote-ready`: the spec, the size, and splitting until one item is one PR
-- [ ] `develop`: the code, on a branch, following the repository's own rules
-- [ ] `push`: the pull request, linked to the item
-- [ ] `review`: inline comments the user selects
-- [ ] `approve`: the merge
+- [x] `promote-backlog`: the high-level design
+- [x] `promote-ready`: the spec, the size, and splitting until one item is one PR
+- [x] `develop`: the code, on a branch, following the repository's own rules
+- [x] `push`: the pull request, linked to the item
+- [x] `review`: inline comments the user selects
+- [x] `approve`: the merge
 
 The design is in [concept.md](concept.md).
 

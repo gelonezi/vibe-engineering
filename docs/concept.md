@@ -127,9 +127,10 @@ find. There is no config file.
 
 ## Status
 
-Built: `create-board` and `create-item`, plus two utilities outside the flow:
-`help`, which shows an illustrated page of this document, and `update`, which
-updates the installed plugin. The other six skills are not built yet.
+Built: all delivery skills (`create-board`, `create-item`, `promote-backlog`,
+`promote-ready`, `develop`, `push`, `review`, `approve`), plus two utilities
+outside the flow: `help`, which shows an illustrated page of this document, and
+`update`, which updates the installed plugin.
 
 This document covers the delivery flow only. What comes after it, such as
 assessing a repository, setting a project up for agents and starting new

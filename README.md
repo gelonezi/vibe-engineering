@@ -52,9 +52,9 @@ engineering.**
 - **A process that doesn't depend on memory.** Any person or agent can pick up
   any item, on any day, and continue from where it stopped.
 
-> **Beta.** This is what the full flow is designed to give you. The board and
-> idea skills work today, and the rest is being built in the open:
-> see [Skills](#skills) and [Where this is going](#where-this-is-going).
+> **Beta.** All skills in the Deliver track are implemented and moving ideas
+> from concept to merged pull requests: see [Skills](#skills) and
+> [Where this is going](#where-this-is-going).
 
 ## How it works
 
@@ -103,12 +103,12 @@ illustrated guide.
 | `create-item` | Talks your idea through with you, using your codebase as context, and saves it as a Draft item. | ✅ Available |
 | `help` | Opens an illustrated guide to the flow, the skills and the rules. | ✅ Available |
 | `update` | Updates the plugin and lists what changed. | ✅ Available |
-| `promote-backlog` | Writes the high-level design and moves the item to Backlog. | 🛠️ Coming next |
-| `promote-ready` | Writes the spec, sizes and splits the work, and moves it to Ready. | 🛠️ Coming next |
-| `develop` | Builds the item on a branch, following your repository's own rules. | 🛠️ Coming next |
-| `push` | Opens the pull request, linked to the item. | 🛠️ Coming next |
-| `review` | Drafts inline review comments; you pick which ones to post. | 🛠️ Coming next |
-| `approve` | Merges after checks pass and moves the item to Done. | 🛠️ Coming next |
+| `promote-backlog` | Writes the high-level design and moves the item to Backlog. | ✅ Available |
+| `promote-ready` | Writes the spec, sizes and splits the work, and moves it to Ready. | ✅ Available |
+| `develop` | Builds the item on a branch, following your repository's own rules. | ✅ Available |
+| `push` | Opens the pull request, linked to the item. | ✅ Available |
+| `review` | Drafts inline review comments; you pick which ones to post. | ✅ Available |
+| `approve` | Merges after checks pass and moves the item to Done. | ✅ Available |
 
 Every skill is called as `vibe-engineering:<skill>`, but you rarely need the
 name: describe what you want and Claude picks the skill.
@@ -121,7 +121,7 @@ software engineers.
 
 | Track | What it gives you | Status |
 | --- | --- | --- |
-| **Deliver** | A feature goes from idea to merged pull request on the board. | 🛠️ In progress |
+| **Deliver** | A feature goes from idea to merged pull request on the board. | ✅ Completed |
 | **Assess** | A report of what your repository is missing to work well with agents. | 🗺️ Planned |
 | **Set up** | A project configured for agents: `CLAUDE.md`, rules, hooks, its own skills, a recorded architecture and quality checks. | 🗺️ Planned |
 | **Start** | Repository templates that are set up correctly from day zero: a general one, .NET with Angular, TypeScript and Python. | 🗺️ Planned |

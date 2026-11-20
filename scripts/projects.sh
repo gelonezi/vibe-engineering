@@ -28,11 +28,25 @@
 #   board <link|name>                   The board the user named, by link or by name (any case, in your
 #                                       account and organizations): "<number>\t<id>\t<title>\t<url>"
 #   list <ownerLogin> [search]          Open projects of an owner: "<number>\t<id>\t<title>\t<url>"
+#   items <projectId> [status]          List items on a board:
+#                                       "<itemId>\t<status>\t<type>\t<number>\t<repo>\t<title>\t<contentId>"
+#   item <itemId>                       Get an item's summary:
+#                                       "<itemId>\t<status>\t<type>\t<number>\t<repo>\t<title>\t<contentId>\t<repoId>"
+#   item-body <itemId>                  Print an item's raw body to stdout
+#   item-update-body <itemId> <bodyFile>
+#                                       Update an item's body from a file
+#   convert-draft <itemId> <repoId>     Convert a draft issue item to a repository issue:
+#                                       "<itemId>\t<issueNumber>\t<issueUrl>"
 #   draft-create <projectId> <title> <bodyFile>
 #                                       Add a draft issue, body read from a file: "<itemId>"
 #   set-status <projectId> <itemId> <status>
 #                                       Set an item's Status by option name, prints the name read back
 #   item-status <itemId>                Print an item's current Status
+#   set-field <projectId> <itemId> <fieldName> <value>
+#                                       Set a field value (single-select option, number, or date)
+#   create-sub-issue <projectId> <parentIssueId> <repoId> <title> <bodyFile>
+#                                       Create a child sub-issue linked to parent and added to project:
+#                                       "<itemId>\t<number>\t<url>\t<issueId>"
 #
 # Template settings (environment variables):
 #   VIBE_ENGINEERING_TEMPLATE_OWNER   default: gelonezi
@@ -293,6 +307,235 @@ case "$cmd" in
         node(id: $i) { ... on ProjectV2Item { fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } } } }
       }' \
       --jq '.data.node.fieldValueByName.name // ""'
+    ;;
+
+  items)
+    [ $# -ge 1 ] && [ $# -le 2 ] || die "usage: items <projectId> [status]"
+    status_filter="${2:-}"
+    gql -f p="$1" -f query='
+      query($p: ID!) {
+        node(id: $p) {
+          ... on ProjectV2 {
+            items(first: 100) {
+              nodes {
+                id
+                type
+                fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+                content {
+                  __typename
+                  ... on DraftIssue { id title }
+                  ... on Issue { id number title repository { nameWithOwner } }
+                  ... on PullRequest { id number title repository { nameWithOwner } }
+                }
+              }
+            }
+          }
+        }
+      }' \
+      --jq '.data.node.items.nodes[]? | [
+        .id,
+        (.fieldValueByName.name // ""),
+        (.type // .content.__typename // ""),
+        (.content.number // "-"),
+        (.content.repository.nameWithOwner // "-"),
+        (.content.title // ""),
+        (.content.id // "")
+      ] | @tsv' \
+    | if [ -n "$status_filter" ]; then
+        awk -F'\t' -v s="$status_filter" 'tolower($2) == tolower(s)'
+      else
+        cat
+      fi
+    ;;
+
+  item)
+    [ $# -eq 1 ] || die "usage: item <itemId>"
+    gql -f i="$1" -f query='
+      query($i: ID!) {
+        node(id: $i) {
+          ... on ProjectV2Item {
+            id
+            type
+            fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+            content {
+              __typename
+              ... on DraftIssue { id title }
+              ... on Issue { id number title repository { id nameWithOwner } }
+              ... on PullRequest { id number title repository { id nameWithOwner } }
+            }
+          }
+        }
+      }' \
+      --jq '.data.node | [
+        .id,
+        (.fieldValueByName.name // ""),
+        (.type // .content.__typename // ""),
+        (.content.number // "-"),
+        (.content.repository.nameWithOwner // "-"),
+        (.content.title // ""),
+        (.content.id // ""),
+        (.content.repository.id // "-")
+      ] | @tsv'
+    ;;
+
+  item-body)
+    [ $# -eq 1 ] || die "usage: item-body <itemId>"
+    gql -f i="$1" -f query='
+      query($i: ID!) {
+        node(id: $i) {
+          ... on ProjectV2Item {
+            content {
+              ... on DraftIssue { body }
+              ... on Issue { body }
+              ... on PullRequest { body }
+            }
+          }
+        }
+      }' \
+      --jq '.data.node.content.body // ""'
+    ;;
+
+  item-update-body)
+    [ $# -eq 2 ] || die "usage: item-update-body <itemId> <bodyFile>"
+    [ -f "$2" ] || die "body file not found: $2"
+    content_info="$(gql -f i="$1" -f query='
+      query($i: ID!) {
+        node(id: $i) {
+          ... on ProjectV2Item {
+            content {
+              __typename
+              ... on DraftIssue { id }
+              ... on Issue { id }
+              ... on PullRequest { id }
+            }
+          }
+        }
+      }' --jq '[.data.node.content.__typename, .data.node.content.id] | @tsv')"
+    IFS=$'\t' read -r content_type content_id <<<"$content_info"
+    case "$content_type" in
+      DraftIssue)
+        gql -f d="$content_id" -F body=@"$2" -f query='
+          mutation($d: ID!, $body: String) {
+            updateProjectV2DraftIssue(input: { draftIssueId: $d, body: $body }) { draftIssue { id } }
+          }' >/dev/null
+        ;;
+      Issue)
+        gql -f id="$content_id" -F body=@"$2" -f query='
+          mutation($id: ID!, $body: String) {
+            updateIssue(input: { id: $id, body: $body }) { issue { id } }
+          }' >/dev/null
+        ;;
+      PullRequest)
+        gql -f id="$content_id" -F body=@"$2" -f query='
+          mutation($id: ID!, $body: String) {
+            updatePullRequest(input: { pullRequestId: $id, body: $body }) { pullRequest { id } }
+          }' >/dev/null
+        ;;
+      *)
+        die "unsupported content type for body update: $content_type"
+        ;;
+    esac
+    echo "OK"
+    ;;
+
+  convert-draft)
+    [ $# -eq 2 ] || die "usage: convert-draft <itemId> <repoId>"
+    gql -f i="$1" -f r="$2" -f query='
+      mutation($i: ID!, $r: ID!) {
+        convertProjectV2DraftIssueItemToIssue(input: { itemId: $i, repositoryId: $r }) {
+          item {
+            id
+            content {
+              ... on Issue {
+                number
+                url
+              }
+            }
+          }
+        }
+      }' \
+      --jq '.data.convertProjectV2DraftIssueItemToIssue.item | [.id, .content.number, .content.url] | @tsv'
+    ;;
+
+  set-field)
+    [ $# -eq 4 ] || die "usage: set-field <projectId> <itemId> <fieldName> <value>"
+    field_lines="$(gql -f p="$1" -f fn="$3" -f query='
+      query($p: ID!, $fn: String!) {
+        node(id: $p) {
+          ... on ProjectV2 {
+            field(name: $fn) {
+              ... on ProjectV2SingleSelectField { id dataType options { id name } }
+              ... on ProjectV2FieldCommon { id dataType }
+            }
+          }
+        }
+      }' \
+      --jq '.data.node.field | if . == null then error("field not found") else (if .options then (.id as $f | .dataType as $dt | .options[] | [$f, $dt, .id, .name] | @tsv) else [.id, .dataType, "", ""] | @tsv end) end')"
+    first_line="$(printf '%s\n' "$field_lines" | head -n 1)"
+    IFS=$'\t' read -r fid ftype _ _ <<<"$first_line"
+    case "$ftype" in
+      SINGLE_SELECT)
+        opt_id="$(printf '%s\n' "$field_lines" | awk -F'\t' -v v="$4" 'tolower($4) == tolower(v) { print $3; exit }')"
+        [ -n "$opt_id" ] || die "field $3 has no option named: $4"
+        gql -f p="$1" -f i="$2" -f f="$fid" -f o="$opt_id" -f query='
+          mutation($p: ID!, $i: ID!, $f: ID!, $o: String!) {
+            updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { singleSelectOptionId: $o } }) { clientMutationId }
+          }' >/dev/null
+        ;;
+      NUMBER)
+        gql -f p="$1" -f i="$2" -f f="$fid" -F n="$4" -f query='
+          mutation($p: ID!, $i: ID!, $f: ID!, $n: Float!) {
+            updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { number: $n } }) { clientMutationId }
+          }' >/dev/null
+        ;;
+      DATE)
+        gql -f p="$1" -f i="$2" -f f="$fid" -f d="$4" -f query='
+          mutation($p: ID!, $i: ID!, $f: ID!, $d: Date!) {
+            updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { date: $d } }) { clientMutationId }
+          }' >/dev/null
+        ;;
+      TEXT)
+        gql -f p="$1" -f i="$2" -f f="$fid" -f t="$4" -f query='
+          mutation($p: ID!, $i: ID!, $f: ID!, $t: String!) {
+            updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { text: $t } }) { clientMutationId }
+          }' >/dev/null
+        ;;
+      *)
+        die "unsupported field type: $ftype"
+        ;;
+    esac
+    echo "OK"
+    ;;
+
+  create-sub-issue)
+    [ $# -eq 5 ] || die "usage: create-sub-issue <projectId> <parentIssueId> <repoId> <title> <bodyFile>"
+    [ -f "$5" ] || die "body file not found: $5"
+    issue_line="$(gql -f r="$3" -f t="$4" -F body=@"$5" -f query='
+      mutation($r: ID!, $t: String!, $body: String) {
+        createIssue(input: { repositoryId: $r, title: $t, body: $body }) {
+          issue { id number url }
+        }
+      }' --jq '.data.createIssue.issue | [.id, (.number | tostring), .url] | @tsv')"
+    [ -n "$issue_line" ] || die "failed to create issue in repository $3"
+    IFS=$'\t' read -r child_issue_id child_number child_url <<<"$issue_line"
+
+    # Link as sub-issue to parent
+    gql -f parent="$2" -f child="$child_issue_id" -f query='
+      mutation($parent: ID!, $child: ID!) {
+        addSubIssue(input: { issueId: $parent, subIssueId: $child }) {
+          subIssue { id }
+        }
+      }' >/dev/null 2>&1 || true
+
+    # Add to project board
+    item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
+      mutation($p: ID!, $c: ID!) {
+        addProjectV2ItemById(input: { projectId: $p, contentId: $c }) {
+          item { id }
+        }
+      }' --jq '.data.addProjectV2ItemById.item.id')"
+
+    printf '%s\t%s\t%s\t%s\n' "$item_id" "$child_number" "$child_url" "$child_issue_id"
     ;;
 
   ""|-h|--help|help)

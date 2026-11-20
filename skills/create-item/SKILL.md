@@ -19,6 +19,15 @@ script's output.
 Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
 - `STATUS=ok`: continue.
+- `STATUS=projects_unavailable`: this session can't reach GitHub Projects at
+  all, which is the case in Claude Code cloud sessions. Don't show the `FIX`
+  line, don't suggest a token, and don't try GitHub's REST API or an MCP
+  server: they can't reach boards from here either. Tell the user in one or
+  two sentences, and offer to shape the idea here anyway. If they agree, skip
+  step 2, do steps 3 and 4, and instead of step 5 give them the agreed title
+  and body to paste: on their board, in the **Draft** column, click
+  **+ Add item**, type the title, press Enter, then open the item and paste
+  the body. Skip steps 5 and 6.
 - Any other status: stop. Show the user the `FIX` line as a command they can
   run, explain it in one sentence, and offer to run the check again once
   they've done it. Don't try to work around it.

@@ -93,6 +93,37 @@ Code on the user's computer and call the skill again there, or make the copy
 by hand with GitHub's *Make a copy*, guided step by step. The skill can't check
 a board made that way, so it gives the user a short checklist.
 
+### Companion plugins do what they already do well
+
+Three plugins are declared as dependencies, so Claude Code installs them with
+this one: `superpowers`, `code-review` and `claude-md-management`. A skill hands
+them a part of its step and keeps everything about the board for itself:
+
+- `promote-backlog` uses `superpowers:brainstorming` to choose the approach with
+  the user. The result goes in `## High-level design`, not in a file, and the
+  skill stops before `superpowers:writing-plans`, because the spec belongs to
+  `promote-ready`.
+- `develop` uses `superpowers:test-driven-development`,
+  `superpowers:systematic-debugging`,
+  `superpowers:verification-before-completion` and, for review fixes,
+  `superpowers:receiving-code-review`. Before committing it offers
+  `claude-md-management:revise-claude-md`, so what was learned ships in the same PR.
+- `review` runs `code-review:code-review` without `--comment`, adds its findings
+  to the checklist, and checks the PR against the spec itself.
+
+`create-item` and `promote-ready` hand nothing over. Brainstorming moves on to a
+design, which an idea must not have yet, and a written plan is far longer than an
+issue body allows.
+
+A declared dependency is strict: Claude Code installs the three with this plugin
+when the official marketplace is added, which it normally is, and refuses to load
+this plugin while one is missing or disabled. It then names the missing one and
+the command that installs it. A copy turned on from claude.ai needs them turned
+on there too. Every hand-over still says what to do when the companion isn't
+there, so the skills keep working if the dependencies are ever made optional.
+`update` checks which ones are installed, with `scripts/companions.sh`. `skill-creator` is not a dependency:
+it's a tool for working on this plugin, not for using it.
+
 ### No iterations
 
 The board has no Iteration field. Work is pulled from Ready one item at a time,

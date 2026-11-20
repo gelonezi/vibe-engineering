@@ -66,7 +66,13 @@ Extract:
 - `## Spec`: The exact requirements, affected files, edge cases, and test plan.
 
 If working on an **In review** item to address feedback, also inspect the open review
-comments or the checklist file from `vibe-engineering:review`.
+comments or the checklist file from `vibe-engineering:review`. If
+`superpowers:receiving-code-review` is available, use it: it checks each comment
+against the code before anything changes, instead of applying comments blindly.
+
+The item's three sections are the approved design. Don't open a new design
+conversation here, with `superpowers:brainstorming` or otherwise. If the spec is
+wrong or has a gap, say so and ask the user, rather than deciding yourself.
 
 ## 5. Prepare the git branch
 
@@ -95,6 +101,14 @@ Follow the target repository's own standards and conventions:
 - Write automated unit and/or integration tests for all changes, covering the acceptance
   criteria in `## Spec`.
 
+Two companion skills make this step more reliable. Use them when they're available,
+and work the same way yourself when they aren't:
+
+- `superpowers:test-driven-development`: write the test first. Each acceptance
+  criterion in `## Spec` becomes a failing test, then the code that makes it pass.
+- `superpowers:systematic-debugging`: when something fails and you don't know why,
+  find the cause before changing code, instead of trying fixes one after another.
+
 ## 7. Verify locally
 
 Run the repository's test and lint suites (e.g., `npm test`, `pytest`, `cargo test`,
@@ -103,12 +117,21 @@ Run the repository's test and lint suites (e.g., `npm test`, `pytest`, `cargo te
 - No existing tests are broken.
 - Linters and code formatters pass cleanly.
 
+Report only what you ran and saw pass in this session. If
+`superpowers:verification-before-completion` is available, use it for this check.
+If the repository has no tests or linters, say so instead of calling the work verified.
+
 ## 8. Commit and report
 
-1. Commit, following the repository's commit message style (look at
+1. Keep what you learned. If the work taught you something about the repository
+   that the next session would need, such as a command or a quirk, and
+   `claude-md-management:revise-claude-md` is available, offer to run it. It shows
+   each proposed change to `CLAUDE.md` and applies only the ones the user approves,
+   so they travel in the same pull request. Skip this when there's nothing new.
+2. Commit, following the repository's commit message style (look at
    `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
    where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.
-2. Report in a few lines:
+3. Report in a few lines:
    - Branch name and commits created
    - Tests and checks verified
    - Current board item status: **In progress**

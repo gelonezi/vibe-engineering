@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-5b4be6)
+![Version 0.4.0](https://img.shields.io/badge/version-0.4.0-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -113,6 +113,21 @@ illustrated guide.
 Every skill is called as `vibe-engineering:<skill>`, but you rarely need the
 name: describe what you want and Claude picks the skill.
 
+### Companion plugins
+
+Vibe Engineering doesn't reinvent what other plugins already do well. Three
+plugins from Anthropic's official marketplace are installed with it, and the
+skills hand them part of the work:
+
+| Plugin | Used by | For |
+| --- | --- | --- |
+| `superpowers` | `promote-backlog`, `develop` | Choosing an approach with you, writing tests first, finding the cause of a failure, checking the work before calling it done, and weighing review comments. |
+| `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your `CLAUDE.md`. Its findings join the checklist, and you still pick what gets posted. |
+| `claude-md-management` | `develop` | Saving what was learned about your repository in `CLAUDE.md`, with your approval. |
+
+The board stays the memory: designs and specs go in the item, not in extra
+files. Ask *"update vibe-engineering"* to check that all three are installed.
+
 ## Where this is going
 
 Delivering features is the first track. The goal is bigger: everything a team
@@ -150,6 +165,24 @@ The full plan, with the order and the decisions behind it, is in
   gh auth refresh -s project
   ```
 
+- The three [companion plugins](#companion-plugins). Claude Code installs them
+  for you with the plugin, from Anthropic's official marketplace, which Claude
+  Code normally has from the start. The plugin doesn't load without them. If
+  Claude Code says a dependency is not installed, or you turn the plugin on from
+  claude.ai, where you need to turn them on too, install them yourself:
+
+  ```bash
+  claude plugin install superpowers@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install code-review@claude-plugins-official
+  ```
+
+  ```bash
+  claude plugin install claude-md-management@claude-plugins-official
+  ```
+
 ## Learn more
 
 - Ask `vibe-engineering:help` for the illustrated guide.
@@ -168,8 +201,10 @@ The full plan, with the order and the decisions behind it, is in
 
 ```text
 .claude-plugin/
-  plugin.json          plugin manifest: name, display name, description, icon
-  marketplace.json     lets this repo be added as a plugin marketplace
+  plugin.json          plugin manifest: name, display name, description, icon,
+                       and the companion plugins it depends on
+  marketplace.json     lets this repo be added as a plugin marketplace, and
+                       allows dependencies on the official marketplace
   icon.png             plugin icon, 1024 px square
 docs/
   concept.md           how the delivery skills work together
@@ -197,6 +232,11 @@ skills/
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run `claude plugin validate . --strict` before pushing.
+5. The companion plugins are listed in three places that must agree:
+   `dependencies` in `plugin.json`, the default list in `scripts/companions.sh`,
+   and the table above. A dependency from another marketplace only installs
+   because `marketplace.json` names that marketplace in
+   `allowCrossMarketplaceDependenciesOn`.
 
 ### Images and icon
 

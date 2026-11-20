@@ -37,6 +37,7 @@ board, never on the template.
   `link`, `verify`, `board`, `items`, `draft-create`, `set-status`),
   `scripts/repo.sh` (pull requests and issues: `pr`, `checks`, `pr-create`,
   `pr-review`, `merge`, `issue-parent`) and `scripts/check-auth.sh`.
+  `scripts/companions.sh` reports which companion plugins are installed.
   Skills reach them as `bash <skill-dir>/../../scripts/<name>.sh`. Scripts that
   only one skill uses live in that skill's own `scripts/` folder.
 - **Script output contract.** Scripts print machine-readable lines that the
@@ -51,6 +52,14 @@ board, never on the template.
   private. `skills/create-board/references/board-spec.md` describes the
   template and is what `verify` output is compared against, so keep it in step
   with project 6. `projects.sh build` is the from-scratch fallback.
+- **Companion plugins.** `plugin.json` declares `superpowers`, `code-review` and
+  `claude-md-management` as `dependencies`, and `marketplace.json` allows them
+  with `allowCrossMarketplaceDependenciesOn`. `promote-backlog`, `develop` and
+  `review` hand them part of a step. Every hand-over is written as "if it's
+  available, use it; otherwise do this yourself", and its output still goes
+  where the board flow says (the item's section, the review checklist). Keep the
+  list in step in `plugin.json`, `scripts/companions.sh`, `README.md` and
+  `docs/concept.md`. The decision is in `docs/concept.md`.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

@@ -192,7 +192,7 @@
 
     <article class="card">
       <header><h3>promote-backlog</h3><span class="badge ok">Available</span></header>
-      <p>Takes a Draft item, or lets you pick one from the Draft column, and works out a high-level design with you. The draft becomes a real issue.</p>
+      <p>Takes a Draft item, or lets you pick one from the Draft column, and works out a high-level design with you, laying out the possible approaches so you can pick one. The draft becomes a real issue.</p>
       <dl><dt>Picks up</dt><dd>A Draft item</dd><dt>Writes</dt><dd><code>## High-level design</code></dd><dt>Ends in</dt><dd>Backlog</dd></dl>
       <p class="ask">Ask: <span>"Promote the stock idea to the backlog"</span></p>
     </article>
@@ -206,7 +206,7 @@
 
     <article class="card">
       <header><h3>develop</h3><span class="badge ok">Available</span></header>
-      <p>Implements the item on a branch, following the destination repository's own rules and nothing but the item's text. Also takes an item back from review when there are comments to fix.</p>
+      <p>Implements the item on a branch, tests first, following the destination repository's own rules and nothing but the item's text. Also takes an item back from review when there are comments to fix.</p>
       <dl><dt>Picks up</dt><dd>A Ready item, or an In review item with comments</dd><dt>Writes</dt><dd>Code on a branch</dd><dt>Ends in</dt><dd>In progress</dd></dl>
       <p class="ask">Ask: <span>"Develop item #42"</span></p>
     </article>
@@ -220,7 +220,7 @@
 
     <article class="card">
       <header><h3>review</h3><span class="badge ok">Available</span></header>
-      <p>Reviews the pull request and proposes inline comments in a checklist. You tick the ones to post, and the rest are discarded.</p>
+      <p>Reviews the pull request against the item's spec, adds a second look for bugs, and proposes inline comments in a checklist. You tick the ones to post, and the rest are discarded.</p>
       <dl><dt>Picks up</dt><dd>An In review item, or a PR link</dd><dt>Writes</dt><dd>The comments you chose</dd><dt>Ends in</dt><dd>In review</dd></dl>
       <p class="ask">Ask: <span>"Review PR 17"</span></p>
     </article>
@@ -240,7 +240,7 @@
 
     <article class="card">
       <header><h3>update</h3><span class="badge ok">Available</span></header>
-      <p>Updates the plugin to the latest published version and lists what changed. New skills show up after you restart Claude Code.</p>
+      <p>Updates the plugin to the latest published version, lists what changed, and checks that the companion plugins are installed. New skills show up after you restart Claude Code.</p>
       <p class="ask">Ask: <span>"Update vibe-engineering"</span></p>
     </article>
 
@@ -255,7 +255,8 @@
       Already logged in? Add the scope with <code>gh auth refresh -s project</code>.</li>
     <li><b>Install the plugin in Claude Code.</b>
       <pre><code>/plugin marketplace add gelonezi/vibe-engineering
-/plugin install vibe-engineering@vibe-engineering</code></pre></li>
+/plugin install vibe-engineering@vibe-engineering</code></pre>
+      Three companion plugins come with it: <code>superpowers</code>, <code>code-review</code> and <code>claude-md-management</code>.</li>
     <li><b>Create a board.</b> Ask for one with <code>create-board</code>. It asks where the board goes, from a list of your account, organizations and repositories. An existing board works too, if it has the six columns above.</li>
     <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you.</li>
     <li><b>Start with an idea.</b> Say what you want in plain words, and <code>create-item</code> takes it from there.</li>
@@ -282,6 +283,7 @@
     <div class="rule"><b>You can't approve your own PR</b><p>GitHub blocks it. Working solo, <code>review</code> posts plain comments and <code>approve</code> merges without a formal approval. If branch protection requires one, the skill stops and tells you.</p></div>
     <div class="rule"><b>Merging can't be undone</b><p><code>approve</code> shows the checks and any unresolved threads, and asks for your confirmation first.</p></div>
     <div class="rule"><b>Cloud sessions can't reach boards</b><p>On claude.ai, GitHub Projects is out of reach. There <code>create-board</code> sends you to Claude Code on your computer, or guides you through copying the board by hand. The other board skills need your computer for now.</p></div>
+    <div class="rule"><b>Companion plugins</b><p>Some skills hand part of their work to <code>superpowers</code>, <code>code-review</code> and <code>claude-md-management</code>, which are installed with this plugin. If Claude Code says a dependency is not installed, install it with <code>claude plugin install &lt;name&gt;@claude-plugins-official</code>. <code>update</code> tells you which are installed.</p></div>
     <div class="rule"><b>Splitting an item</b><p>When one item becomes several, the original stays as the parent and each child is a sub-issue carrying its own copy of the text. The parent closes when the last child is done.</p></div>
     <div class="rule"><b>Text accumulates</b><p>Every section goes into the same item. GitHub stops at about 65,000 characters, so <code>promote-ready</code> warns before reaching it.</p></div>
   </div>

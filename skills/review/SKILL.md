@@ -50,6 +50,18 @@ Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
 ## 4. Review
 
+The review has two halves: the code on its own, and the code against the item.
+
+**The code on its own.** If `code-review:code-review` is available, run it on the
+PR **without** `--comment`, so its findings come back to the chat instead of going
+to GitHub. It uses several agents to look for definite bugs and breaks of the
+repository's `CLAUDE.md`, and checks each finding before reporting it. It stops by
+itself on a draft or closed PR, and on one Claude has already commented on. If it
+stops, or isn't available, cover *Correctness* and *Fit* below yourself.
+
+**The code against the item.** That skill doesn't know the board, so *The spec* and
+*Tests* below are always yours.
+
 Go through the diff with these questions:
 
 - **The spec:** does it do everything `## Spec` asks? Does it do things the spec
@@ -72,7 +84,8 @@ straight to the PR.
    mkdir -p .vibe
    grep -qxF '.vibe/' .git/info/exclude 2>/dev/null || echo '.vibe/' >> .git/info/exclude
    ```
-2. Write `.vibe/review-<prNumber>.md`:
+2. Write `.vibe/review-<prNumber>.md`, with your findings and the ones from
+   `code-review:code-review` in one list, without duplicates:
    ```markdown
    # Review of PR #<prNumber>
 

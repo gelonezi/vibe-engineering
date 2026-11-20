@@ -46,7 +46,7 @@
 #                                       Set a field value (single-select option, number, or date)
 #   create-sub-issue <projectId> <parentIssueId> <repoId> <title> <bodyFile>
 #                                       Create a child sub-issue linked to parent and added to project:
-#                                       "<itemId>\t<number>\t<url>\t<issueId>"
+#                                       "<itemId>\t<number>\t<url>\t<issueId>\t<linkedAsSubIssue>"
 #
 # Template settings (environment variables):
 #   VIBE_ENGINEERING_TEMPLATE_OWNER   default: gelonezi
@@ -312,11 +312,13 @@ case "$cmd" in
   items)
     [ $# -ge 1 ] && [ $# -le 2 ] || die "usage: items <projectId> [status]"
     status_filter="${2:-}"
-    gql -f p="$1" -f query='
-      query($p: ID!) {
+    # --paginate follows $endCursor, so boards with more than 100 items are read in full.
+    gql --paginate -f p="$1" -f query='
+      query($p: ID!, $endCursor: String) {
         node(id: $p) {
           ... on ProjectV2 {
-            items(first: 100) {
+            items(first: 100, after: $endCursor) {
+              pageInfo { hasNextPage endCursor }
               nodes {
                 id
                 type
@@ -525,7 +527,9 @@ case "$cmd" in
         addSubIssue(input: { issueId: $parent, subIssueId: $child }) {
           subIssue { id }
         }
-      }' >/dev/null 2>&1 || true
+      }' >/dev/null 2>&1 && linked=true || linked=false
+    # The issue exists either way, so don't stop here: a retry would create a duplicate.
+    [ "$linked" = true ] || echo "WARN: issue #$child_number was created but couldn't be linked as a sub-issue of the parent" >&2
 
     # Add to project board
     item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
@@ -535,7 +539,7 @@ case "$cmd" in
         }
       }' --jq '.data.addProjectV2ItemById.item.id')"
 
-    printf '%s\t%s\t%s\t%s\n' "$item_id" "$child_number" "$child_url" "$child_issue_id"
+    printf '%s\t%s\t%s\t%s\t%s\n' "$item_id" "$child_number" "$child_url" "$child_issue_id" "$linked"
     ;;
 
   ""|-h|--help|help)

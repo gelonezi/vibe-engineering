@@ -28,8 +28,3 @@ covers it. Don't paste the page into the chat.
 If they only asked for help, say in one line what the page covers, and name the
 best first step: `vibe-engineering:create-board` without a board, or
 `vibe-engineering:create-item` with one.
-
-## Keeping the page current
-
-The page is written by hand. When a skill is added or changes, update it along
-with `README.md` and `docs/concept.md`.

@@ -1,6 +1,6 @@
 ---
 name: promote-backlog
-description: Move a feature idea from Draft to Backlog on your GitHub Projects board by analyzing the codebase, writing the high-level design (HLD), and converting draft issues to real issues if needed. Use when an idea in Draft is ready for architecture design, or when the user asks to design, promote to backlog, or create an HLD for an item.
+description: Write the high-level design (HLD) for a Draft item on the vibe-engineering GitHub Projects board and move it to Backlog, turning a draft into a real issue when needed. Use when the user wants to design, architect or plan the approach for an idea, says something like "let's design the stock idea" or "move it to the backlog", or an item in Draft is ready for design. Covers the architecture only, not the detailed spec or the code.
 ---
 
 # vibe-engineering:promote-backlog
@@ -9,7 +9,7 @@ Helps the user take an item from **Draft** to **Backlog** by producing its High-
 Design (HLD). The item carries its own context forward, as described in
 [docs/concept.md](../../docs/concept.md).
 
-Every GitHub call goes through scripts in the plugin's `scripts/` folder. Run them
+Every GitHub call goes through the scripts in the plugin's `scripts/` folder. Run them
 with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below shorten that to
 `bash scripts/<name>.sh`. Never guess IDs: get each one from a script's output.
 
@@ -98,9 +98,14 @@ Check the `<type>` field from `item <itemId>`:
      ```bash
      bash scripts/projects.sh convert-draft <itemId> <repoId>
      ```
-     This outputs `<itemId>\t<issueNumber>\t<issueUrl>`. Keep these for reporting.
+     This outputs `<itemId>\t<issueNumber>\t<issueUrl>`. Use this `itemId` from
+     now on, and keep the number and link for the report.
 
-## 5. Shape the High-Level Design (HLD)
+     Run it once. If it fails, run `bash scripts/projects.sh item <itemId>` before
+     trying again: if the type is now `Issue`, the conversion went through, and a
+     second run would fail or create confusion.
+
+## 5. Shape the high-level design
 
 The high-level design translates the idea into the software's architecture before
 diving into task-level specifications.
@@ -115,11 +120,13 @@ diving into task-level specifications.
    - What are the architectural trade-offs, security implications, and error cases?
    - Are there open technical questions that must be resolved?
 3. **Format the HLD section:**
-   The HLD section starts with `## High-level design`. All headings inside it MUST
-   start at `###`.
+   The HLD section starts with `## High-level design`, and any headings inside it
+   start at `###`. Each skill owns one `##` section, and later skills find theirs
+   by its heading, so a stray `##` would split the design in two.
 
-   **Golden Rule:** Never modify the existing `## Idea` section. Append the HLD
-   directly beneath it.
+   Leave the `## Idea` section exactly as it is, and add the HLD below it. The idea
+   is the user's own record of what they asked for, and later steps check the work
+   against it.
 
    Example structure:
    ```markdown
@@ -151,7 +158,7 @@ trade-offs or architectural alternatives. Continue refining until the user appro
 
 1. Prepare the updated body:
    Combine the untouched `## Idea` content and the new `## High-level design` content.
-   Write to a new temporary file (e.g. `/tmp/vibe-item-body.md`).
+   Write it to a new temporary file made with `mktemp`, so two runs never share one.
 2. Update the item body:
    ```bash
    bash scripts/projects.sh item-update-body <itemId> <tempBodyFile>
@@ -160,11 +167,9 @@ trade-offs or architectural alternatives. Continue refining until the user appro
    ```bash
    bash scripts/projects.sh set-status <projectId> <itemId> Backlog
    ```
-   This prints the status read back.
-4. Remove the temporary file.
-5. Verify status readback:
-   Run `bash scripts/projects.sh item-status <itemId>`. If it is not `Backlog`, inform
-   the user (board automations may have moved it).
+   It prints the status it reads back. If it isn't `Backlog`, tell the user: board
+   workflows can move items too.
+4. Delete the temporary file.
 
 ## 8. Report
 

@@ -1,6 +1,6 @@
 ---
 name: push
-description: Push the current feature branch to GitHub, open or update a Pull Request linked to the board item, and move the item to In review. Use when code changes are committed and ready for pull request creation and code review.
+description: Push the current branch, open or update its pull request linked to the vibe-engineering board item, and move the item to In review. Use when the user says push it, open a PR, create the pull request or send it for review, or the code for a board item is committed and ready. Use this rather than a plain git push when the work belongs to an item on the board.
 ---
 
 # vibe-engineering:push
@@ -9,7 +9,7 @@ Pushes the active branch, creates or updates the Pull Request linked to the boar
 and moves the item from **In progress** to **In review**. The flow is described in
 [docs/concept.md](../../docs/concept.md).
 
-Every GitHub call goes through scripts in the plugin's `scripts/` folder. Run them
+Every GitHub call goes through the scripts in the plugin's `scripts/` folder. Run them
 with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below shorten that to
 `bash scripts/<name>.sh`. Never guess IDs: get each one from a script's output.
 
@@ -32,11 +32,10 @@ per match: `<number>\t<id>\t<title>\t<url>`. Keep the project's ID and URL.
 
 ## 3. Identify the item and branch
 
-1. Check current git branch:
-   ```bash
-   current_branch="$(git branch --show-current)"
-   ```
-2. Verify clean git working tree:
+1. Check the current branch with `git branch --show-current`. If it's the
+   repository's default branch, stop: the work belongs on the item's own branch,
+   which `vibe-engineering:develop` creates.
+2. Check that everything is committed:
    ```bash
    git status --porcelain
    ```
@@ -51,54 +50,50 @@ per match: `<number>\t<id>\t<title>\t<url>`. Keep the project's ID and URL.
      ```
      Ask the user which item this branch belongs to.
 
-**Column check:**
-Ensure the item is in **In progress**. If not, ask the user before moving it forward.
+**Column check:** the item should be in **In progress**. If it's somewhere else,
+say where, and ask before moving it on, since it may have skipped a step.
 
 ## 4. Push the branch
 
 Push the branch to origin:
 ```bash
-git push -u origin "$current_branch"
+git push -u origin <branch>
 ```
 
-## 5. Create or update the Pull Request
+## 5. Open or update the pull request
 
-1. Check if a PR already exists for this branch:
-   ```bash
-   existing_pr="$(gh pr list --head "$current_branch" --json number,url --jq '.[0] // empty')"
-   ```
-2. **If no PR exists:**
-   - Read the item summary to get the issue number and title:
-     `bash scripts/projects.sh item <itemId>`
-   - Draft a clear PR description:
+1. Check whether the branch already has an open PR:
+   `bash scripts/repo.sh pr-for-branch <branch>`. It prints
+   `<number>  <url>`, or nothing.
+2. **If there's one:** the push in step 4 already added the new commits to it.
+   Tell the user, with its link, and go on to step 6.
+3. **If there's none:**
+   - Read the item with `bash scripts/projects.sh item <itemId>` for its issue
+     number, repository and title.
+   - Draft the description. Write the issue as `<owner/name>#<issueNumber>`: a
+     bare `#<n>` only closes the issue when it's in the same repository as the PR.
      ```markdown
-     Closes #<issueNumber>
+     Closes <owner/name>#<issueNumber>
 
      ### Overview
-     (Clear summary of the changes and files modified per the spec)
+     (What changed and why, following the item's spec)
 
      ### Verification
-     - (List test suites executed and passing)
+     - (The tests and checks you ran, and their result)
 
-     Board item: <itemUrl>
+     Board item: <boardUrl>
      ```
-   - Ask user for confirmation on PR title and description before creating.
-   - Create PR:
-     ```bash
-     gh pr create --title "<PR title>" --body-file <tempBodyFile>
-     ```
-3. **If PR already exists:**
-   - Inform the user that new commits were pushed to the existing PR URL.
+   - Show the title and description, and change them until the user agrees.
+     The PR is visible to everyone who can see the repository.
+   - Write the description to a new temporary file (`mktemp`), then run
+     `bash scripts/repo.sh pr-create "<title>" <bodyFile>`. It prints the PR's
+     link. Delete the file afterwards.
 
-## 6. Update board status to In review
+## 6. Move the item to In review
 
-1. Move item to In review:
-   ```bash
-   bash scripts/projects.sh set-status <projectId> <itemId> "In review"
-   ```
-2. Verify status readback:
-   `bash scripts/projects.sh item-status <itemId>`.
-   If it is not `In review`, report what the board shows.
+Run `bash scripts/projects.sh set-status <projectId> <itemId> "In review"`. It
+prints the status it reads back. Board workflows can also move items, so if it
+isn't `In review`, tell the user what the board shows.
 
 ## 7. Report
 

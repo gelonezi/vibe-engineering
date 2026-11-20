@@ -1,6 +1,6 @@
 ---
 name: approve
-description: Verify PR checks and mergeability, ask for explicit confirmation, merge the PR, close parent issues if all sub-issues are finished, and move the item to Done on your GitHub Projects board. Use when a reviewed pull request is ready to merge.
+description: Merge a reviewed pull request for a vibe-engineering board item after checking its checks, conflicts and review status, then close a finished parent issue and move the item to Done. Use when the user says approve, merge, ship it, land it or finish an item, or an item in In review is ready to merge. Always asks before merging.
 ---
 
 # vibe-engineering:approve
@@ -10,7 +10,7 @@ moves the board item from **In review** to **Done**. Merging cannot be undone, s
 skill always verifies and asks first. The flow is described in
 [docs/concept.md](../../docs/concept.md).
 
-Every GitHub call goes through scripts in the plugin's `scripts/` folder. Run them
+Every GitHub call goes through the scripts in the plugin's `scripts/` folder. Run them
 with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below shorten that to
 `bash scripts/<name>.sh`. Never guess IDs: get each one from a script's output.
 
@@ -29,81 +29,88 @@ Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
    The user must tell you which board to use: its link, or its board, panel or
    project name. If they haven't, ask and wait.
    Run `bash scripts/projects.sh board "<what they told you>"`.
-2. Select item:
-   If the user specified an item or PR number, use it. Otherwise, list items in
+2. Select the item:
+   If the user named an item or a pull request, use it. Otherwise, list the items in
    **In review**:
    ```bash
    bash scripts/projects.sh items <projectId> "In review"
    ```
    Show the list and ask which item to approve and merge.
+3. Find its pull request. If the user gave a PR, use it. Otherwise the branch that
+   `vibe-engineering:develop` made is `feature/<issueNumber>-<slug>`: find it with
+   `git branch -r --list 'origin/feature/<issueNumber>-*'`, then run
+   `bash scripts/repo.sh pr-for-branch <branch>`. If there's no match, ask the user
+   for the PR.
 
-## 3. Audit PR status and CI checks
+## 3. Check the pull request
 
-1. Retrieve PR mergeability and status:
-   ```bash
-   gh pr view <prNumber> --json number,title,state,mergeable,mergeStateStatus,url
-   ```
-   - If `mergeable` is `CONFLICTING`: stop. Explain that merge conflicts exist and
-     must be resolved first on the branch.
-2. Check automated CI checks:
-   ```bash
-   gh pr checks <prNumber>
-   ```
-   - If checks are failing: report failing checks and ask if the user wants to investigate.
-   - If checks are still running: inform the user and ask if they wish to wait.
-3. Check branch protection:
-   If branch protection requires external approvals from another team member and
-   none exist, GitHub will block the merge. Report this clearly without trying to
-   bypass it.
+Run `bash scripts/repo.sh pr <prNumber>`. It prints
+`<number>  <state>  <isDraft>  <mergeable>  <mergeStateStatus>  <reviewDecision>  <headBranch>  <baseBranch>  <url>  <title>`.
+
+- `state` isn't `OPEN`: say so and stop. It may already be merged or closed.
+- `mergeable` is `CONFLICTING`: stop. The conflicts have to be fixed on the branch
+  first, which `vibe-engineering:develop` can do.
+- `isDraft` is `true`: say so. GitHub won't merge a draft until it's marked ready.
+- `reviewDecision` is `CHANGES_REQUESTED`: name it, and ask whether the comments
+  were dealt with before going on. `REVIEW_REQUIRED` means branch protection wants
+  an approval that isn't there yet, and GitHub will block the merge. Report it, and
+  don't try to get round it. `NONE` means no review rule applies.
+
+Then run `bash scripts/repo.sh checks <prNumber>`. Its last line is `CHECKS=...`:
+
+- `fail`: list the failing checks, and ask whether to look into them instead.
+- `pending`: say which are still running, and ask whether to wait.
+- `pass` or `none`: carry on. With `none`, tell the user the repository has no
+  automated checks, so nothing tested this PR on GitHub.
 
 ## 4. Confirm with the user
 
-**Golden Rule:** Merging cannot be undone. Always ask before merging.
+A merge can't be undone, so never merge without a clear yes for this PR. Show:
 
-Show the user:
-- PR title, number, and URL
-- Summary of CI check results
-- Prompt:
-  > *"All checks have passed and PR #<number> is ready to merge. Should I merge it now and move the board item to Done?"*
+- the PR's title, number and link
+- the checks and the review status, in one line each
+- the merge method you'll use (see step 5)
 
-Wait for explicit confirmation.
+Then ask, for example: *"PR #<number> is ready. Shall I merge it and move the item
+to Done?"* Wait for the answer.
 
-## 5. Merge the Pull Request
+## 5. Merge
 
-Once confirmed:
-1. Merge the pull request (using repository default or squash merge, deleting branch):
-   ```bash
-   gh pr merge <prNumber> --squash --delete-branch
-   ```
-2. Pull latest main branch locally to keep the local repo in sync:
-   ```bash
-   git checkout main && git pull
-   ```
+1. Pick the merge method. Run `bash scripts/repo.sh merge-settings`, which prints
+   `<defaultBranch>  <squashAllowed>  <mergeAllowed>  <rebaseAllowed>`. Use `squash`
+   when it's allowed, since one item is one commit on the default branch. Otherwise
+   use the one allowed method, or ask if several are.
+2. Merge: `bash scripts/repo.sh merge <prNumber> <method>`. This also deletes the
+   branch.
+3. Bring the local copy up to date, if the user is in that repository and has no
+   uncommitted changes: `git checkout <defaultBranch> && git pull`.
 
-## 6. Parent Issue Check (Sub-issues)
+## 6. Close a finished parent issue
 
-If the item was a sub-issue:
-1. Inspect the parent issue to see if all sub-issues are now closed.
-2. If all sub-issues of the parent are closed, inform the user:
-   > *"All sub-issues for parent issue #<parentNumber> are now complete. Would you like me to close the parent issue as well?"*
-3. If confirmed, close the parent issue:
-   ```bash
-   gh issue close <parentNumber>
-   ```
+Run `bash scripts/repo.sh issue-parent <owner/name> <issueNumber>`. If it prints
+nothing, the item has no parent, so skip this step. Otherwise it prints
+`<parentNumber>  <parentState>  <completedSubIssues>  <totalSubIssues>`.
 
-## 7. Update board status to Done
+If the parent is still `OPEN` and every sub-issue is completed, ask:
+*"All the sub-issues of #<parentNumber> are done. Shall I close it as well?"* On a
+yes, run `bash scripts/repo.sh issue-close <owner/name> <parentNumber>`.
 
-1. Move the item to **Done**:
-   ```bash
-   bash scripts/projects.sh set-status <projectId> <itemId> Done
-   ```
-2. Verify status readback:
-   `bash scripts/projects.sh item-status <itemId>`.
+## 7. Move the item to Done
+
+The board's *Pull request merged* workflow usually does this on its own. Set it
+anyway, so the result doesn't depend on the workflow being on:
+
+```bash
+bash scripts/projects.sh set-status <projectId> <itemId> Done
+```
+
+It prints the status it reads back. If it isn't `Done`, tell the user what it shows.
 
 ## 8. Report
 
-Report concisely:
-- Merged PR URL and commit
-- Feature branch deleted
-- Item status: **Done**
-- Completion celebration: the feature has completed the full Vibe Engineering delivery cycle!
+Report in a few lines:
+
+- the merged PR, as a link, and the method used
+- that the branch was deleted
+- the item's status: **Done**, and the parent issue if you closed it
+- that the item has finished the whole flow, from idea to merged code

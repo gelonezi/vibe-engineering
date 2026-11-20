@@ -1,6 +1,6 @@
 ---
 name: develop
-description: Build a feature or fix from a Ready or In review board item on a branch, following the repository's own rules and the item's spec as its sole context. Use when picking up a Ready item to develop, or an In review item to address comments.
+description: Write the code for a Ready item on the vibe-engineering GitHub Projects board, on a new branch, following the item's spec and the repository's own rules, with tests; or go back to an In review item to fix review comments. Use when the user says develop, build, implement, code or start working on an item or issue, picks up the next Ready item, or wants to address review feedback on an item's pull request.
 ---
 
 # vibe-engineering:develop
@@ -9,7 +9,7 @@ Takes an item from **Ready** (or an **In review** item with review comments to a
 and moves it to **In progress** while writing the code on a git branch. The flow is
 described in [docs/concept.md](../../docs/concept.md).
 
-Every GitHub call goes through scripts in the plugin's `scripts/` folder. Run them
+Every GitHub call goes through the scripts in the plugin's `scripts/` folder. Run them
 with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below shorten that to
 `bash scripts/<name>.sh`. Never guess IDs: get each one from a script's output.
 
@@ -50,9 +50,13 @@ If it is in any other status (e.g. `Draft` or `Backlog`), warn the user:
 
 Wait for confirmation before continuing.
 
-## 4. Read the item — The Single Source of Truth
+## 4. Read the item
 
-**Golden Rule:** The item is the only context. Read:
+The item decides **what** to build. Take it from the item's text only, not from
+earlier chats or your own guesses, so that anyone picking the item up later builds
+the same thing. The repository's own rules (step 6) decide **how** to build it.
+
+Read:
 1. `bash scripts/projects.sh item <itemId>`
 2. `bash scripts/projects.sh item-body <itemId>`
 
@@ -71,17 +75,18 @@ comments or the checklist file from `vibe-engineering:review`.
    git status --porcelain
    ```
    If uncommitted changes exist, stop and ask the user how they want to handle them.
-2. Determine branch name:
-   - **From Ready (new work):** Create and switch to a new branch:
-     `git checkout -b feature/<issueNumber>-<short-slug>`
+2. Choose the branch:
+   - **From Ready (new work):** create it from the default branch, kept up to date:
+     `git checkout -b feature/<issueNumber>-<short-slug>`. Keep this name pattern:
+     `push`, `review` and `approve` find the item's PR by it. If the item has no
+     issue number yet, it skipped `vibe-engineering:promote-backlog`: say so, and
+     ask before going on.
    - **From In review (revising work):** Switch to the existing branch for that PR.
-3. Move board item to **In progress**:
-   ```bash
-   bash scripts/projects.sh set-status <projectId> <itemId> "In progress"
-   ```
-   Verify with `bash scripts/projects.sh item-status <itemId>`.
+3. Move the item to **In progress**:
+   `bash scripts/projects.sh set-status <projectId> <itemId> "In progress"`.
+   It prints the status it reads back. If it isn't `In progress`, tell the user.
 
-## 6. Implement the Spec
+## 6. Implement the spec
 
 Follow the target repository's own standards and conventions:
 - Consult project guidelines (`CLAUDE.md`, `.github/CONTRIBUTING.md`, linter configs, or README).
@@ -98,10 +103,11 @@ Run the repository's test and lint suites (e.g., `npm test`, `pytest`, `cargo te
 - No existing tests are broken.
 - Linters and code formatters pass cleanly.
 
-## 8. Commit and Report
+## 8. Commit and report
 
-1. Stage and commit changes with a descriptive message referencing the issue:
-   `git commit -m "feat: <summary> (#<issueNumber>)"`
+1. Commit, following the repository's commit message style (look at
+   `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
+   where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.
 2. Report in a few lines:
    - Branch name and commits created
    - Tests and checks verified

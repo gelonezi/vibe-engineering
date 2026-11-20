@@ -33,8 +33,10 @@ board, never on the template.
   headings at `###`. The full flow, rules and design decisions are in
   `docs/concept.md`; read it before adding or changing a delivery skill.
 - **Skills never call GitHub directly.** Every GitHub call goes through
-  `scripts/projects.sh` (subcommands such as `owners`, `repos`, `copy`, `link`,
-  `verify`, `board`, `draft-create`, `set-status`) and `scripts/check-auth.sh`.
+  `scripts/projects.sh` (the board: subcommands such as `owners`, `repos`, `copy`,
+  `link`, `verify`, `board`, `items`, `draft-create`, `set-status`),
+  `scripts/repo.sh` (pull requests and issues: `pr`, `checks`, `pr-create`,
+  `pr-review`, `merge`, `issue-parent`) and `scripts/check-auth.sh`.
   Skills reach them as `bash <skill-dir>/../../scripts/<name>.sh`. Scripts that
   only one skill uses live in that skill's own `scripts/` folder.
 - **Script output contract.** Scripts print machine-readable lines that the
@@ -49,7 +51,8 @@ board, never on the template.
   private. `skills/create-board/references/board-spec.md` describes the
   template and is what `verify` output is compared against, so keep it in step
   with project 6. `projects.sh build` is the from-scratch fallback.
-- **Mutations are not idempotent.** `copy` and `draft-create` create a new
+- **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
+  `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as
   `link` or `set-status`. Status is set last and read back, because board
   automations may move items.
@@ -64,9 +67,11 @@ board, never on the template.
 - **Plain words first:** a skill explains itself in language a person without
   an engineering background can follow. Docs and skills are written in plain,
   short sentences without em dashes.
-- Only `create-board`, `create-item`, `help` and `update` exist. The other
-  skills in `docs/concept.md` and the README (`promote-backlog`, `promote-ready`,
-  `develop`, `push`, `review`, `approve`) are planned; see `docs/roadmap.md`.
+- All eight delivery skills exist, plus `help` and `update`. The skills after
+  `create-item` find an item's pull request by its branch name,
+  `feature/<issueNumber>-<slug>`, which `develop` creates: keep that pattern.
+- Check a changed skill with Skill Creator's validator, from the skill-creator
+  plugin's folder: `python3 -m scripts.quick_validate <path-to-skill>`.
 
 ## Releasing a change
 

@@ -1,6 +1,6 @@
 ---
 name: promote-ready
-description: Specify, size, and move a Backlog item to Ready on your GitHub Projects board, splitting it into sub-issues if needed so that one Ready item equals one pull request. Use when an item with an idea and high-level design is ready to be specified and picked up for development.
+description: Write the detailed spec for a Backlog item on the vibe-engineering GitHub Projects board, set its Size and Estimate, split it into sub-issues until each one is a single pull request, and move it to Ready. Use when the user wants to spec, specify, size, estimate, break down, split or get an item ready for development, or says something like "get the stock item ready". Not for writing the code.
 ---
 
 # vibe-engineering:promote-ready
@@ -10,7 +10,7 @@ specification (`## Spec`), setting its `Size` and `Estimate`, and enforcing the 
 rule: **One Ready item equals one pull request**. The flow is described in
 [docs/concept.md](../../docs/concept.md).
 
-Every GitHub call goes through scripts in the plugin's `scripts/` folder. Run them
+Every GitHub call goes through the scripts in the plugin's `scripts/` folder. Run them
 with `bash <skill-dir>/../../scripts/<name>.sh`; the steps below shorten that to
 `bash scripts/<name>.sh`. Never guess IDs: get each one from a script's output.
 
@@ -80,34 +80,38 @@ section. If either is missing, warn the user:
 
 Wait for their confirmation.
 
-## 5. Shape the Spec, Size, and Sizing / Splitting
+## 5. Shape the spec, the size and any split
 
 A specification tells `vibe-engineering:develop` exactly what to build and how to
 verify it. It leaves no ambiguity about files, interfaces, acceptance criteria, or tests.
 
-### 5.1. The "One Ready item = One PR" Rule
+### 5.1. One Ready item is one pull request
 Evaluate the scope against the single pull request standard:
 - Can this feature be built, tested, and reviewed safely in a single PR (ideally < 400 lines of diff)?
 - If yes: keep it as a single item.
 - If no (the work spans independent layers, migrations, or large sub-features): **split it into sub-issues**.
 
-### 5.2. Sizing and Estimates
+### 5.2. Size and estimate
 - **Size**: Assign one of `XS`, `S`, `M`, `L`, `XL`.
   - `XS`: Tiny tweak, config change, typo, 1-2 lines.
   - `S`: Small bugfix or localized component update (~under 100 lines).
   - `M`: Standard feature slice or endpoint with tests (~100-300 lines).
   - `L`: Significant feature requiring careful review (~300-500 lines).
   - `XL`: Almost certainly needs splitting. If keeping as XL, explain why.
-- **Estimate**: A numeric story point or hour estimate (e.g., `1`, `2`, `3`, `5`, `8`).
+- **Estimate**: story points, as a number from `1`, `2`, `3`, `5`, `8` or `13`. Points
+  measure effort relative to other items, not hours. The board adds them up in each
+  column, so a mix of points and hours would make those totals meaningless.
 
-### 5.3. GitHub Character Limit Check
+### 5.3. GitHub's length limit
 GitHub issue bodies have a limit of ~65,000 characters. Check the character count of
 the existing body plus proposed spec. If the total exceeds 50,000 characters, warn the
 user and recommend splitting the item into sub-issues to avoid truncation.
 
-### 5.4. Spec Content Structure
-The spec section begins with `## Spec`. All internal headings MUST start at `###`.
-Never alter the existing `## Idea` or `## High-level design` sections.
+### 5.4. What the spec contains
+The spec section begins with `## Spec`, and any headings inside it start at `###`,
+because later skills find each section by its `##` heading. Leave `## Idea` and
+`## High-level design` exactly as they are: they record what was asked and decided,
+and the review checks the work against them.
 
 ```markdown
 ## Spec
@@ -132,11 +136,11 @@ Show the proposed `## Spec`, the assigned `Size`, and the `Estimate`.
   specs, sizes, and estimates.
 Refine with the user until they approve.
 
-## 7. Apply & Move to Ready
+## 7. Save it and move to Ready
 
-### Case A: Single Item (No splitting)
+### Case A: one item, no split
 1. Write the full body (existing `## Idea` + existing `## High-level design` + new `## Spec`)
-   to a temporary file.
+   to a new temporary file made with `mktemp`.
 2. Update the issue body:
    ```bash
    bash scripts/projects.sh item-update-body <itemId> <tempBodyFile>
@@ -150,21 +154,28 @@ Refine with the user until they approve.
    ```bash
    bash scripts/projects.sh set-status <projectId> <itemId> Ready
    ```
-5. Remove the temporary file.
-6. Verify status readback:
-   `bash scripts/projects.sh item-status <itemId>`.
+   It prints the status it reads back. If it isn't `Ready`, tell the user.
+5. Delete the temporary file.
 
-### Case B: Multi-item Split (Sub-issues)
+### Case B: split into sub-issues
 1. The original item remains in its column (or tracks progress via the board's
    *Sub-issues progress* field).
-2. For each child slice:
+2. Take two IDs from the `item <itemId>` line you read in step 4: the parent's
+   `<contentId>` (7th column, the issue itself) and `<repoId>` (8th column). Every
+   child goes in the parent's repository.
+3. For each child slice:
    - Prepare a body file containing the parent's `## Idea` and `## High-level design`,
      followed by the child's specific `## Spec`.
    - Create the sub-issue on the repository and add it to the board:
      ```bash
      bash scripts/projects.sh create-sub-issue <projectId> <parentContentId> <repoId> "<parentTitle>: <childTitle>" <childBodyFile>
      ```
-     This outputs `<childItemId>\t<childNumber>\t<childUrl>\t<childIssueId>`.
+     This outputs `<childItemId>\t<childNumber>\t<childUrl>\t<childIssueId>\t<linked>`.
+     The issue now exists, so never run this again for the same child: a second run
+     makes a duplicate. If `<linked>` is `false`, it couldn't be attached to the
+     parent. Tell the user, since `vibe-engineering:approve` uses that link to know
+     when the parent is finished; they can attach it under the parent's
+     *Sub-issues* on GitHub.
    - Set Size and Estimate on the child item:
      ```bash
      bash scripts/projects.sh set-field <projectId> <childItemId> Size "<ChildSize>"

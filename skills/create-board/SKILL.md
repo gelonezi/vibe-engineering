@@ -92,7 +92,9 @@ Don't create a duplicate without asking.
 ## 4. Create the board
 
 1. Check the template: `bash scripts/projects.sh template`.
-   It prints `<id>  <title>  <public>  <url>`.
+   It prints `<id>  <title>  <public>  <url>`. If `public` is `false`, only the
+   template's owner can copy it, so the copy will fail for anyone else. Tell the
+   user the template isn't published yet, and offer the fallback in step 6.
 2. Copy it: `bash scripts/projects.sh copy <ownerLogin> "<name>"`.
    It prints `<id>  <number>  <url>`. Views, fields and workflows come with
    the copy. Items don't. Never run `copy` a second time for the same board:

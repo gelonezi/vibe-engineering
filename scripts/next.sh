@@ -37,6 +37,9 @@
 #     or a plain comment.
 # Text can't be resolved, so a later commit is taken as the answer to it. The
 # author's plain comments and replies in threads never count.
+# One case is accepted as it is: when the author deletes every comment on a
+# line from their own review, GitHub reports it as a review with only text, and
+# no field tells the two apart. Its text then counts until the next commit.
 # "Fix comments" is offered for "comments", and for "-", when there is no way
 # to tell. In progress says "Update the pull request" once one is open. `board`
 # makes at most three calls: the board, the open PRs of every repository with

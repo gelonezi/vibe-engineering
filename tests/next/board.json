@@ -417,6 +417,27 @@
         "nodes": []
        }
       }
+     },
+     {
+      "id": "R19",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 19,
+       "title": "Author's review left with only text after its line comment was deleted",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
      }
     ]
    }

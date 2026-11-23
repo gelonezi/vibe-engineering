@@ -201,6 +201,12 @@ The author's plain comments and replies in threads never count, and neither
 does the text of the author's review when it also has comments on lines: its
 threads carry the feedback.
 
+One case is accepted as it is. When the author deletes every comment on a
+line from their own review, GitHub reports that review as one with only text,
+and no field tells the two apart. Its text then counts until the next commit,
+although nothing may be left to fix. The panel offers the button when it
+can't tell.
+
 If the panel can't find the pull request, it offers Fix comments anyway,
 because it can't tell. The panel reads all of this in at most three calls to
 GitHub, however many items are in review, and it starts no process for each

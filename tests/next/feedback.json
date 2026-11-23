@@ -670,6 +670,52 @@
      "nodes": []
     }
    }
+  },
+  "p14": {
+   "pullRequest": {
+    "number": 119,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 1 comments.",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
   }
  }
 }

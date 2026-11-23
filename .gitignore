@@ -1,1 +1,9 @@
+# Claude Code files that belong to one person or one computer, never to the
+# repository. The guide, .claude/CLAUDE.md, is not one of them: it is tracked,
+# and so is anything else under .claude/ that is not named here.
 .claude/settings.local.json
+.claude/*.local.*
+CLAUDE.local.md
+.claude/worktrees/
+.claude/agent-memory-local/
+.claude/scheduled_tasks.*

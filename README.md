@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.12](https://img.shields.io/badge/version-0.5.12-5b4be6)
+![Version 0.5.13](https://img.shields.io/badge/version-0.5.13-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -148,9 +148,13 @@ hand them part of the work:
 | Plugin | Used by | For |
 | --- | --- | --- |
 | `superpowers` | `promote-backlog`, `develop` | Choosing an approach with you, writing tests first, finding the cause of a failure, checking the work before calling it done, and weighing review comments. |
-| `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your `CLAUDE.md`. Its findings join the checklist, and you still pick what gets posted. |
-| `claude-md-management` | `develop` | Saving what was learned about your repository in `CLAUDE.md`, with your approval. |
+| `code-review` | `review` | A second look at the pull request for definite bugs and breaks of your project's guide. Its findings join the checklist, and you still pick what gets posted. |
+| `claude-md-management` | `develop` | Saving what was learned about your repository in its guide, with your approval. |
 | `skill-creator` | No skill yet | Writing and checking your project's own skills, ready when you need it. |
+
+Your project's guide is the file Claude Code reads its rules from: `CLAUDE.md`
+in the top folder, or `.claude/CLAUDE.md`. The skills find it in either place,
+and tell a companion where it is.
 
 The board stays the memory: designs and specs go in the item, not in extra
 files. The companions are optional: if one is missing, the skill does that part
@@ -233,6 +237,8 @@ The full plan, with the order and the decisions behind it, is in
 ### Layout
 
 ```text
+.claude/
+  CLAUDE.md            the guide for people and for Claude Code working on this plugin
 .claude-plugin/
   plugin.json          plugin manifest: name, display name, description, icon
   marketplace.json     lets this repo be added as a plugin marketplace
@@ -248,7 +254,7 @@ docs/
 hooks/
   hooks.json           lists the side panel's module
   panel.tsx            the side panel: the board beside the chat
-scripts/               helper scripts shared by the skills, for GitHub and for .vibe/
+scripts/               helper scripts shared by the skills, for GitHub, for .vibe/ and for finding a project's guide
 skills/
   <skill-name>/
     SKILL.md           instructions Claude follows
@@ -261,12 +267,16 @@ tests/
   next/                next.sh against a stand-in gh: bash tests/next/run.sh
   repo/                repo.sh's review thread commands and pr-edit: bash tests/repo/run.sh
   vibe-dir/            vibe-dir.sh in real git repositories: bash tests/vibe-dir/run.sh
+  guide/               guide.sh in real git repositories, and where this repository's own guide is: bash tests/guide/run.sh
+.gitignore             keeps a person's own Claude Code files out of git
 ```
 
 ### Releasing a change
 
 The guide for people and for Claude Code working on this plugin is in
-[`.claude/CLAUDE.md`](.claude/CLAUDE.md).
+[`.claude/CLAUDE.md`](.claude/CLAUDE.md). It is not in the top folder, because
+the top folder is also the plugin's root, and the strict check in step 5 fails
+on a `CLAUDE.md` there. Claude Code reads it from `.claude/` just the same.
 
 1. Bump `version` in `.claude-plugin/plugin.json` and in the version badge above.
    `vibe-engineering:update` reports the installed and published commits, and
@@ -281,11 +291,12 @@ The guide for people and for Claude Code working on this plugin is in
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run the script checks before pushing: `bash tests/syntax.sh`,
-   `bash tests/next/run.sh`, `bash tests/repo/run.sh` and
-   `bash tests/vibe-dir/run.sh`. None needs Claude Code or a GitHub login.
+   `bash tests/next/run.sh`, `bash tests/repo/run.sh`,
+   `bash tests/vibe-dir/run.sh` and `bash tests/guide/run.sh`. None needs
+   Claude Code or a GitHub login.
    The tests of `next.sh` and `repo.sh` need `jq`, and on Windows jq 1.7 or
-   newer. The test of `vibe-dir.sh` needs only git. GitHub runs the same four
-   on Linux, macOS and Windows for every pull request and every push to
+   newer. The tests of `vibe-dir.sh` and `guide.sh` need only git. GitHub runs
+   the same five on Linux, macOS and Windows for every pull request and every push to
    `main` (`.github/workflows/checks.yml`), and its checks must pass before
    the merge.
 5. Run `claude plugin validate . --strict` before pushing, and

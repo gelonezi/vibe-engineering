@@ -118,8 +118,8 @@ A template is the project standard applied before the first commit.
 
 - [x] The script tests run on GitHub for every pull request and every push
   to `main` of this repository, on Linux, macOS and Windows: the syntax check
-  of every script, and the tests of `next.sh board`, of `vibe-dir.sh`, and of
-  `repo.sh`'s `pr-edit` and review thread commands.
+  of every script, and the tests of `next.sh board`, of `vibe-dir.sh`, of
+  `guide.sh`, and of `repo.sh`'s `pr-edit` and review thread commands.
 - [ ] Tests for the shared scripts that have none: `projects.sh`,
   `check-auth.sh`, `companions.sh`, `update.sh` and the rest of `repo.sh`.
   The side panel has its first tests, run by hand with

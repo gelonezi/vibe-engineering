@@ -120,7 +120,17 @@ wrong or has a gap, say so and ask the user, rather than deciding yourself.
 ## 6. Implement the spec
 
 Follow the target repository's own standards and conventions:
-- Consult project guidelines (`CLAUDE.md`, `.github/CONTRIBUTING.md`, linter configs, or README).
+- Read the repository's guide. Claude Code reads a project's rules from
+  `CLAUDE.md` or from `.claude/CLAUDE.md`, so the guide may be in either place.
+  Run `bash scripts/guide.sh`. It prints the path of each guide file, one per
+  line, from the repository's top folder, and ends with `GUIDES=<n>`. Read the
+  ones with no folder before `CLAUDE.md`, `.claude/CLAUDE.md` or
+  `.claude/rules/`: they hold rules for the whole repository. Read one inside a
+  folder, such as `packages/api/CLAUDE.md`, when you change files in that
+  folder or below it. With `GUIDES=0` the repository has no guide: say so in
+  one sentence. If it prints an `ERROR:` line instead, show it, and look for
+  those names in the repository yourself.
+- Consult its other guidelines too (`.github/CONTRIBUTING.md`, linter configs, or README).
 - Implement only what is required by `## Spec`. Avoid scope creep.
 - Follow existing patterns in the codebase (naming, error handling, architecture).
 - Write automated unit and/or integration tests for all changes, covering the acceptance
@@ -151,8 +161,13 @@ If the repository has no tests or linters, say so instead of calling the work ve
 1. Keep what you learned. If the work taught you something about the repository
    that the next session would need, such as a command or a quirk, and
    `claude-md-management:revise-claude-md` is available, offer to run it. It shows
-   each proposed change to `CLAUDE.md` and applies only the ones the user approves,
-   so they travel in the same pull request. Skip this when there's nothing new.
+   each proposed change to the guide and applies only the ones the user approves,
+   so they travel in the same pull request. When you run it, give it the guide
+   files that `bash scripts/guide.sh` listed in step 6, and say that these are
+   the files to update. Its examples name `./CLAUDE.md`, so without the paths it
+   could start a second guide in the top folder of a repository that keeps its
+   guide in `.claude/CLAUDE.md`. With `GUIDES=0`, let it choose the place. Skip
+   this when there's nothing new.
 2. Commit, following the repository's commit message style (look at
    `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
    where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.

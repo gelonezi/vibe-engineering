@@ -52,12 +52,46 @@ Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
 The review has two halves: the code on its own, and the code against the item.
 
+**Find the repository's guide first.** Claude Code reads a project's rules from
+`CLAUDE.md` or from `.claude/CLAUDE.md`, so a repository may keep its guide in
+either place. Run `bash scripts/guide.sh` in the repository. It prints the path
+of each guide file, one per line, from the repository's top folder, and ends
+with `GUIDES=<n>`:
+
+- `CLAUDE.md`, `.claude/CLAUDE.md` or a file under `.claude/rules/`, with no
+  folder before it, holds rules for the whole repository.
+- The same names inside a folder, such as `packages/api/CLAUDE.md`, hold rules
+  for that folder only. Keep the ones in a folder the PR changes, or in a
+  folder above one.
+- `GUIDES=0`: the repository has no guide. Say so in one sentence, and check
+  *Fit* against its linters and the code around the change.
+- It lists the files as they are on this computer. A guide that the PR itself
+  adds, moves or changes is in the diff: read it there.
+- If it prints an `ERROR:` line instead, show it, and look for those names in
+  the repository yourself.
+
 **The code on its own.** If `code-review:code-review` is available, run it on the
 PR **without** `--comment`, so its findings come back to the chat instead of going
 to GitHub. It uses several agents to look for definite bugs and breaks of the
-repository's `CLAUDE.md`, and checks each finding before reporting it. It stops by
-itself on a draft or closed PR, and on one Claude has already commented on. If it
-stops, or isn't available, cover *Correctness* and *Fit* below yourself.
+repository's guide, and checks each finding before reporting it.
+
+By itself it looks for a `CLAUDE.md` in the top folder and in the folders the PR
+changes, so it can miss a guide kept in `.claude/`, and then checks the PR
+against no rules at all. Tell it where the guide is. In the same request, after
+the PR, give it the paths you kept above, and say that these are the
+repository's `CLAUDE.md` files for its compliance check, together with any it
+finds itself. For example, for PR 17:
+
+> Pull request 17. The repository's guide files are `.claude/CLAUDE.md` and
+> `packages/api/CLAUDE.md`. Treat each one as a CLAUDE.md file: put them on
+> the list of CLAUDE.md files, and check the changes against them.
+
+Give the paths exactly as `guide.sh` printed them. With `GUIDES=0`, give it
+only the PR.
+
+It stops by itself on a draft or closed PR, and on one Claude has already
+commented on. If it stops, or isn't available, cover *Correctness* and *Fit*
+below yourself.
 
 **The code against the item.** That skill doesn't know the board, so *The spec* and
 *Tests* below are always yours.
@@ -68,8 +102,8 @@ Go through the diff with these questions:
   doesn't ask for? Extra scope makes the PR harder to review and is worth naming.
 - **Correctness:** edge cases, off-by-one errors, unhandled errors.
 - **Tests:** is each new behavior tested, including the edge cases in the spec?
-- **Fit:** does it follow the repository's own rules (`CLAUDE.md`, linters) and the
-  patterns of the code around it?
+- **Fit:** does it follow the repository's own rules (the guide files you found
+  above, linters) and the patterns of the code around it?
 
 Only comment on lines the PR adds or changes. GitHub can't attach a comment to a
 line outside the diff.

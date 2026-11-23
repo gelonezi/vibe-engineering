@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pull requests and issues, used by the push, review and approve skills.
+# Pull requests and issues, used by the develop, push, review and approve skills.
 # Runs in the current git repository unless a link names another one.
 # Needs only gh; no jq.
 #
@@ -10,6 +10,11 @@
 #   pr-create <title> <bodyFile>        Open a PR from the current branch, prints its URL
 #   pr-body <number|link>               The PR's description
 #   pr-diff <number|link>               The PR's diff
+#   pr-comments <number|link>           What reviewers wrote, one row per comment:
+#                                       "<kind>\t<author>\t<state>\t<path>\t<line>\t<body>", then COMMENTS=<n>.
+#                                       kind is review, inline or general. state is the verdict for a
+#                                       review, open or resolved for an inline comment, and - otherwise.
+#                                       A line break in a body is written as \n. Read-only.
 #   checks <number|link>                One line per check, then CHECKS=pass|fail|pending|none
 #   pr-review <prLink> <payloadFile>    Post one review with inline comments, prints its URL.
 #                                       The payload is GitHub's JSON: {"event":"COMMENT","body":"...",
@@ -52,6 +57,52 @@ case "$cmd" in
   pr-diff)
     [ $# -eq 1 ] || die "usage: pr-diff <number|link>"
     gh pr diff "$1"
+    ;;
+
+  pr-comments)
+    [ $# -eq 1 ] || die "usage: pr-comments <number|link>"
+    # The comments query needs the owner, the repository and the number, so
+    # resolve the pull request first. An unknown one stops here, with gh's message.
+    pr_line="$(gh pr view "$1" --json number,url --jq '[.number, .url] | @tsv')"
+    IFS=$'\t' read -r pr_number pr_url <<<"$pr_line"
+    pr_path="${pr_url#*://}"; pr_path="${pr_path#*/}"
+    pr_owner="${pr_path%%/*}"; pr_path="${pr_path#*/}"; pr_name="${pr_path%%/*}"
+    # One call for reviews, inline threads and general comments. The rows are
+    # built inside --jq, so there is no pipe. @tsv keeps each body on one line.
+    # A review that only carries inline comments has no text of its own and the
+    # verdict COMMENTED: it is left out, since its comments are printed anyway.
+    gh api graphql -f o="$pr_owner" -f n="$pr_name" -F i="$pr_number" -f query='
+      query($o: String!, $n: String!, $i: Int!) {
+        repository(owner: $o, name: $n) {
+          pullRequest(number: $i) {
+            reviews(first: 100) { pageInfo { hasNextPage } nodes { author { login } state body } }
+            reviewThreads(first: 100) {
+              pageInfo { hasNextPage }
+              nodes {
+                isResolved path line originalLine
+                comments(first: 100) { pageInfo { hasNextPage } nodes { author { login } body } }
+              }
+            }
+            comments(first: 100) { pageInfo { hasNextPage } nodes { author { login } body } }
+          }
+        }
+      }' \
+      --jq '.data.repository.pullRequest as $p
+        | ([$p.reviews.nodes[]
+             | select((.body // "") != "" or .state != "COMMENTED")
+             | ["review", (.author.login // "ghost"), .state, "-", "-", (if (.body // "") == "" then "-" else .body end)]]
+           + [$p.reviewThreads.nodes[] | . as $t | $t.comments.nodes[]
+             | ["inline", (.author.login // "ghost"), (if $t.isResolved then "resolved" else "open" end),
+                ($t.path // "-"), (($t.line // $t.originalLine // "-") | tostring),
+                (if (.body // "") == "" then "-" else .body end)]]
+           + [$p.comments.nodes[]
+             | ["general", (.author.login // "ghost"), "-", "-", "-", (if (.body // "") == "" then "-" else .body end)]]
+          ) as $rows
+        | ($rows[] | @tsv),
+          (if ($p.reviews.pageInfo.hasNextPage or $p.reviewThreads.pageInfo.hasNextPage or $p.comments.pageInfo.hasNextPage
+               or ([$p.reviewThreads.nodes[].comments.pageInfo.hasNextPage] | any))
+           then "WARN=more comments exist than the 100 shown per kind" else empty end),
+          "COMMENTS=\($rows | length)"'
     ;;
 
   checks)

@@ -1,0 +1,53 @@
+{
+  "data": {
+    "repository": {
+      "pullRequest": {
+        "reviewThreads": {
+          "totalCount": 103,
+          "nodes": [
+            {
+              "id": "PRRT_8",
+              "isResolved": true,
+              "path": "src/a.ts",
+              "line": 2,
+              "originalLine": 2,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "An older thread, resolved."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "PRRT_9",
+              "isResolved": false,
+              "path": "src/a.ts",
+              "line": 3,
+              "originalLine": 3,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "The newest thread."
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

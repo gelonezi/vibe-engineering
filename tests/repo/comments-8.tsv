@@ -1,0 +1,6 @@
+review	ana	CHANGES_REQUESTED	-	-	Please fix the stock total.
+inline	ana	resolved	src/a.ts	2	An older thread, resolved.
+inline	ana	open	src/a.ts	3	The newest thread.
+general	ben	-	-	-	Looks good overall.
+WARN=more comments exist than the 100 shown per kind
+COMMENTS=4

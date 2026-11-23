@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.9](https://img.shields.io/badge/version-0.5.9-5b4be6)
+![Version 0.5.10](https://img.shields.io/badge/version-0.5.10-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -254,6 +254,8 @@ skills/
     assets/            files the skill shows the user, such as the help page
 tests/
   panel.test.tsx       the side panel's tests: claude plugin test .
+  next/                next.sh against a stand-in gh: bash tests/next/run.sh
+  repo/                repo.sh's review thread commands: bash tests/repo/run.sh
 ```
 
 ### Releasing a change

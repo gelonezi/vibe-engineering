@@ -15,11 +15,18 @@
 #                                       kind is review, inline or general. state is the verdict for a
 #                                       review, open or resolved for an inline comment, and - otherwise.
 #                                       A line break in a body is written as \n. Read-only.
+#                                       Inline comments come from the newest 100 review threads,
+#                                       the same ones pr-threads reads.
 #   pr-threads <number|link>            The open review threads, one row each:
 #                                       "<threadId>\t<path>\t<line>\t<author>\t<firstComment>", then THREADS=<n>.
 #                                       A line break in a comment is written as \n. Read-only.
+#                                       It reads the newest 100 threads, as next.sh board does, and
+#                                       prints a WARN= line before THREADS= when there are more.
 #   resolve-thread <threadId>           Mark one review thread resolved. Prints RESOLVED=true.
 #                                       Visible on the PR; undo it on GitHub with "Unresolve".
+#                                       On failure it prints nothing on standard output and one
+#                                       "ERROR: ..." line on standard error, and exits 1.
+#                                       Safe to run again: resolving a resolved thread changes nothing.
 #   checks <number|link>                One line per check, then CHECKS=pass|fail|pending|none
 #   pr-review <prLink> <payloadFile>    Post one review with inline comments, prints its URL.
 #                                       The payload is GitHub's JSON: {"event":"COMMENT","body":"...",
@@ -77,13 +84,14 @@ case "$cmd" in
     # built inside --jq, so there is no pipe. @tsv keeps each body on one line.
     # A review that only carries inline comments has no text of its own and the
     # verdict COMMENTED: it is left out, since its comments are printed anyway.
+    # The threads are read as pr-threads reads them: see the note there.
     gh api graphql -f o="$pr_owner" -f n="$pr_name" -F i="$pr_number" -f query='
       query($o: String!, $n: String!, $i: Int!) {
         repository(owner: $o, name: $n) {
           pullRequest(number: $i) {
             reviews(first: 100) { pageInfo { hasNextPage } nodes { author { login } state body } }
-            reviewThreads(first: 100) {
-              pageInfo { hasNextPage }
+            reviewThreads(last: 100) {
+              totalCount
               nodes {
                 isResolved path line originalLine
                 comments(first: 100) { pageInfo { hasNextPage } nodes { author { login } body } }
@@ -105,7 +113,8 @@ case "$cmd" in
              | ["general", (.author.login // "ghost"), "-", "-", "-", (if (.body // "") == "" then "-" else .body end)]]
           ) as $rows
         | ($rows[] | @tsv),
-          (if ($p.reviews.pageInfo.hasNextPage or $p.reviewThreads.pageInfo.hasNextPage or $p.comments.pageInfo.hasNextPage
+          (if ($p.reviews.pageInfo.hasNextPage or $p.comments.pageInfo.hasNextPage
+               or $p.reviewThreads.totalCount > ($p.reviewThreads.nodes | length)
                or ([$p.reviewThreads.nodes[].comments.pageInfo.hasNextPage] | any))
            then "WARN=more comments exist than the 100 shown per kind" else empty end),
           "COMMENTS=\($rows | length)"'
@@ -117,12 +126,17 @@ case "$cmd" in
     IFS=$'\t' read -r pr_number pr_url <<<"$pr_line"
     pr_path="${pr_url#*://}"; pr_path="${pr_path#*/}"
     pr_owner="${pr_path%%/*}"; pr_path="${pr_path#*/}"; pr_name="${pr_path%%/*}"
+    # GitHub lists threads oldest first. The last 100 are the newest, and the
+    # same ones next.sh board reads for the Fix comments button: read another
+    # end here, and a thread could keep the button on with no id to resolve it.
+    # With "last", GitHub's hasNextPage is not dependable, so the total tells
+    # whether there are more threads than were read.
     gh api graphql -f o="$pr_owner" -f n="$pr_name" -F i="$pr_number" -f query='
       query($o: String!, $n: String!, $i: Int!) {
         repository(owner: $o, name: $n) {
           pullRequest(number: $i) {
-            reviewThreads(first: 100) {
-              pageInfo { hasNextPage }
+            reviewThreads(last: 100) {
+              totalCount
               nodes { id isResolved path line originalLine comments(first: 1) { nodes { author { login } body } } }
             }
           }
@@ -133,15 +147,32 @@ case "$cmd" in
         | ($open[] | [.id, (.path // "-"), ((.line // .originalLine // "-") | tostring),
              (.comments.nodes[0].author.login // "ghost"),
              (if (.comments.nodes[0].body // "") == "" then "-" else .comments.nodes[0].body end)] | @tsv),
-          (if $t.pageInfo.hasNextPage then "WARN=more threads exist than the 100 shown" else empty end),
+          (if $t.totalCount > ($t.nodes | length) then "WARN=more threads exist than the newest 100 shown" else empty end),
           "THREADS=\($open | length)"'
     ;;
 
   resolve-thread)
-    [ $# -eq 1 ] || die "usage: resolve-thread <threadId>"
-    gh api graphql -f t="$1" -f query='
+    [ $# -eq 1 ] && [ -n "$1" ] || die "usage: resolve-thread <threadId>"
+    # When a call fails, gh prints GitHub's JSON answer on standard output and
+    # its own message on standard error. Neither reaches the caller as it is:
+    # the answer is kept in a variable and the message in a file, and one
+    # ERROR line is built from the message. There is no pipe. The file is made
+    # first, so that a failure to make it happens before GitHub is called.
+    err_file="$(mktemp)" || die "couldn't create a temporary file, so nothing was resolved"
+    trap 'rm -f "$err_file"' EXIT
+    if resolved="$(gh api graphql -f t="$1" -f query='
       mutation($t: ID!) { resolveReviewThread(input: { threadId: $t }) { thread { isResolved } } }' \
-      --jq '"RESOLVED=\(.data.resolveReviewThread.thread.isResolved)"'
+      --jq '.data.resolveReviewThread.thread.isResolved' 2>"$err_file")"; then
+      [ "$resolved" = "true" ] || die "GitHub did not mark thread $1 as resolved"
+      echo "RESOLVED=true"
+    else
+      # gh's message, on one line, without its "gh: " and without spaces at the end.
+      why="$(tr '\n' ' ' <"$err_file")"
+      why="${why//$'\r'/}"
+      why="${why#gh: }"
+      why="${why%"${why##*[! ]}"}"
+      die "couldn't resolve thread $1: ${why:-GitHub gave no reason}"
+    fi
     ;;
 
   checks)

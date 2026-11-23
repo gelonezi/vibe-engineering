@@ -18,6 +18,7 @@ bash -n scripts/*.sh skills/*/scripts/*.sh   # syntax check the scripts
 bash scripts/projects.sh help          # prints the command reference from the header comment
 claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
 bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts where strace is installed)
+bash tests/repo/run.sh                 # runs repo.sh's review thread commands against a stand-in gh and fixtures (needs jq)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
 
@@ -50,6 +51,10 @@ board, never on the template.
   the user verbatim. If you change an output format, update every SKILL.md that
   reads it. Scripts must depend only on `gh` (no `jq`; use `gh --jq`) and stay
   LF-only (`.gitattributes`), as they run on Windows Git Bash, macOS and Linux.
+  When a call fails, `gh api` prints GitHub's raw JSON on standard output and
+  its own message on standard error. A command whose output a skill parses
+  keeps both from the caller and prints one `ERROR:` line on standard error,
+  as `repo.sh resolve-thread` does.
   Under `pipefail`, check text a script already holds with Bash itself, and
   never end a pipe in a command that stops reading early (`grep -q`, `head`,
   `awk` with `exit`): the answer then changes from run to run.
@@ -95,10 +100,20 @@ board, never on the template.
   set a variable instead), and update `tests/next/` when a step's rule
   changes. The rule for Fix comments is written in three places that must
   agree: the script's header, `docs/concept.md` and `README.md`.
+- **Review threads are read from one end.** `next.sh board`,
+  `repo.sh pr-threads` and `repo.sh pr-comments` all read the newest 100
+  threads of a pull request (`reviewThreads(last: 100)`), so the threads that
+  keep Fix comments on are the ones `push` can resolve. Change them together;
+  `tests/repo/run.sh` fails when one differs. `develop` hands the threads it
+  fixed to `push` in `.vibe/fixed-threads-<prNumber>.txt`, kept out of git
+  through `.git/info/exclude` as the checklist of `review` is, and `push`
+  resolves them only after the fix is pushed.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as
-  `link` or `set-status`. Status is set last and read back, because board
+  `link` or `set-status`. `repo.sh resolve-thread` is safe to run again:
+  resolving a thread that is already resolved changes nothing (checked on a
+  real thread). Status is set last and read back, because board
   automations may move items.
 
 ## Conventions for skills

@@ -1,0 +1,8 @@
+review	ana	CHANGES_REQUESTED	-	-	Please fix the stock total.
+inline	ana	open	src/stock.ts	12	Use the warehouse id here.
+inline	me	open	src/stock.ts	12	Done.
+inline	ana	resolved	src/stock.ts	30	Typo.
+inline	ghost	open	src/stock.ts	44	First line\nsecond line
+inline	ben	open	docs/a.md	-	-
+general	ben	-	-	-	Looks good overall.
+COMMENTS=7

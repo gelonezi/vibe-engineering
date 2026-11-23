@@ -87,7 +87,9 @@ Then run `bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per co
 
 Then run `bash scripts/repo.sh pr-threads <prNumber>`. It prints each open review
 thread as `<threadId>\t<path>\t<line>\t<author>\t<firstComment>` and ends with
-`THREADS=<n>`. Keep the IDs: step 8 offers to resolve the threads you fix.
+`THREADS=<n>`. Keep the IDs: step 8 writes down the threads you fix, so that
+`vibe-engineering:push` can offer to resolve them once the fix is on the pull
+request. Pass a `WARN` line on in one sentence.
 
 Also look for the checklist file from `vibe-engineering:review`. If
 `superpowers:receiving-code-review` is available, use it: it checks each comment
@@ -154,16 +156,32 @@ If the repository has no tests or linters, say so instead of calling the work ve
 2. Commit, following the repository's commit message style (look at
    `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
    where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.
-3. **Only when fixing review comments:** list the open threads this work fixed, by
-   their path, line and comment, and ask the user whether to mark them resolved
-   on GitHub. For each one they confirm, run
-   `bash scripts/repo.sh resolve-thread <threadId>`, which prints `RESOLVED=true`.
-   Leave a thread open when you only answered it or disagreed, so the reviewer
-   decides. Resolving is visible on the pull request, and the board's side panel
-   offers **Fix comments** until every thread is resolved. A review that requested
-   changes stays in force until its reviewer reviews again, whatever you resolve.
+3. **Only when fixing review comments:** write down the open threads this work
+   fixed, so that `vibe-engineering:push` can offer to mark them resolved. Don't
+   resolve them here. The fix is only on this computer until it is pushed, and
+   a reviewer would see a thread resolved on code that has not changed.
+   - From the repository's top folder, create the `.vibe` folder and keep it
+     out of git, so the file is never committed:
+     ```bash
+     mkdir -p .vibe
+     grep -qxF '.vibe/' .git/info/exclude 2>/dev/null || echo '.vibe/' >> .git/info/exclude
+     ```
+   - Write the IDs of the threads you fixed to
+     `.vibe/fixed-threads-<prNumber>.txt`, one per line, exactly as `pr-threads`
+     printed them in step 4. If the file is already there, from fixes that
+     were not pushed yet, keep its lines and add the new IDs, without
+     repeating one.
+   - Leave a thread out when you only answered it or disagreed, so the
+     reviewer decides.
+   - If you fixed no open thread, don't write the file.
+   - Tell the user which threads you wrote down, by path, line and comment.
+     Say that `push` will ask before it marks them resolved, and that they
+     can take a line out of the file to keep a thread open.
 4. Report in a few lines:
    - Branch name and commits created
    - Tests and checks verified
+   - Only when fixing review comments: the threads written down for `push`
    - Current board item status: **In progress**
-   - Next step: `vibe-engineering:push` to push the branch and open or update the PR.
+   - Next step: `vibe-engineering:push` to push the branch and open or update
+     the PR. After a push that fixes review comments, it also offers to mark
+     the fixed threads resolved.

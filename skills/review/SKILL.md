@@ -97,11 +97,20 @@ straight to the PR.
 3. Show the findings in the chat, and say the user can tick them in the file or
    just tell you which ones to post.
 
+If the review found nothing at all, write no checklist. Say so, and go to
+step 7: there is nothing to post.
+
 ## 6. Post the chosen comments
 
 Posting is visible to everyone on the PR, so post only what the user picked.
 
 1. Read the ticked items (`- [x]`) from the checklist, with any wording changes.
+
+   **If no comment is picked** (nothing is ticked, and the user named none),
+   post nothing. Don't write a payload and don't run `pr-review`. A review with
+   only its text would keep **Fix comments** on in the board's side panel until
+   the next commit, with nothing to fix. Delete `.vibe/review-<prNumber>.md`
+   and go to step 7.
 2. Write them to a new temporary file (`mktemp`) as one review, in GitHub's format:
    ```json
    {
@@ -124,8 +133,10 @@ Posting is visible to everyone on the PR, so post only what the user picked.
 
 Report in a few lines:
 
-- how many comments were posted, with the review's link
+- how many comments were posted, with the review's link. If no comment was
+  picked, say that no review was posted
 - the next step:
   - fixes needed: `vibe-engineering:develop`, which goes back to the branch and
     moves the item to **In progress**
-  - nothing to fix: `vibe-engineering:approve`, to merge and finish the item
+  - nothing to fix, or no review posted: `vibe-engineering:approve`, to merge
+    and finish the item

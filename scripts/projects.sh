@@ -540,13 +540,55 @@ case "$cmd" in
     # The issue exists either way, so don't stop here: a retry would create a duplicate.
     [ "$linked" = true ] || echo "WARN: issue #$child_number was created but couldn't be linked as a sub-issue of the parent" >&2
 
-    # Add to project board
-    item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
+    # Add to project board. The board's own workflow "Auto-add sub-issues to
+    # project" may add the issue a moment earlier, and the add then fails with
+    # "Content already exists in this project". The issue is on the board either
+    # way, so a failed add is followed by a lookup instead of ending the command.
+    # The add's error text goes to a file, apart from its answer, and is shown
+    # only if the command fails in the end.
+    add_err_file="$(mktemp)"
+    if item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
       mutation($p: ID!, $c: ID!) {
         addProjectV2ItemById(input: { projectId: $p, contentId: $c }) {
           item { id }
         }
-      }' --jq '.data.addProjectV2ItemById.item.id')"
+      }' --jq '.data.addProjectV2ItemById.item.id' 2>"$add_err_file")"; then
+      rm -f "$add_err_file"
+    else
+      add_err="$(tr '\n' ' ' <"$add_err_file")"
+      rm -f "$add_err_file"
+      # The item this issue has on this board, if any. Items of the same issue
+      # on other boards are left out. It only reads, so asking twice is safe.
+      board_item() {
+        local found
+        found="$(gql -f c="$child_issue_id" -f query='
+          query($c: ID!) {
+            node(id: $c) { ... on Issue { projectItems(first: 50) { nodes { id project { id } } } } }
+          }' --jq ".data.node.projectItems.nodes[]? | select(.project.id == \"$1\") | .id" 2>/dev/null || true)"
+        printf '%s' "${found%%$'\n'*}"
+      }
+      item_id="$(board_item "$1")"
+      if [ -z "$item_id" ]; then
+        sleep 2
+        item_id="$(board_item "$1")"
+      fi
+      if [ -z "$item_id" ]; then
+        # The issue exists, so say exactly what was done: a second run would
+        # create a duplicate.
+        {
+          echo "ERROR: issue #$child_number was created, but it is not on the board."
+          echo "Issue: $child_url"
+          if [ "$linked" = true ]; then
+            echo "It was linked to its parent as a sub-issue."
+          else
+            echo "It was not linked to its parent as a sub-issue."
+          fi
+          echo "The board refused it with: $add_err"
+          echo "Do not run this command again: it would create a second issue. Add the issue to the board by hand."
+        } >&2
+        exit 1
+      fi
+    fi
 
     printf '%s\t%s\t%s\t%s\t%s\n' "$item_id" "$child_number" "$child_url" "$child_issue_id" "$linked"
     ;;

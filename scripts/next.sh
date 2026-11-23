@@ -17,12 +17,16 @@
 # the work. <type> is DRAFT_ISSUE, ISSUE or PULL_REQUEST, and <number> and
 # <repo> are "-" for a draft issue. Labels never hold a comma or a colon.
 #
-# <pr> is what the item's open pull request says, as `board` reads it from the
-# PRs that close the issue (push writes "Closes <repo>#<n>"): "open", or
-# "comments" when a reviewer asked for changes or left a thread unresolved.
-# Left out or "-", no open pull request was found. "Fix comments" is offered
-# only for "comments", or for "-", when there is no way to tell. In progress
-# says "Update the pull request" once one is open.
+# <pr> is what the item's open pull request says: "open", "comments" when a
+# reviewer left feedback that no commit has answered yet, or "-" when none was
+# found. `board` finds the pull request as the other skills do, by its branch
+# `feature/<number>-<slug>`, and else by the "Closes <repo>#<number>" line push
+# writes. Feedback is a review that requests changes or says something, an
+# open review thread, or a comment on the pull request, from a person rather
+# than a bot, made after the pull request's latest commit. A push that answers
+# it makes the item "open" again until someone reviews it once more.
+# "Fix comments" is offered for "comments", and for "-", when there is no way
+# to tell. In progress says "Update the pull request" once one is open.
 set -euo pipefail
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -80,7 +84,7 @@ case "$cmd" in
                   ... on Issue {
                     number title repository { nameWithOwner } subIssuesSummary { total completed }
                     closedByPullRequestsReferences(first: 5, includeClosedPrs: false) {
-                      nodes { state reviewDecision reviewThreads(first: 50) { nodes { isResolved } } }
+                      nodes { number state repository { nameWithOwner } }
                     }
                   }
                   ... on PullRequest { number title repository { nameWithOwner } }
@@ -97,19 +101,91 @@ case "$cmd" in
         (.content.number // "-"),
         (.content.repository.nameWithOwner // "-"),
         "\(.content.subIssuesSummary.completed // 0)/\(.content.subIssuesSummary.total // 0)",
-        ([.content.closedByPullRequestsReferences.nodes[]? | select(.state == "OPEN")] as $prs
-          | if ($prs | length) == 0 then "-"
-            elif any($prs[]; .reviewDecision == "CHANGES_REQUESTED"
-                   or any(.reviewThreads.nodes[]?; .isResolved | not)) then "comments"
-            else "open" end),
+        ([.content.closedByPullRequestsReferences.nodes[]? | select(.state == "OPEN")
+          | "\(.repository.nameWithOwner)#\(.number)"] | first // "-"),
         (.content.title // "")
       ] | @tsv')"
     [ -n "$rows" ] || exit 0
+
+    # The open pull requests of each repository with work in progress or in
+    # review, read once per repository: "<repo>\t<headBranch>\t<number>" lines.
+    open_prs=""
+    seen_repos=" "
+    prs_of() {
+      case "$seen_repos" in *" $1 "*) return ;; esac
+      seen_repos="$seen_repos$1 "
+      open_prs="$open_prs$(gh api graphql -f o="${1%%/*}" -f n="${1#*/}" -f query='
+        query($o: String!, $n: String!) {
+          repository(owner: $o, name: $n) {
+            pullRequests(states: OPEN, first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
+              nodes { number headRefName }
+            }
+          }
+        }' --jq '.data.repository.pullRequests.nodes[]? | "'"$1"'\t\(.headRefName)\t\(.number)"' \
+        </dev/null 2>/dev/null || true)
+"
+    }
+
+    # Sets `found` to the issue's pull request, as "<repo>#<number>", or "-".
+    # It sets a variable rather than printing, so the cache above survives.
+    pr_for() {
+      local repo="$1" number="$2" r head n
+      found="$3"
+      prs_of "$repo"
+      while IFS=$'\t' read -r r head n; do
+        [ "$r" = "$repo" ] || continue
+        case "$head" in "feature/$number-"*) found="$r#$n"; return ;; esac
+      done <<< "$open_prs"
+    }
+
+    # "comments" when a person left feedback after the latest commit, else "open".
+    feedback_of() {
+      local repo="${1%#*}" number="${1##*#}"
+      gh api graphql -f o="${repo%%/*}" -f n="${repo#*/}" -F i="$number" -f query='
+        query($o: String!, $n: String!, $i: Int!) {
+          repository(owner: $o, name: $n) {
+            pullRequest(number: $i) {
+              commits(last: 1) { nodes { commit { committedDate } } }
+              reviews(last: 50) { nodes { state body submittedAt author { __typename } } }
+              reviewThreads(last: 100) {
+                nodes { isResolved isOutdated comments(last: 1) { nodes { createdAt author { __typename } } } }
+              }
+              comments(last: 50) { nodes { createdAt author { __typename } } }
+            }
+          }
+        }' \
+        --jq '.data.repository.pullRequest as $p
+          | ($p.commits.nodes[0].commit.committedDate // "") as $since
+          | [ ($p.reviews.nodes[]
+                | select(.author.__typename != "Bot")
+                | select(.state == "CHANGES_REQUESTED" or (.state == "COMMENTED" and (.body // "") != ""))
+                | .submittedAt),
+              ($p.reviewThreads.nodes[]
+                | select((.isResolved or .isOutdated) | not)
+                | .comments.nodes[] | select(.author.__typename != "Bot") | .createdAt),
+              ($p.comments.nodes[] | select(.author.__typename != "Bot") | .createdAt) ]
+          | if any(.[]; . != null and . > $since) then "comments" else "open" end' \
+        </dev/null 2>/dev/null || echo "-"
+    }
+
     # Bash folds empty tab-separated fields together, so the query writes "~"
     # for an empty one, and it is turned back into an empty field here.
-    while IFS=$'\t' read -r id status type number repo subs pr title; do
+    while IFS=$'\t' read -r id status type number repo subs linked title; do
       [ "$status" = "~" ] && status=""
       [ "$type" = "~" ] && type=""
+      pr="-"
+      lower="$(printf '%s' "$status" | tr '[:upper:]' '[:lower:]')"
+      if [ "$type" = "ISSUE" ] && [ "$number" != "-" ] && [ "${subs#*/}" = "0" ]; then
+        case "$lower" in
+          "in progress"|"in review")
+            pr_for "$repo" "$number" "$linked"
+            if [ "$found" != "-" ]; then
+              pr="open"
+              if [ "$lower" = "in review" ]; then pr="$(feedback_of "$found")"; fi
+            fi
+            ;;
+        esac
+      fi
       printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
         "$id" "$status" "$type" "$number" "$repo" "$subs" \
         "$(steps_for "$status" "$type" "${subs#*/}" "$pr")" "$title"

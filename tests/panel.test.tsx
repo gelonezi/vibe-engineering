@@ -209,6 +209,26 @@ test('fixing comments asks develop for the review comments', async ($, on) => {
   await ui.unmount()
 })
 
+test('the buttons are the steps next.sh gives, no more', async ($, on) => {
+  const rows = [
+    'PVTI_7\tIn progress\tISSUE\t11\tme/shop\t0/0\tpush:Update the pull request\tStock export',
+    'PVTI_8\tIn review\tISSUE\t12\tme/shop\t0/0\treview:Review,approve:Merge\tStock import',
+  ].join('\n')
+  const { sent } = engine(on, { next: [0, rows, ''] })
+  await $.session.start({ cwd: '/work', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, ...BOARD })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Button', key: 'PVTI_8-develop-Fix comments' })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'PVTI_8-approve-Merge' })).toBeDefined()
+  await ui.press({ key: 'PVTI_7-push-Update the pull request' })
+
+  expect(sent.at(0)?.text).toBe(
+    'Use vibe-engineering:push for the item "Stock export" (me/shop#11) on the board https://github.com/users/me/projects/3.',
+  )
+  await ui.unmount()
+})
+
 test('new idea asks create-item for the board shown', async ($, on) => {
   const { sent } = engine(on)
   await $.session.start({ cwd: '/work', surface: 'desktop', isInteractive: true })

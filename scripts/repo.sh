@@ -15,6 +15,11 @@
 #                                       kind is review, inline or general. state is the verdict for a
 #                                       review, open or resolved for an inline comment, and - otherwise.
 #                                       A line break in a body is written as \n. Read-only.
+#   pr-threads <number|link>            The open review threads, one row each:
+#                                       "<threadId>\t<path>\t<line>\t<author>\t<firstComment>", then THREADS=<n>.
+#                                       A line break in a comment is written as \n. Read-only.
+#   resolve-thread <threadId>           Mark one review thread resolved. Prints RESOLVED=true.
+#                                       Visible on the PR; undo it on GitHub with "Unresolve".
 #   checks <number|link>                One line per check, then CHECKS=pass|fail|pending|none
 #   pr-review <prLink> <payloadFile>    Post one review with inline comments, prints its URL.
 #                                       The payload is GitHub's JSON: {"event":"COMMENT","body":"...",
@@ -104,6 +109,39 @@ case "$cmd" in
                or ([$p.reviewThreads.nodes[].comments.pageInfo.hasNextPage] | any))
            then "WARN=more comments exist than the 100 shown per kind" else empty end),
           "COMMENTS=\($rows | length)"'
+    ;;
+
+  pr-threads)
+    [ $# -eq 1 ] || die "usage: pr-threads <number|link>"
+    pr_line="$(gh pr view "$1" --json number,url --jq '[.number, .url] | @tsv')"
+    IFS=$'\t' read -r pr_number pr_url <<<"$pr_line"
+    pr_path="${pr_url#*://}"; pr_path="${pr_path#*/}"
+    pr_owner="${pr_path%%/*}"; pr_path="${pr_path#*/}"; pr_name="${pr_path%%/*}"
+    gh api graphql -f o="$pr_owner" -f n="$pr_name" -F i="$pr_number" -f query='
+      query($o: String!, $n: String!, $i: Int!) {
+        repository(owner: $o, name: $n) {
+          pullRequest(number: $i) {
+            reviewThreads(first: 100) {
+              pageInfo { hasNextPage }
+              nodes { id isResolved path line originalLine comments(first: 1) { nodes { author { login } body } } }
+            }
+          }
+        }
+      }' \
+      --jq '.data.repository.pullRequest.reviewThreads as $t
+        | [$t.nodes[] | select(.isResolved | not)] as $open
+        | ($open[] | [.id, (.path // "-"), ((.line // .originalLine // "-") | tostring),
+             (.comments.nodes[0].author.login // "ghost"),
+             (if (.comments.nodes[0].body // "") == "" then "-" else .comments.nodes[0].body end)] | @tsv),
+          (if $t.pageInfo.hasNextPage then "WARN=more threads exist than the 100 shown" else empty end),
+          "THREADS=\($open | length)"'
+    ;;
+
+  resolve-thread)
+    [ $# -eq 1 ] || die "usage: resolve-thread <threadId>"
+    gh api graphql -f t="$1" -f query='
+      mutation($t: ID!) { resolveReviewThread(input: { threadId: $t }) { thread { isResolved } } }' \
+      --jq '"RESOLVED=\(.data.resolveReviewThread.thread.isResolved)"'
     ;;
 
   checks)

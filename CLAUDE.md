@@ -17,6 +17,7 @@ claude plugin validate . --strict      # run before every push (release checklis
 bash -n scripts/*.sh skills/*/scripts/*.sh   # syntax check the scripts
 bash scripts/projects.sh help          # prints the command reference from the header comment
 claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
+bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
 
@@ -38,7 +39,8 @@ board, never on the template.
   `scripts/projects.sh` (the board: subcommands such as `owners`, `repos`, `copy`,
   `link`, `verify`, `board`, `items`, `draft-create`, `set-status`),
   `scripts/repo.sh` (pull requests and issues: `pr`, `checks`, `pr-create`,
-  `pr-comments`, `pr-review`, `merge`, `issue-parent`) and `scripts/check-auth.sh`.
+  `pr-comments`, `pr-threads`, `resolve-thread`, `pr-review`, `merge`, `issue-parent`)
+  and `scripts/check-auth.sh`.
   `scripts/companions.sh` reports which companion plugins are installed.
   Skills reach them as `bash <skill-dir>/../../scripts/<name>.sh`. Scripts that
   only one skill uses live in that skill's own `scripts/` folder.
@@ -88,6 +90,8 @@ board, never on the template.
 - **`scripts/next.sh` decides the next step.** It is the one place that maps a
   column to the skill that moves an item out of it. The panel and the chat
   guide both read it. When the flow changes, change it with `docs/concept.md`.
+  The panel runs it on every refresh, so keep `board` to its three GitHub
+  calls, and update `tests/next/` when a step's rule changes.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

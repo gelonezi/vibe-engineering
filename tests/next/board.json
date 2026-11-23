@@ -1,0 +1,299 @@
+{
+ "data": {
+  "node": {
+   "items": {
+    "nodes": [
+     {
+      "id": "D1",
+      "type": "DRAFT_ISSUE",
+      "fieldValueByName": {
+       "name": "Draft"
+      },
+      "content": {
+       "title": "An idea"
+      }
+     },
+     {
+      "id": "P1",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In progress"
+      },
+      "content": {
+       "number": 1,
+       "title": "Progress without a PR",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "P2",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In progress"
+      },
+      "content": {
+       "number": 2,
+       "title": "Progress with a PR",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R3",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 3,
+       "title": "Clean review",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R4",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 4,
+       "title": "Open thread",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R5",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 5,
+       "title": "Changes requested, then a commit",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R6",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 6,
+       "title": "Changes requested, then approved",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R7",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 7,
+       "title": "Reviewer text after the commit",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R8",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 8,
+       "title": "Author replies and bot comments only",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R9",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 9,
+       "title": "Found by its Closes line",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": [
+         {
+          "number": 80,
+          "state": "MERGED",
+          "repository": {
+           "nameWithOwner": "me/shop"
+          }
+         },
+         {
+          "number": 90,
+          "state": "OPEN",
+          "repository": {
+           "nameWithOwner": "me/other"
+          }
+         }
+        ]
+       }
+      }
+     },
+     {
+      "id": "R10",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 10,
+       "title": "No PR at all",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R11",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 11,
+       "title": "Reviewer text before the commit",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "X1",
+      "type": "PULL_REQUEST",
+      "fieldValueByName": null,
+      "content": {
+       "number": 7,
+       "title": "A PR on the board",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       }
+      }
+     },
+     {
+      "id": "PA",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 12,
+       "title": "A parent",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 3,
+        "completed": 1
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     }
+    ]
+   }
+  }
+ }
+}

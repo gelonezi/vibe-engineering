@@ -79,16 +79,15 @@ line outside the diff.
 The user picks which comments go to GitHub, so they go to a file first, not
 straight to the PR.
 
-1. Create the folder and keep it out of git, so the checklist is never
-   committed. Run the three lines together. Git gives the path of its exclude
-   file, because in a git worktree or a submodule `.git` is a file, not a folder:
-   ```bash
-   mkdir -p .vibe
-   exclude="$(git rev-parse --git-path info/exclude)"
-   grep -qxF '.vibe/' "$exclude" 2>/dev/null || echo '.vibe/' >> "$exclude"
-   ```
-2. Write `.vibe/review-<prNumber>.md`, with your findings and the ones from
-   `code-review:code-review` in one list, without duplicates:
+1. Make the folder for the checklist and keep it out of git, so the checklist
+   is never committed: run `bash scripts/vibe-dir.sh`. It makes `.vibe` in the
+   repository's top folder, makes sure git ignores it, and prints
+   `VIBE_DIR=<path>`. If it prints an `ERROR:` line instead, show it and don't
+   write the checklist: it could end up in a commit.
+2. Write `review-<prNumber>.md` in that folder, which is
+   `.vibe/review-<prNumber>.md` from the repository's top folder, with your
+   findings and the ones from `code-review:code-review` in one list, without
+   duplicates:
    ```markdown
    # Review of PR #<prNumber>
 

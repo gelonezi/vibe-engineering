@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.11](https://img.shields.io/badge/version-0.5.11-5b4be6)
+![Version 0.5.12](https://img.shields.io/badge/version-0.5.12-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -108,7 +108,7 @@ beside the chat with a button for each item's next step.
 | `promote-backlog` | Writes the high-level design and moves the item to Backlog. | ✅ Available |
 | `promote-ready` | Writes the spec, sizes and splits the work, and moves it to Ready. | ✅ Available |
 | `develop` | Builds the item on a branch, following your repository's own rules. | ✅ Available |
-| `push` | Opens the pull request, linked to the item. | ✅ Available |
+| `push` | Opens the pull request, linked to the item, and keeps its title and description true on later pushes. | ✅ Available |
 | `review` | Drafts inline review comments; you pick which ones to post. | ✅ Available |
 | `approve` | Merges after checks pass and moves the item to Done. | ✅ Available |
 
@@ -248,7 +248,7 @@ docs/
 hooks/
   hooks.json           lists the side panel's module
   panel.tsx            the side panel: the board beside the chat
-scripts/               GitHub helper scripts shared by the skills
+scripts/               helper scripts shared by the skills, for GitHub and for .vibe/
 skills/
   <skill-name>/
     SKILL.md           instructions Claude follows
@@ -259,7 +259,8 @@ tests/
   syntax.sh            every script parses: bash tests/syntax.sh
   panel.test.tsx       the side panel's tests: claude plugin test .
   next/                next.sh against a stand-in gh: bash tests/next/run.sh
-  repo/                repo.sh's review thread commands: bash tests/repo/run.sh
+  repo/                repo.sh's review thread commands and pr-edit: bash tests/repo/run.sh
+  vibe-dir/            vibe-dir.sh in real git repositories: bash tests/vibe-dir/run.sh
 ```
 
 ### Releasing a change
@@ -277,11 +278,13 @@ tests/
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run the script checks before pushing: `bash tests/syntax.sh`,
-   `bash tests/next/run.sh` and `bash tests/repo/run.sh`. None needs Claude
-   Code or a GitHub login. The two tests need `jq`, and on Windows jq 1.7 or
-   newer. GitHub runs the same three on Linux, macOS and Windows for every
-   pull request and every push to `main` (`.github/workflows/checks.yml`),
-   and its checks must pass before the merge.
+   `bash tests/next/run.sh`, `bash tests/repo/run.sh` and
+   `bash tests/vibe-dir/run.sh`. None needs Claude Code or a GitHub login.
+   The tests of `next.sh` and `repo.sh` need `jq`, and on Windows jq 1.7 or
+   newer. The test of `vibe-dir.sh` needs only git. GitHub runs the same four
+   on Linux, macOS and Windows for every pull request and every push to
+   `main` (`.github/workflows/checks.yml`), and its checks must pass before
+   the merge.
 5. Run `claude plugin validate . --strict` before pushing, and
    `claude plugin test .` when the side panel changed. These two run only by
    hand: GitHub does not run them.

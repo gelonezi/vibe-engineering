@@ -160,21 +160,17 @@ If the repository has no tests or linters, say so instead of calling the work ve
    fixed, so that `vibe-engineering:push` can offer to mark them resolved. Don't
    resolve them here. The fix is only on this computer until it is pushed, and
    a reviewer would see a thread resolved on code that has not changed.
-   - From the repository's top folder, create the `.vibe` folder and keep it
-     out of git, so the file is never committed and `git status` doesn't show
-     it. Run the three lines together. Git gives the path of its exclude
-     file, because in a git worktree or a submodule `.git` is a file, not a
-     folder:
-     ```bash
-     mkdir -p .vibe
-     exclude="$(git rev-parse --git-path info/exclude)"
-     grep -qxF '.vibe/' "$exclude" 2>/dev/null || echo '.vibe/' >> "$exclude"
-     ```
-   - Write the IDs of the threads you fixed to
-     `.vibe/fixed-threads-<prNumber>.txt`, one per line, exactly as `pr-threads`
-     printed them in step 4. If the file is already there, from fixes that
-     were not pushed yet, keep its lines and add the new IDs, without
-     repeating one.
+   - Make the folder for the file and keep it out of git, so the file is
+     never committed and `git status` doesn't show it: run
+     `bash scripts/vibe-dir.sh`. It makes `.vibe` in the repository's top
+     folder, makes sure git ignores it, and prints `VIBE_DIR=<path>`. If it
+     prints an `ERROR:` line instead, show it and don't write the file: it
+     could end up in a commit.
+   - Write the IDs of the threads you fixed to `fixed-threads-<prNumber>.txt`
+     in that folder, which is `.vibe/fixed-threads-<prNumber>.txt` from the
+     repository's top folder. One per line, exactly as `pr-threads` printed
+     them in step 4. If the file is already there, from fixes that were not
+     pushed yet, keep its lines and add the new IDs, without repeating one.
    - Leave a thread out when you only answered it or disagreed, so the
      reviewer decides.
    - If you fixed no open thread, don't write the file.

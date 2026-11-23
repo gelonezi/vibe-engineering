@@ -9,14 +9,16 @@ here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 export GH_STUB_LOG; GH_STUB_LOG="$(mktemp)"
 errf="$(mktemp)"
-trap 'rm -f "$GH_STUB_LOG" "$errf"' EXIT
+nomktemp="$(mktemp -d)"
+trap 'rm -rf "$GH_STUB_LOG" "$errf" "$nomktemp"' EXIT
 fail=0; passed=0
 
 # Runs repo.sh with the stand-in gh. Sets `out` (standard output), `err`
-# (standard error) and `code` (the exit code).
+# (standard error) and `code` (the exit code). A folder in `first` goes
+# before everything else in PATH.
 run() {
   set +e
-  out="$(PATH="$here:$PATH" bash "$root/scripts/repo.sh" "$@" 2>"$errf")"; code=$?
+  out="$(PATH="${first:+$first:}$here:$PATH" bash "$root/scripts/repo.sh" "$@" 2>"$errf")"; code=$?
   set -e
   err="$(cat "$errf")"
 }
@@ -75,6 +77,21 @@ failed PRRT_forbidden "ERROR: couldn't resolve thread PRRT_forbidden: me does no
 failed PRRT_offline "ERROR: couldn't resolve thread PRRT_offline: error connecting to api.github.com check your internet connection or https://githubstatus.com"
 failed PRRT_silent "ERROR: couldn't resolve thread PRRT_silent: GitHub gave no reason"
 failed PRRT_stuck "ERROR: GitHub did not mark thread PRRT_stuck as resolved"
+# gh on Windows ends its message with a carriage return and a line break. The
+# ERROR line must not carry the carriage return.
+failed PRRT_windows "ERROR: couldn't resolve thread PRRT_windows: Could not resolve to a node with the global id of 'PRRT_windows'"
+
+# resolve-thread when the temporary file can't be made: mktemp's own message
+# stays out of standard error, and GitHub is not called. A stand-in mktemp
+# that always fails is put first in PATH for this one run.
+calls="$(wc -l < "$GH_STUB_LOG" | tr -d ' ')"
+printf '%s\n' '#!/usr/bin/env bash' 'echo "mktemp: failed to create file" >&2' 'exit 1' > "$nomktemp/mktemp"
+chmod +x "$nomktemp/mktemp"
+first="$nomktemp" run resolve-thread PRRT_ok
+check "resolve-thread without a temporary file: standard output is empty" "$out" ""
+check "resolve-thread without a temporary file: standard error" "$err" "ERROR: couldn't create a temporary file, so nothing was resolved"
+check "resolve-thread without a temporary file: exit code" "$code" 1
+check "resolve-thread without a temporary file: gh is not called" "$(wc -l < "$GH_STUB_LOG" | tr -d ' ')" "$calls"
 
 # resolve-thread with an empty id or no id stops before it calls GitHub.
 calls="$(wc -l < "$GH_STUB_LOG" | tr -d ' ')"

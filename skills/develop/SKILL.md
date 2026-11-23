@@ -161,10 +161,14 @@ If the repository has no tests or linters, say so instead of calling the work ve
    resolve them here. The fix is only on this computer until it is pushed, and
    a reviewer would see a thread resolved on code that has not changed.
    - From the repository's top folder, create the `.vibe` folder and keep it
-     out of git, so the file is never committed:
+     out of git, so the file is never committed and `git status` doesn't show
+     it. Run the three lines together. Git gives the path of its exclude
+     file, because in a git worktree or a submodule `.git` is a file, not a
+     folder:
      ```bash
      mkdir -p .vibe
-     grep -qxF '.vibe/' .git/info/exclude 2>/dev/null || echo '.vibe/' >> .git/info/exclude
+     exclude="$(git rev-parse --git-path info/exclude)"
+     grep -qxF '.vibe/' "$exclude" 2>/dev/null || echo '.vibe/' >> "$exclude"
      ```
    - Write the IDs of the threads you fixed to
      `.vibe/fixed-threads-<prNumber>.txt`, one per line, exactly as `pr-threads`

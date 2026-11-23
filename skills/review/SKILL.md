@@ -79,10 +79,13 @@ line outside the diff.
 The user picks which comments go to GitHub, so they go to a file first, not
 straight to the PR.
 
-1. Create the folder and keep it out of git, so the checklist is never committed:
+1. Create the folder and keep it out of git, so the checklist is never
+   committed. Run the three lines together. Git gives the path of its exclude
+   file, because in a git worktree or a submodule `.git` is a file, not a folder:
    ```bash
    mkdir -p .vibe
-   grep -qxF '.vibe/' .git/info/exclude 2>/dev/null || echo '.vibe/' >> .git/info/exclude
+   exclude="$(git rev-parse --git-path info/exclude)"
+   grep -qxF '.vibe/' "$exclude" 2>/dev/null || echo '.vibe/' >> "$exclude"
    ```
 2. Write `.vibe/review-<prNumber>.md`, with your findings and the ones from
    `code-review:code-review` in one list, without duplicates:

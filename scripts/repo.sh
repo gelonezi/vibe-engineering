@@ -158,7 +158,8 @@ case "$cmd" in
     # the answer is kept in a variable and the message in a file, and one
     # ERROR line is built from the message. There is no pipe. The file is made
     # first, so that a failure to make it happens before GitHub is called.
-    err_file="$(mktemp)" || die "couldn't create a temporary file, so nothing was resolved"
+    # mktemp's own message is dropped, to keep standard error to one line.
+    err_file="$(mktemp 2>/dev/null)" || die "couldn't create a temporary file, so nothing was resolved"
     trap 'rm -f "$err_file"' EXIT
     if resolved="$(gh api graphql -f t="$1" -f query='
       mutation($t: ID!) { resolveReviewThread(input: { threadId: $t }) { thread { isResolved } } }' \

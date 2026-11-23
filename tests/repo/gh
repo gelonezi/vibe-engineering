@@ -55,6 +55,12 @@ case "$query" in
         printf 'error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com\n' >&2
         exit 1 ;;
       PRRT_silent) exit 1 ;;
+      PRRT_windows)
+        # gh's message as Windows writes it: each line ends with a carriage
+        # return before the line break.
+        printf '{"data":{"resolveReviewThread":null},"errors":[{"type":"NOT_FOUND"}]}'
+        printf "gh: Could not resolve to a node with the global id of 'PRRT_windows'\r\n" >&2
+        exit 1 ;;
       *) echo "unexpected thread id: $thread" >&2; exit 1 ;;
     esac ;;
   *"reviewThreads("*)

@@ -52,9 +52,11 @@ board, never on the template.
   reads it. Scripts must depend only on `gh` (no `jq`; use `gh --jq`) and stay
   LF-only (`.gitattributes`), as they run on Windows Git Bash, macOS and Linux.
   When a call fails, `gh api` prints GitHub's raw JSON on standard output and
-  its own message on standard error. A command whose output a skill parses
-  keeps both from the caller and prints one `ERROR:` line on standard error,
-  as `repo.sh resolve-thread` does.
+  its own message on standard error. `repo.sh resolve-thread` keeps both from
+  the caller and prints one `ERROR:` line on standard error: write a new
+  command the same way. The older commands still pass GitHub's answer
+  through. Leave `repo.sh pr-review` that way, because `review` reads that
+  answer when GitHub refuses a line.
   Under `pipefail`, check text a script already holds with Bash itself, and
   never end a pipe in a command that stops reading early (`grep -q`, `head`,
   `awk` with `exit`): the answer then changes from run to run.
@@ -105,9 +107,12 @@ board, never on the template.
   threads of a pull request (`reviewThreads(last: 100)`), so the threads that
   keep Fix comments on are the ones `push` can resolve. Change them together;
   `tests/repo/run.sh` fails when one differs. `develop` hands the threads it
-  fixed to `push` in `.vibe/fixed-threads-<prNumber>.txt`, kept out of git
-  through `.git/info/exclude` as the checklist of `review` is, and `push`
-  resolves them only after the fix is pushed.
+  fixed to `push` in `.vibe/fixed-threads-<prNumber>.txt`, and `push`
+  resolves them only after the fix is pushed. The file is kept out of git
+  as the checklist of `review` is, through git's exclude file. Both skills
+  take its path from `git rev-parse --git-path info/exclude`, never a fixed
+  `.git/info/exclude`: in a git worktree or a submodule `.git` is a file, and
+  `push` stops when `git status` shows the hand-over file.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

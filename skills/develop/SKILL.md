@@ -29,7 +29,7 @@ The user must tell you which board to use: its link, or its board, panel or
 project name. If they haven't, ask and wait. Never choose one yourself.
 
 Run `bash scripts/projects.sh board "<what they told you>"`. It prints one line
-per match: `<number>\t<id>\t<title>\t<url>`. Keep the project's ID and URL.
+per match: `<number>\t<id>\t<title>\t<public>\t<url>`. Keep the project's ID and URL.
 
 ## 3. Select the item
 

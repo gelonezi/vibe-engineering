@@ -5,6 +5,7 @@
 # that repo.sh and next.sh read the same end of a pull request's list of
 # review threads. Needs jq, and no GitHub. Run: bash tests/repo/run.sh
 set -euo pipefail
+command -v jq > /dev/null 2>&1 || { echo "FAIL: this test needs jq, and jq is not installed"; exit 1; }
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 export GH_STUB_LOG; GH_STUB_LOG="$(mktemp)"

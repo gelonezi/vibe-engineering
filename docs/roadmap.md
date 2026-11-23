@@ -40,7 +40,7 @@ Each track is a group of skills. Skill names are working names.
 | **4. Start** | A new repository that is set up correctly from day zero. | Planned |
 | **5. Guide** | A guided path for people with no software engineering background. | Started: `ui` |
 | **6. Team** | Planning, status and learning for a team of people and agents. | Planned |
-| **7. Trust** | Tests and checks that keep the plugin itself reliable. | Planned, starts with Deliver |
+| **7. Trust** | Tests and checks that keep the plugin itself reliable. | Started: script tests on every pull request |
 
 ### 1. Deliver: from idea to merged pull request
 
@@ -116,9 +116,14 @@ A template is the project standard applied before the first commit.
 
 ### 7. Trust: a plugin you can rely on
 
-- [ ] Automated tests for the shared scripts, run on every push to this
-  repository. The side panel has its first tests, run with
-  `claude plugin test .`.
+- [x] The script tests run on GitHub for every pull request and every push
+  to `main` of this repository, on Linux, macOS and Windows: the syntax check
+  of every script, and the tests of `next.sh board` and of `repo.sh`'s review
+  thread commands.
+- [ ] Tests for the shared scripts that have none: `projects.sh`,
+  `check-auth.sh`, `companions.sh`, `update.sh` and the rest of `repo.sh`.
+- [ ] The side panel's tests on GitHub too. It has its first tests, run by
+  hand with `claude plugin test .`, which needs Claude Code.
 - [ ] An eval suite that runs each skill against a throwaway board.
 - [ ] A changelog, and a rule for what a version number means.
 - [ ] A listing in Anthropic's plugin directory.

@@ -2,8 +2,11 @@
 # Runs scripts/next.sh board against a stand-in gh and checks the steps it
 # offers for each kind of item, the number of GitHub calls, and that a longer
 # board starts no more processes. Needs jq, and no GitHub. The last check also
-# needs strace, and is skipped without it. Run: bash tests/next/run.sh
+# needs strace, and is skipped without it: the PASS line then says so. With
+# NEED_STRACE=1, a run that could not count process starts fails instead.
+# Run: bash tests/next/run.sh
 set -euo pipefail
+command -v jq > /dev/null 2>&1 || { echo "FAIL: this test needs jq, and jq is not installed"; exit 1; }
 here="$(cd "$(dirname "$0")" && pwd)"
 export GH_STUB_LOG; GH_STUB_LOG="$(mktemp)"
 long="$(mktemp -d)"; trace="$(mktemp)"
@@ -70,5 +73,12 @@ if command -v strace > /dev/null 2>&1; then
     cost="$few process starts, and as many for ten times the items, repositories and pull requests"
   fi
 fi
+case "$cost" in
+  "process starts not counted"*)
+    if [ "${NEED_STRACE:-}" = 1 ]; then
+      echo "FAIL: NEED_STRACE=1, but $cost"
+      fail=1
+    fi ;;
+esac
 [ "$fail" = 0 ] && echo "PASS: $(printf '%s\n' "$got" | wc -l | tr -d ' ') items, $calls calls, $cost"
 exit "$fail"

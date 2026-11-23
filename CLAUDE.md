@@ -14,10 +14,10 @@ through the GitHub CLI, and one TypeScript hooks module, the side panel
 
 ```bash
 claude plugin validate . --strict      # run before every push (release checklist)
-bash -n scripts/*.sh skills/*/scripts/*.sh   # syntax check the scripts
+bash tests/syntax.sh                   # syntax check of every script: bash -n on each one (bash -n with several files checks only the first)
 bash scripts/projects.sh help          # prints the command reference from the header comment
 claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
-bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts where strace is installed)
+bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts where strace is installed, and NEED_STRACE=1 makes that a must)
 bash tests/repo/run.sh                 # runs repo.sh's review thread commands against a stand-in gh and fixtures (needs jq)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
@@ -113,6 +113,19 @@ board, never on the template.
   take its path from `git rev-parse --git-path info/exclude`, never a fixed
   `.git/info/exclude`: in a git worktree or a submodule `.git` is a file, and
   `push` stops when `git status` shows the hand-over file.
+- **GitHub runs the script checks.** `.github/workflows/checks.yml` runs
+  `tests/syntax.sh`, `tests/next/run.sh` and `tests/repo/run.sh` on Linux,
+  macOS and Windows (in Git Bash), for every pull request and every push to
+  `main`. They need no Claude Code and no GitHub login, so the workflow has
+  no secrets and can only read the repository. It does not run
+  `claude plugin validate` or `claude plugin test`: those still run by hand.
+  Each check ends in a `PASS:` line, which a job's log shows. Add a new
+  script test as one more step there, and keep it runnable by hand with the
+  same command. When a job fails on one system, fix the script or the test:
+  never take the system out of the list. The tests need a `jq` binary and
+  say so when it is missing; the plugin's own scripts still must not need
+  one. Only the Linux job counts process starts, because `strace` exists
+  only there.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as
@@ -141,12 +154,20 @@ board, never on the template.
 
 1. Bump `version` in `.claude-plugin/plugin.json` **and** the version badge in
    `README.md`. Without a bump, `vibe-engineering:update` won't fetch the change.
+   An item's spec names "the next patch version after main", never a fixed
+   number: other items may merge first. Take the number when the item is
+   developed, and take it again if `main` got a release before the merge.
 2. Keep `README.md`, `docs/concept.md`, `docs/roadmap.md` and the hand-written
    `skills/help/assets/help.html` consistent with which skills exist.
 3. `description`/`displayName` appear in both `plugin.json` and
    `marketplace.json`; the marketplace entry wins, so change both together.
-4. Run `claude plugin validate . --strict` and, when the panel changed,
-   `claude plugin test .`.
+4. Run the script checks: `bash tests/syntax.sh`, `bash tests/next/run.sh`
+   and `bash tests/repo/run.sh`. GitHub runs the same three on Linux, macOS
+   and Windows for the pull request, and its checks must pass before the
+   merge.
+5. Run `claude plugin validate . --strict` and, when the panel changed,
+   `claude plugin test .`. These two run only by hand: GitHub does not run
+   them.
 
 Commit messages follow the existing style: a short imperative summary, with
 `, release X.Y.Z` appended when the version is bumped.

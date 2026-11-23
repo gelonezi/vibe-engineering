@@ -36,14 +36,24 @@ if ! probe_err="$(gh api graphql --hostname "$host" \
       -f query='query { viewer { projectsV2(first: 1) { totalCount } } }' 2>&1 >/dev/null)"; then
   probe_ok=false
   probe_err="$(printf '%s' "$probe_err" | tr '\n' ' ')"
+  # Claude Code cloud sessions refuse GraphQL, and also every REST path
+  # outside the session's own repositories, so Projects' REST endpoints
+  # (/users/<login>/projectsV2/...) don't help either. Match the proxy's
+  # messages, and treat any 403 in a session that says it's remote the same
+  # way, so a reworded message still lands on the cloud path.
+  unavailable=false
   case "$probe_err" in
-    *"GraphQL is not available"*)
-      echo "STATUS=projects_unavailable"
-      echo "ERROR=$probe_err"
-      echo "FIX=This session can't reach GitHub Projects, and a new token won't change that. Use Claude Code on your own computer."
-      exit 6
-      ;;
+    *"GraphQL is not available"*|*"sessions are bound to their configured repositories"*)
+      unavailable=true ;;
+    *"HTTP 403"*)
+      [ "${CLAUDE_CODE_REMOTE:-}" = "true" ] && unavailable=true ;;
   esac
+  if [ "$unavailable" = true ]; then
+    echo "STATUS=projects_unavailable"
+    echo "ERROR=$probe_err"
+    echo "FIX=This session can't reach GitHub Projects, and a new token won't change that. Use Claude Code on your own computer."
+    exit 6
+  fi
 fi
 
 if ! gh project --help >/dev/null 2>&1; then

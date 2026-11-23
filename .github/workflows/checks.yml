@@ -1,0 +1,66 @@
+# Runs the checks that need no Claude Code and no GitHub login, on the three
+# systems the scripts support. `claude plugin validate . --strict` and
+# `claude plugin test .` are not run here: they still run by hand, as
+# "Releasing a change" in CLAUDE.md says.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: Scripts on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      # Each system reports on its own. A failure on one is fixed in the
+      # scripts or the tests: never take a system out of this list.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash   # Git Bash on Windows
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Show the tools
+        run: |
+          echo "Bash $BASH_VERSION"
+          jq --version || echo "jq is not installed"
+
+      # Counting process starts needs the strace of Linux. NEED_STRACE=1
+      # makes tests/next/run.sh fail there if it could not count. macOS has
+      # no strace and the one in Git Bash can't make this count, so on those
+      # two that part is skipped, and the test's PASS line says so.
+      - name: Make sure strace is there
+        if: runner.os == 'Linux'
+        run: |
+          if ! command -v strace > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y strace
+          fi
+          echo "NEED_STRACE=1" >> "$GITHUB_ENV"
+
+      # The three tests below run even when an earlier check failed, so one
+      # run shows every failure on a system.
+      - name: Check that every script parses
+        run: bash tests/syntax.sh
+
+      - name: Test next.sh
+        if: ${{ !cancelled() }}
+        run: bash tests/next/run.sh
+
+      - name: Test repo.sh
+        if: ${{ !cancelled() }}
+        run: bash tests/repo/run.sh
+
+      # This one needs git, which every runner has, and no jq.
+      - name: Test vibe-dir.sh
+        if: ${{ !cancelled() }}
+        run: bash tests/vibe-dir/run.sh

@@ -1,0 +1,721 @@
+{
+ "data": {
+  "p0": {
+   "pullRequest": {
+    "number": 103,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 2 comments.",
+       "submittedAt": "2026-11-23T09:00:00Z",
+       "comments": {
+        "totalCount": 2
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": [
+      {
+       "isResolved": true
+      },
+      {
+       "isResolved": true
+      }
+     ]
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p1": {
+   "pullRequest": {
+    "number": 104,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": []
+    },
+    "reviewThreads": {
+     "nodes": [
+      {
+       "isResolved": true
+      },
+      {
+       "isResolved": false
+      }
+     ]
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p2": {
+   "pullRequest": {
+    "number": 105,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "CHANGES_REQUESTED",
+       "body": "",
+       "submittedAt": "2026-11-23T09:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": null
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p3": {
+   "pullRequest": {
+    "number": 106,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": [
+      {
+       "state": "APPROVED"
+      }
+     ]
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "CHANGES_REQUESTED",
+       "body": "",
+       "submittedAt": "2026-11-23T09:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "rita"
+       }
+      },
+      {
+       "state": "APPROVED",
+       "body": "",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "rita"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p4": {
+   "pullRequest": {
+    "number": 107,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Please rename it",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "rita"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p5": {
+   "pullRequest": {
+    "number": 108,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Coverage went down",
+       "submittedAt": "2026-11-23T11:45:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "Bot",
+        "login": "ci"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": [
+      {
+       "publishedAt": "2026-11-23T11:00:00Z",
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      },
+      {
+       "publishedAt": "2026-11-23T11:30:00Z",
+       "author": {
+        "__typename": "Bot",
+        "login": "ci"
+       }
+      }
+     ]
+    }
+   }
+  },
+  "p6": {
+   "pullRequest": {
+    "number": 90,
+    "repository": {
+     "nameWithOwner": "me/other"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": "CHANGES_REQUESTED",
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": []
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p7": {
+   "pullRequest": {
+    "number": 111,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": []
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": [
+      {
+       "publishedAt": "2026-11-23T09:00:00Z",
+       "author": {
+        "__typename": "User",
+        "login": "rita"
+       }
+      }
+     ]
+    }
+   }
+  },
+  "p8": {
+   "pullRequest": {
+    "number": 113,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 2 comments.\n\n- a.ts:99: rename it\n- b.ts:7: drop it",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p9": {
+   "pullRequest": {
+    "number": 114,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 2 comments.\n\n- a.ts:99: rename it\n- b.ts:7: drop it",
+       "submittedAt": "2026-11-23T09:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p10": {
+   "pullRequest": {
+    "number": 115,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 2 comments.",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 2
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      },
+      {
+       "state": "COMMENTED",
+       "body": "",
+       "submittedAt": "2026-11-23T11:30:00Z",
+       "comments": {
+        "totalCount": 1
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": [
+      {
+       "isResolved": true
+      },
+      {
+       "isResolved": true
+      }
+     ]
+    },
+    "comments": {
+     "nodes": [
+      {
+       "publishedAt": "2026-11-23T11:40:00Z",
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    }
+   }
+  },
+  "p11": {
+   "pullRequest": {
+    "number": 116,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": [
+      {
+       "state": "APPROVED"
+      },
+      {
+       "state": "CHANGES_REQUESTED"
+      }
+     ]
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "",
+       "submittedAt": "2026-11-23T09:00:00Z",
+       "comments": {
+        "totalCount": 1
+       },
+       "author": {
+        "__typename": "User",
+        "login": "rita"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": [
+      {
+       "isResolved": true
+      }
+     ]
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p12": {
+   "pullRequest": {
+    "number": 117,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": [
+      {
+       "state": "APPROVED"
+      }
+     ]
+    },
+    "reviews": {
+     "nodes": []
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p13": {
+   "pullRequest": {
+    "number": 118,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": []
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  },
+  "p14": {
+   "pullRequest": {
+    "number": 119,
+    "repository": {
+     "nameWithOwner": "me/shop"
+    },
+    "author": {
+     "login": "me"
+    },
+    "reviewDecision": null,
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-23T10:00:00Z"
+       }
+      }
+     ]
+    },
+    "latestOpinionatedReviews": {
+     "nodes": []
+    },
+    "reviews": {
+     "nodes": [
+      {
+       "state": "COMMENTED",
+       "body": "Review from vibe-engineering: 1 comments.",
+       "submittedAt": "2026-11-23T11:00:00Z",
+       "comments": {
+        "totalCount": 0
+       },
+       "author": {
+        "__typename": "User",
+        "login": "me"
+       }
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "comments": {
+     "nodes": []
+    }
+   }
+  }
+ }
+}

@@ -65,8 +65,33 @@ Extract:
 - `## High-level design`: Understanding the architectural decisions and boundaries.
 - `## Spec`: The exact requirements, affected files, edge cases, and test plan.
 
-If working on an **In review** item to address feedback, also inspect the open review
-comments or the checklist file from `vibe-engineering:review`. If
+If working on an **In review** item to address feedback, also read what the reviewers
+wrote. First find the item's pull request. If the user gave a PR, use it. Otherwise
+its branch is `feature/<issueNumber>-<slug>`: get the real name with
+`git branch -r --list 'origin/feature/<issueNumber>-*'`, then run
+`bash scripts/repo.sh pr-for-branch <branch>`, which prints `<number>\t<url>`. If
+there's no branch or it prints nothing, the item has no open pull request: tell the
+user, and ask for the PR.
+
+Then run `bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per comment,
+`<kind>\t<author>\t<state>\t<path>\t<line>\t<body>`, and ends with `COMMENTS=<n>`:
+
+- `review` rows are whole reviews, with the reviewer's verdict as the state.
+- `inline` rows are comments on a line of the diff. The state is `open` or
+  `resolved`. Fix the `open` ones, and say how many were already resolved.
+- `general` rows are comments on the pull request as a whole.
+- A line break inside a comment is written as `\n`.
+- `COMMENTS=0`: tell the user there is nothing to fix on the pull request, and ask
+  whether they have comments of their own.
+- Pass a `WARN` line on in one sentence.
+
+Then run `bash scripts/repo.sh pr-threads <prNumber>`. It prints each open review
+thread as `<threadId>\t<path>\t<line>\t<author>\t<firstComment>` and ends with
+`THREADS=<n>`. Keep the IDs: step 8 writes down the threads you fix, so that
+`vibe-engineering:push` can offer to resolve them once the fix is on the pull
+request. Pass a `WARN` line on in one sentence.
+
+Also look for the checklist file from `vibe-engineering:review`. If
 `superpowers:receiving-code-review` is available, use it: it checks each comment
 against the code before anything changes, instead of applying comments blindly.
 
@@ -131,8 +156,32 @@ If the repository has no tests or linters, say so instead of calling the work ve
 2. Commit, following the repository's commit message style (look at
    `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
    where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.
-3. Report in a few lines:
+3. **Only when fixing review comments:** write down the open threads this work
+   fixed, so that `vibe-engineering:push` can offer to mark them resolved. Don't
+   resolve them here. The fix is only on this computer until it is pushed, and
+   a reviewer would see a thread resolved on code that has not changed.
+   - Make the folder for the file and keep it out of git, so the file is
+     never committed and `git status` doesn't show it: run
+     `bash scripts/vibe-dir.sh`. It makes `.vibe` in the repository's top
+     folder, makes sure git ignores it, and prints `VIBE_DIR=<path>`. If it
+     prints an `ERROR:` line instead, show it and don't write the file: it
+     could end up in a commit.
+   - Write the IDs of the threads you fixed to `fixed-threads-<prNumber>.txt`
+     in that folder, which is `.vibe/fixed-threads-<prNumber>.txt` from the
+     repository's top folder. One per line, exactly as `pr-threads` printed
+     them in step 4. If the file is already there, from fixes that were not
+     pushed yet, keep its lines and add the new IDs, without repeating one.
+   - Leave a thread out when you only answered it or disagreed, so the
+     reviewer decides.
+   - If you fixed no open thread, don't write the file.
+   - Tell the user which threads you wrote down, by path, line and comment.
+     Say that `push` will ask before it marks them resolved, and that they
+     can take a line out of the file to keep a thread open.
+4. Report in a few lines:
    - Branch name and commits created
    - Tests and checks verified
+   - Only when fixing review comments: the threads written down for `push`
    - Current board item status: **In progress**
-   - Next step: `vibe-engineering:push` to push the branch and open or update the PR.
+   - Next step: `vibe-engineering:push` to push the branch and open or update
+     the PR. After a push that fixes review comments, it also offers to mark
+     the fixed threads resolved.

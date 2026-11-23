@@ -1,0 +1,4 @@
+PRRT_1	src/stock.ts	12	ana	Use the warehouse id here.
+PRRT_3	src/stock.ts	44	ghost	First line\nsecond line
+PRRT_4	docs/a.md	-	ben	-
+THREADS=3

@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.4](https://img.shields.io/badge/version-0.5.4-5b4be6)
+![Version 0.5.12](https://img.shields.io/badge/version-0.5.12-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -108,7 +108,7 @@ beside the chat with a button for each item's next step.
 | `promote-backlog` | Writes the high-level design and moves the item to Backlog. | ✅ Available |
 | `promote-ready` | Writes the spec, sizes and splits the work, and moves it to Ready. | ✅ Available |
 | `develop` | Builds the item on a branch, following your repository's own rules. | ✅ Available |
-| `push` | Opens the pull request, linked to the item. | ✅ Available |
+| `push` | Opens the pull request, linked to the item, and keeps its title and description true on later pushes. | ✅ Available |
 | `review` | Drafts inline review comments; you pick which ones to post. | ✅ Available |
 | `approve` | Merges after checks pass and moves the item to Done. | ✅ Available |
 
@@ -119,7 +119,13 @@ name: describe what you want and Claude picks the skill.
 
 `/vibe-engineering:ui` opens a pane beside the chat that lists your board by
 column. Each item has a button for its next step: *Design it*, *Write the spec*,
-*Build it*, *Open the pull request*, *Review*, *Fix comments* or *Merge*. A
+*Build it*, *Open the pull request* (or *Update the pull request* once it's
+open), *Review*, *Fix comments* or *Merge*. *Fix comments* shows while a
+reviewer's latest verdict requests changes or a review thread is still open.
+Until the next commit, it also shows after a review with only text, whoever
+wrote it, and after a review with comments on lines or a plain comment from
+someone other than the pull request's author. A bot's text doesn't count. It
+shows too when the panel can't find the item's pull request. A
 button starts that skill on that item, exactly as if you had typed it, so every
 skill still asks before anything that can't be undone. The panel only reads the
 board, and reads it again whenever Claude finishes. The column to act on first,
@@ -165,7 +171,7 @@ software engineers.
 | **Start** | Repository templates that are set up correctly from day zero: a general one, .NET with Angular, TypeScript and Python. | 🗺️ Planned |
 | **Guide** | A guided path for people with no software engineering background. | 🚧 Started: the side panel |
 | **Team** | Iteration planning, status reports and retrospectives for a team of people and agents. | 🗺️ Planned |
-| **Trust** | Tests and evals that keep the plugin itself reliable. | 🗺️ Planned |
+| **Trust** | Tests and evals that keep the plugin itself reliable. | 🚧 Started: script tests on every pull request |
 
 The full plan, with the order and the decisions behind it, is in
 [docs/roadmap.md](docs/roadmap.md).
@@ -231,6 +237,9 @@ The full plan, with the order and the decisions behind it, is in
   plugin.json          plugin manifest: name, display name, description, icon
   marketplace.json     lets this repo be added as a plugin marketplace
   icon.png             plugin icon, 1024 px square
+.github/
+  workflows/
+    checks.yml         the checks GitHub runs on Linux, macOS and Windows
 docs/
   concept.md           how the delivery skills work together
   roadmap.md           where the plugin is going
@@ -239,7 +248,7 @@ docs/
 hooks/
   hooks.json           lists the side panel's module
   panel.tsx            the side panel: the board beside the chat
-scripts/               GitHub helper scripts shared by the skills
+scripts/               helper scripts shared by the skills, for GitHub and for .vibe/
 skills/
   <skill-name>/
     SKILL.md           instructions Claude follows
@@ -247,7 +256,11 @@ skills/
     scripts/           helper scripts only this skill uses
     assets/            files the skill shows the user, such as the help page
 tests/
+  syntax.sh            every script parses: bash tests/syntax.sh
   panel.test.tsx       the side panel's tests: claude plugin test .
+  next/                next.sh against a stand-in gh: bash tests/next/run.sh
+  repo/                repo.sh's review thread commands and pr-edit: bash tests/repo/run.sh
+  vibe-dir/            vibe-dir.sh in real git repositories: bash tests/vibe-dir/run.sh
 ```
 
 ### Releasing a change
@@ -258,15 +271,27 @@ The guide for people and for Claude Code working on this plugin is in
 1. Bump `version` in `.claude-plugin/plugin.json` and in the version badge above.
    `vibe-engineering:update` reports the installed and published commits, and
    tells the user how to force a reinstall when a push didn't come with a bump.
+   An item's spec names "the next patch version after main", never a fixed
+   number: other items may merge first. Take the number when the item is
+   developed, and take it again if `main` got a release before the merge.
 2. Keep `README.md`, `docs/concept.md`, `docs/roadmap.md` and
    `skills/help/assets/help.html` in step: the help page is written by hand and
    says which skills exist.
 3. The plugin's `description` and `displayName` appear in both `plugin.json` and
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
-4. Run `claude plugin validate . --strict` before pushing, and
-   `claude plugin test .` when the side panel changed.
-5. The companion plugins are listed in two places that must agree: the default
+4. Run the script checks before pushing: `bash tests/syntax.sh`,
+   `bash tests/next/run.sh`, `bash tests/repo/run.sh` and
+   `bash tests/vibe-dir/run.sh`. None needs Claude Code or a GitHub login.
+   The tests of `next.sh` and `repo.sh` need `jq`, and on Windows jq 1.7 or
+   newer. The test of `vibe-dir.sh` needs only git. GitHub runs the same four
+   on Linux, macOS and Windows for every pull request and every push to
+   `main` (`.github/workflows/checks.yml`), and its checks must pass before
+   the merge.
+5. Run `claude plugin validate . --strict` before pushing, and
+   `claude plugin test .` when the side panel changed. These two run only by
+   hand: GitHub does not run them.
+6. The companion plugins are listed in two places that must agree: the default
    list in `scripts/companions.sh` and the table above. They are optional on
    purpose. A `dependencies` entry in `plugin.json` would install them
    automatically, but Claude Code then refuses to load this plugin whenever one

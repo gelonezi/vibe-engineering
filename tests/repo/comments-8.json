@@ -1,0 +1,87 @@
+{
+  "data": {
+    "repository": {
+      "pullRequest": {
+        "reviews": {
+          "pageInfo": {
+            "hasNextPage": false
+          },
+          "nodes": [
+            {
+              "author": {
+                "login": "ana"
+              },
+              "state": "CHANGES_REQUESTED",
+              "body": "Please fix the stock total."
+            },
+            {
+              "author": {
+                "login": "ana"
+              },
+              "state": "COMMENTED",
+              "body": ""
+            }
+          ]
+        },
+        "reviewThreads": {
+          "totalCount": 103,
+          "nodes": [
+            {
+              "id": "PRRT_8",
+              "isResolved": true,
+              "path": "src/a.ts",
+              "line": 2,
+              "originalLine": 2,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "An older thread, resolved."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "PRRT_9",
+              "isResolved": false,
+              "path": "src/a.ts",
+              "line": 3,
+              "originalLine": 3,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "The newest thread."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "comments": {
+          "pageInfo": {
+            "hasNextPage": false
+          },
+          "nodes": [
+            {
+              "author": {
+                "login": "ben"
+              },
+              "body": "Looks good overall."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

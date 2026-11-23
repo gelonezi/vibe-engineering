@@ -79,13 +79,15 @@ line outside the diff.
 The user picks which comments go to GitHub, so they go to a file first, not
 straight to the PR.
 
-1. Create the folder and keep it out of git, so the checklist is never committed:
-   ```bash
-   mkdir -p .vibe
-   grep -qxF '.vibe/' .git/info/exclude 2>/dev/null || echo '.vibe/' >> .git/info/exclude
-   ```
-2. Write `.vibe/review-<prNumber>.md`, with your findings and the ones from
-   `code-review:code-review` in one list, without duplicates:
+1. Make the folder for the checklist and keep it out of git, so the checklist
+   is never committed: run `bash scripts/vibe-dir.sh`. It makes `.vibe` in the
+   repository's top folder, makes sure git ignores it, and prints
+   `VIBE_DIR=<path>`. If it prints an `ERROR:` line instead, show it and don't
+   write the checklist: it could end up in a commit.
+2. Write `review-<prNumber>.md` in that folder, which is
+   `.vibe/review-<prNumber>.md` from the repository's top folder, with your
+   findings and the ones from `code-review:code-review` in one list, without
+   duplicates:
    ```markdown
    # Review of PR #<prNumber>
 
@@ -97,11 +99,20 @@ straight to the PR.
 3. Show the findings in the chat, and say the user can tick them in the file or
    just tell you which ones to post.
 
+If the review found nothing at all, write no checklist. Say so, and go to
+step 7: there is nothing to post.
+
 ## 6. Post the chosen comments
 
 Posting is visible to everyone on the PR, so post only what the user picked.
 
 1. Read the ticked items (`- [x]`) from the checklist, with any wording changes.
+
+   **If no comment is picked** (nothing is ticked, and the user named none),
+   post nothing. Don't write a payload and don't run `pr-review`. A review with
+   only its text would keep **Fix comments** on in the board's side panel until
+   the next commit, with nothing to fix. Delete `.vibe/review-<prNumber>.md`
+   and go to step 7.
 2. Write them to a new temporary file (`mktemp`) as one review, in GitHub's format:
    ```json
    {
@@ -124,8 +135,10 @@ Posting is visible to everyone on the PR, so post only what the user picked.
 
 Report in a few lines:
 
-- how many comments were posted, with the review's link
+- how many comments were posted, with the review's link. If no comment was
+  picked, say that no review was posted
 - the next step:
   - fixes needed: `vibe-engineering:develop`, which goes back to the branch and
     moves the item to **In progress**
-  - nothing to fix: `vibe-engineering:approve`, to merge and finish the item
+  - nothing to fix, or no review posted: `vibe-engineering:approve`, to merge
+    and finish the item

@@ -133,6 +133,34 @@ test('the board shown last in a folder is shown again without a name', async ($,
   expect(String(out.result)).toContain('BOARD=Shop board')
 })
 
+test('after a reload, an open pane reads the kept board again', async ($, on) => {
+  const { ran } = engine(on, {
+    store: { 'board:/work': { id: 'PVT_1', title: 'Shop board', url: BOARD.url } },
+  })
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+  await settle()
+
+  expect(ran.some(each => String(each.argv.at(1)).endsWith('next.sh'))).toBe(true)
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: 'DRAFT (1)' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('a pane drawn before the board is read reads it', async ($, on) => {
+  const { ran } = engine(on, {
+    isClosed: true,
+    store: { 'board:/work': { id: 'PVT_1', title: 'Shop board', url: BOARD.url } },
+  })
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+  await settle()
+  expect(ran).toHaveLength(0)
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await settle()
+  expect(ran.some(each => String(each.argv.at(1)).endsWith('next.sh'))).toBe(true)
+  await ui.unmount()
+})
+
 test('the pane lists items by column, on every surface', async ($, on) => {
   engine(on)
   await $.session.start({ cwd: '/work', surface: 'desktop', isInteractive: true })
@@ -177,6 +205,26 @@ test('fixing comments asks develop for the review comments', async ($, on) => {
 
   expect(sent.at(0)?.text).toBe(
     'Use vibe-engineering:develop to fix the review comments on the item "Product page shows stock" (me/shop#9) on the board https://github.com/users/me/projects/3.',
+  )
+  await ui.unmount()
+})
+
+test('the buttons are the steps next.sh gives, no more', async ($, on) => {
+  const rows = [
+    'PVTI_7\tIn progress\tISSUE\t11\tme/shop\t0/0\tpush:Update the pull request\tStock export',
+    'PVTI_8\tIn review\tISSUE\t12\tme/shop\t0/0\treview:Review,approve:Merge\tStock import',
+  ].join('\n')
+  const { sent } = engine(on, { next: [0, rows, ''] })
+  await $.session.start({ cwd: '/work', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, ...BOARD })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Button', key: 'PVTI_8-develop-Fix comments' })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'PVTI_8-approve-Merge' })).toBeDefined()
+  await ui.press({ key: 'PVTI_7-push-Update the pull request' })
+
+  expect(sent.at(0)?.text).toBe(
+    'Use vibe-engineering:push for the item "Stock export" (me/shop#11) on the board https://github.com/users/me/projects/3.',
   )
   await ui.unmount()
 })

@@ -1,0 +1,21 @@
+An idea	promote-backlog:Design it
+Progress without a PR	push:Open the pull request
+Progress with a PR	push:Update the pull request
+Clean review	review:Review,approve:Merge
+Open thread	review:Review,develop:Fix comments,approve:Merge
+Changes requested, then a commit	review:Review,develop:Fix comments,approve:Merge
+Changes requested, then approved	review:Review,approve:Merge
+Reviewer text after the commit	review:Review,develop:Fix comments,approve:Merge
+Author replies and bot comments only	review:Review,approve:Merge
+Found by its Closes line	review:Review,develop:Fix comments,approve:Merge
+No PR at all	review:Review,develop:Fix comments,approve:Merge
+Reviewer text before the commit	review:Review,approve:Merge
+A PR on the board	-
+A parent	-
+Author's text-only review after the commit	review:Review,develop:Fix comments,approve:Merge
+Author's text-only review before the commit	review:Review,approve:Merge
+Author's review with threads, all resolved	review:Review,approve:Merge
+Changes requested, older than the last 50 reviews	review:Review,develop:Fix comments,approve:Merge
+Approved in GitHub's list of verdicts	review:Review,approve:Merge
+A status in capital letters	review:Review,approve:Merge
+Author's review left with only text after its line comment was deleted	review:Review,develop:Fix comments,approve:Merge

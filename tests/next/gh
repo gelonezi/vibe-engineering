@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# A stand-in for gh, used by run.sh: answers next.sh's GraphQL calls from the
+# JSON files beside it, through jq, and logs one line per call. GH_STUB_DIR
+# names another folder to take the JSON files from. GH_STUB_JQ is an option
+# for jq, left unquoted so that an empty one adds nothing: run.sh sets it to
+# -b (binary mode) where jq would otherwise end each line with a carriage
+# return, which the real gh --jq does not.
+here="${GH_STUB_DIR:-$(cd "$(dirname "$0")" && pwd)}"
+query=""; filter=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -f|-F) case "$2" in query=*) query="${2#query=}" ;; esac; shift 2 ;;
+    --jq) filter="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+case "$query" in
+  *"items(first"*) file=board ;;
+  *"pullRequests(states"*) file=prs ;;
+  *"...F"*) file=feedback ;;
+  *) echo "unexpected query" >&2; exit 1 ;;
+esac
+echo "$file" >> "$GH_STUB_LOG"
+[ -f "$here/$file.json" ] || exit 1
+jq ${GH_STUB_JQ:-} -r "$filter" "$here/$file.json"

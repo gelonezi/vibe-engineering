@@ -66,9 +66,14 @@ Extract:
 - `## Spec`: The exact requirements, affected files, edge cases, and test plan.
 
 If working on an **In review** item to address feedback, also read what the reviewers
-wrote. Find the item's pull request with
-`bash scripts/repo.sh pr-for-branch feature/<issueNumber>-<slug>`, then run
-`bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per comment,
+wrote. First find the item's pull request. If the user gave a PR, use it. Otherwise
+its branch is `feature/<issueNumber>-<slug>`: get the real name with
+`git branch -r --list 'origin/feature/<issueNumber>-*'`, then run
+`bash scripts/repo.sh pr-for-branch <branch>`, which prints `<number>\t<url>`. If
+there's no branch or it prints nothing, the item has no open pull request: tell the
+user, and ask for the PR.
+
+Then run `bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per comment,
 `<kind>\t<author>\t<state>\t<path>\t<line>\t<body>`, and ends with `COMMENTS=<n>`:
 
 - `review` rows are whole reviews, with the reviewer's verdict as the state.

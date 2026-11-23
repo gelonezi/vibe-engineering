@@ -278,6 +278,7 @@ new_repo own-gitignore
 cp "$root/.gitignore" "$repo/.gitignore"
 ignored() { git -C "$repo" check-ignore -q --no-index "$1"; }
 for path in .claude/settings.local.json .claude/CLAUDE.local.md CLAUDE.local.md \
+  .claude.local.md docs/.claude.local.md \
   .claude/worktrees/one/README.md .claude/agent-memory-local/reviewer/MEMORY.md \
   .claude/scheduled_tasks.json; do
   check ".gitignore: $path stays out of git" "$(yes_no ignored "$path")" yes

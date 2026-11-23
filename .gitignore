@@ -4,6 +4,9 @@
 .claude/settings.local.json
 .claude/*.local.*
 CLAUDE.local.md
+# Claude Code does not read this one. The companion claude-md-management
+# writes a person's own notes to it, and expects git to ignore it.
+.claude.local.md
 .claude/worktrees/
 .claude/agent-memory-local/
 .claude/scheduled_tasks.*

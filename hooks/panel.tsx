@@ -52,6 +52,9 @@ let view: View = { kind: 'empty' }
 let isTurnRunning = false
 const agents = new Map<string, number>()
 let loads = 0
+/** The pane body's width as last drawn (0 until then), and the rows last asked for. */
+let width = 0
+let askedRows = 0
 
 /** Claude is working: the main turn, or a background agent it started. */
 const isBusy = () => {
@@ -179,13 +182,45 @@ const load = async ($: EngineInterface) => {
   if (mine !== loads) return
   view = next
   redraw($)
+  await fitPane($)
 }
+
+/** Rows the pane's body needs at that width: the board and any message under its buttons. */
+export const rowsNeeded = (shown: View, columns: number) => {
+  const items = shown.kind === 'ready' || shown.kind === 'loading' ? shown.items : []
+  const message =
+    shown.kind === 'error'
+      ? 1 + Math.ceil(shown.message.length / Math.max(columns, 40))
+      : shown.kind === 'ready' && items.length === 0
+        ? 1
+        : 0
+  return rowsFor(items, columns) + message
+}
+
+/** The rows to ask for: what the body needs and a spare row, within bounds. */
+export const rowsWanted = (shown: View, columns: number) =>
+  Math.min(60, Math.max(8, rowsNeeded(shown, columns) + 1))
 
 /** Opens the pane, asking for as many rows as the board needs. */
 const openPane = ($: EngineInterface) => {
-  const items = view.kind === 'ready' || view.kind === 'loading' ? view.items : []
-  const rows = Math.min(60, Math.max(8, rowsFor(items, 0) + 1))
-  return $.ui.open({ id: PANE, title: 'Vibe Engineering', rows })
+  askedRows = rowsWanted(view, width)
+  return $.ui.open({ id: PANE, title: 'Vibe Engineering', rows: askedRows })
+}
+
+/**
+ * Asks again when the board now needs another height. The pane was sized
+ * before the board was read, and the board changes as work moves. Only a pane
+ * already drawn is asked: opening it again resizes it, and never opens one the
+ * person closed.
+ */
+const fitPane = async ($: EngineInterface) => {
+  if (rowsWanted(view, width) === askedRows) return
+  try {
+    const pane = (await $.ui.panes()).find(each => each.id === PANE)
+    if (pane?.isPlaced) await openPane($)
+  } catch {
+    // The size is a wish: the board is drawn either way, and scrolls.
+  }
 }
 
 /** Sends a step's prompt, unless Claude is already working. */
@@ -342,9 +377,10 @@ export const register: Register = on => {
           ? `updated ${view.at}`
           : ''
     const items = view.kind === 'ready' || view.kind === 'loading' ? view.items : []
-    const wide = e.props.bodyColumns >= 70
+    width = e.props.bodyColumns
+    const wide = width >= 70
     const room = e.props.scroll?.bodyRows ?? 0
-    const isCut = room > 0 && rowsFor(items, e.props.bodyColumns) > room
+    const isCut = room > 0 && rowsNeeded(view, width) > room
 
     const stepButtons = (item: Item) =>
       item.steps.map(step => (
@@ -373,7 +409,13 @@ export const register: Register = on => {
             Change board
           </Button>
         </Box>
-        {isCut && <Text dimColor>More below: scroll the panel to see every column.</Text>}
+        {isCut && (
+          <Text dimColor>
+            {e.props.isFocused
+              ? 'More below: scroll with the arrow keys or Page Down.'
+              : 'More below: press ctrl+x then tab to focus the panel, then scroll with the arrow keys.'}
+          </Text>
+        )}
         {view.kind === 'error' && (
           <Box flexDirection="column">
             <Text color="error">The board could not be read.</Text>

@@ -42,6 +42,7 @@ const engine = (
     auth?: string
     store?: Record<string, unknown>
     verdict?: 'allow' | 'ask' | 'deny'
+    isClosed?: boolean
   } = {},
 ) => {
   const ran: Ran[] = []
@@ -61,7 +62,9 @@ const engine = (
     return { value: { isPlaced: true } }
   })
   on('ui.panes', () => ({
-    value: [{ id: 'vibe-board', title: 'Vibe Engineering', isShown: true, isFocused: false, isPlaced: true }],
+    value: scripts.isClosed
+      ? []
+      : [{ id: 'vibe-board', title: 'Vibe Engineering', isShown: true, isFocused: false, isPlaced: true }],
   }))
   on('ui.toast', (_, e) => {
     toasts.push(e.text)
@@ -81,6 +84,10 @@ const engine = (
   })
   return { ran, sent, toasts, opens }
 }
+
+/** Lets the reads the panel starts without waiting for them finish. */
+const later = (globalThis as unknown as { setTimeout: (done: () => void, ms: number) => unknown }).setTimeout
+const settle = () => new Promise<void>(resolve => later(resolve, 20))
 
 const ended = (turnId: string, agentId?: string) => ({
   answer: '',
@@ -272,6 +279,80 @@ test('a short pane says there is more below', async ($, on) => {
   const tall = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect(await tall.find({ type: 'Text', text: /More below/ })).toBeUndefined()
   await tall.unmount()
+})
+
+test('the hint says how to reach the rest', async ($, on) => {
+  engine(on)
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+  await $.tool.call({ tool: TOOL, ...BOARD })
+
+  const short = { ...PANE.props, scroll: { offset: 0, bodyRows: 5 } }
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal', props: short })
+  expect(await ui.find({ type: 'Text', text: /ctrl\+x then tab/ })).toBeDefined()
+  await ui.unmount()
+
+  const focused = await $.ui.mount({ ...PANE, surface: 'terminal', props: { ...short, isFocused: true } })
+  expect(await focused.find({ type: 'Text', text: /arrow keys or Page Down/ })).toBeDefined()
+  await focused.unmount()
+})
+
+test('/vibe-board in a new session grows the pane once the board is read', async ($, on) => {
+  const { opens } = engine(on, {
+    store: { 'board:/work': { id: 'PVT_1', title: 'Shop board', url: BOARD.url } },
+  })
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+
+  await $.command.run({
+    command: 'vibe-board',
+    args: '',
+    origin: { kind: 'composer' },
+    presentation: { isFullscreen: false, columns: 80 },
+  })
+  await settle()
+
+  expect(opens.at(0)?.rows).toBe(8)
+  expect(opens).toHaveLength(2)
+  expect(opens.at(1)?.rows).toBeGreaterThan(8)
+})
+
+test('the pane is asked again when the board grows, and only then', async ($, on) => {
+  const scripts: { next: [number, string, string] } = { next: [0, ROWS, ''] }
+  const { opens } = engine(on, scripts)
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+  await $.tool.call({ tool: TOOL, ...BOARD })
+  const before = opens.length
+
+  await $.turn.start({ text: 'anything', turnId: 't1' })
+  await $.turn.complete(ended('t1'))
+  await settle()
+  expect(opens).toHaveLength(before)
+
+  const more = Array.from({ length: 6 }, (_, n) =>
+    `PVTI_${10 + n}\tReady\tISSUE\t${20 + n}\tme/shop\t0/0\tdevelop:Build it\tNew work ${n}`,
+  )
+  scripts.next = [0, [ROWS, ...more].join('\n'), '']
+  await $.turn.start({ text: 'add six items', turnId: 't2' })
+  await $.turn.complete(ended('t2'))
+  await settle()
+  expect(opens).toHaveLength(before + 1)
+  expect(opens.at(-1)?.rows).toBeGreaterThan(opens.at(before - 1)?.rows ?? 0)
+})
+
+test('a pane the person closed is not opened again by a read', async ($, on) => {
+  const { opens } = engine(on, {
+    isClosed: true,
+    store: { 'board:/work': { id: 'PVT_1', title: 'Shop board', url: BOARD.url } },
+  })
+  await $.session.start({ cwd: '/work', surface: 'terminal', isInteractive: true })
+  await $.command.run({
+    command: 'vibe-board',
+    args: '',
+    origin: { kind: 'composer' },
+    presentation: { isFullscreen: false, columns: 80 },
+  })
+  await settle()
+
+  expect(opens).toHaveLength(1)
 })
 
 test('the person asking for the panel opens it, sized to the board', async ($, on) => {

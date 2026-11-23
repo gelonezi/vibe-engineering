@@ -22,6 +22,7 @@
 #   merge-settings                      "<defaultBranch>\t<squashAllowed>\t<mergeAllowed>\t<rebaseAllowed>"
 #   merge <number|link> <squash|merge|rebase>
 #                                       Merge and delete the branch. Can't be undone.
+#                                       A squash commit gets the subject "<PR title> (#<number>)".
 #   issue-parent <owner/name> <number>  The issue's parent, if any:
 #                                       "<parentNumber>\t<parentState>\t<completedSubIssues>\t<totalSubIssues>"
 #   issue-close <owner/name> <number>   Close an issue
@@ -142,7 +143,18 @@ case "$cmd" in
   merge)
     [ $# -eq 2 ] || die "usage: merge <number|link> <squash|merge|rebase>"
     case "$2" in squash|merge|rebase) ;; *) die "unknown merge method: $2" ;; esac
-    gh pr merge "$1" "--$2" --delete-branch
+    if [ "$2" = squash ]; then
+      # Without a subject, GitHub picks one from the repository's settings, and
+      # can take the title of the branch's first commit instead of the pull
+      # request's current title. So build it here, as GitHub would: the title,
+      # then the number. It is built inside --jq as one string: @tsv would
+      # double a backslash in the title. No body is given, so GitHub writes it.
+      subject="$(gh pr view "$1" --json number,title --jq '.title + " (#" + (.number | tostring) + ")"')"
+      [ -n "$subject" ] || die "couldn't read the title of pull request: $1"
+      gh pr merge "$1" --squash --subject "$subject" --delete-branch
+    else
+      gh pr merge "$1" "--$2" --delete-branch
+    fi
     ;;
 
   issue-parent)

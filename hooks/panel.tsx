@@ -275,6 +275,15 @@ export const register: Register = on => {
       name: 'vibe-board',
       description: 'Show the vibe-engineering board panel beside the chat',
     })
+    // A reload of the plugin starts the module afresh while its pane stays
+    // open: draw the kept board, and read it if the pane is there.
+    if (board) {
+      redraw($)
+      void $.ui
+        .panes()
+        .then(panes => (panes.some(pane => pane.id === PANE) ? load($) : undefined))
+        .catch(() => undefined)
+    }
     return started
   })
 
@@ -303,7 +312,7 @@ export const register: Register = on => {
   on('tool.check', { tool: 'mcp__vibe-engineering__show_board' }, async ($, e, next) => {
     const verdict = await next(e)
     return verdict.decision === 'ask' ? { decision: 'allow' } : verdict
-  })
+  }).catch(($, e, next) => next(e))
 
   on('tool.run', { tool: 'mcp__vibe-engineering__show_board' }, async ($, e) => {
     const input = e as unknown as { projectId?: string; title?: string; url?: string }
@@ -367,6 +376,9 @@ export const register: Register = on => {
         </Box>
       )
     }
+
+    // Drawn with a board but nothing read yet (after a reload, say): read it.
+    if (view.kind === 'empty') void load($).catch(() => undefined)
 
     const busy = isBusy()
     const status = busy

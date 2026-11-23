@@ -13,6 +13,8 @@
 # on a line of its own, also when the file's last line has no line break.
 # When git already ignores the folder, by any rule in any file, nothing is
 # added, so it is safe to run again.
+# Git is asked whether a new file there would be ignored. A file under .vibe
+# that is already in a commit stays tracked, and does not change the answer.
 # On failure it prints nothing on standard output and one "ERROR: ..." line
 # on standard error, and exits 1.
 set -euo pipefail
@@ -31,7 +33,10 @@ top="$(git rev-parse --show-toplevel 2>/dev/null)" || die "not inside a git work
 cd "$top" || die "couldn't open the folder $top"
 mkdir -p .vibe 2>/dev/null || die "couldn't create the folder $top/.vibe"
 
-ignored() { git check-ignore -q .vibe/ 2>/dev/null; }
+# --no-index: the answer comes from the ignore rules alone. Without it, one
+# file under .vibe in git's index makes git answer "not ignored", although a
+# new file there is ignored.
+ignored() { git check-ignore -q --no-index .vibe/ 2>/dev/null; }
 
 if ! ignored; then
   # Asked from the top folder, so a path that is not absolute starts there.

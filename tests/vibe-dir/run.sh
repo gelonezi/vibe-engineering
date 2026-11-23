@@ -141,6 +141,38 @@ run_in "$repo"
 worked ".vibe in .gitignore"
 check ".vibe in .gitignore: the exclude file is not changed" "$(yes_no cmp -s "$exclude" "$tmp/before")" yes
 
+# A file under .vibe is already in a commit. That is where the glued pattern
+# led: the hand-over file showed in git status, and it was committed. Git is
+# asked about a new file, so the committed one does not stop the run, and a
+# new file stays out of git status.
+new_repo committed
+mkdir "$repo/.vibe"
+: > "$repo/.vibe/fixed-threads-7.txt"
+git -C "$repo" add -f .vibe/fixed-threads-7.txt > /dev/null 2>&1
+git -C "$repo" -c user.name=test -c user.email=test@example.com commit -q -m second
+printf 'foo' > "$exclude"
+run_in "$repo"
+worked "a committed file under .vibe"
+check "a committed file under .vibe: the pattern is added" "$(bytes "$exclude")" 'foo\n.vibe/\n'
+: > "$repo/.vibe/review-1.md"
+check "a committed file under .vibe: git ignores a new file" "$(yes_no ignored "$repo" .vibe/review-1.md)" yes
+check "a committed file under .vibe: git status shows nothing of the new file" "$(git -C "$repo" status --porcelain)" ""
+# The pattern is there now, and the committed file still is: nothing is added.
+cp "$exclude" "$tmp/before"
+run_in "$repo"
+worked "a committed file under .vibe, second run"
+check "a committed file under .vibe, second run: the exclude file is the same" "$(yes_no cmp -s "$exclude" "$tmp/before")" yes
+# push deletes the hand-over file from the working folder only: it is still
+# in git's index.
+rm "$repo/.vibe/fixed-threads-7.txt"
+run_in "$repo"
+worked "a committed file under .vibe, deleted from the folder"
+check "a committed file under .vibe, deleted from the folder: the exclude file is the same" "$(yes_no cmp -s "$exclude" "$tmp/before")" yes
+# A rule that un-ignores the folder still stops the run there.
+printf '!.vibe/\n' > "$repo/.gitignore"
+run_in "$repo"
+stopped "a committed file under .vibe and a rule that un-ignores it" "ERROR: git still does not ignore .vibe/ after adding it to *: look for a rule such as !.vibe in a .gitignore"
+
 # From a subfolder, the folder is still made in the top folder.
 new_repo subfolder
 mkdir -p "$repo/a/b"

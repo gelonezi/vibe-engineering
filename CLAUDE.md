@@ -65,9 +65,13 @@ board, never on the template.
   Under `pipefail`, check text a script already holds with Bash itself, and
   never end a pipe in a command that stops reading early (`grep -q`, `head`,
   `awk` with `exit`): the answer then changes from run to run.
-  Text for GitHub that a person wrote, such as a title or a description,
-  reaches a script in a file, never inside a command line: quotes, backticks
-  and dollar signs then need no care. `repo.sh pr-edit` takes both that way.
+  A new command takes text for GitHub that a person wrote, such as a title
+  or a description, from a file, never as an argument: quotes, backticks
+  and dollar signs then arrive as written. `repo.sh pr-edit` takes both that
+  way. The older commands take only the description from a file:
+  `repo.sh pr-create`, `projects.sh draft-create` and
+  `projects.sh create-sub-issue` still take the title as an argument, where
+  the shell changes a backtick or a dollar sign inside double quotes.
 - **`create-board` copies a template project** (`gh project copy` of
   `users/gelonezi/projects/6`, overridable with
   `VIBE_ENGINEERING_TEMPLATE_OWNER` / `_NUMBER`). Boards are always created
@@ -120,9 +124,12 @@ board, never on the template.
   as the checklist of `review` is, through git's exclude file. Both skills
   call `scripts/vibe-dir.sh` for that, and write no shell lines of their
   own: `push` stops when `git status` shows the hand-over file. The script
-  asks git whether `.vibe/` is ignored (`git check-ignore`) and adds the
-  pattern only when it is not, on a line of its own, also when the file's
-  last line has no line break. It takes the file's path from
+  asks git whether `.vibe/` is ignored (`git check-ignore --no-index`) and
+  adds the pattern only when it is not, on a line of its own, also when the
+  file's last line has no line break. Keep `--no-index`: without it, one
+  committed file under `.vibe/` makes git answer "not ignored" although a
+  new file there is ignored, and the script then fails on every run. It
+  takes the file's path from
   `git rev-parse --git-path info/exclude`, never a fixed `.git/info/exclude`:
   in a git worktree or a submodule `.git` is a file.
 - **`push` keeps an open pull request's text true.** On a push to a pull

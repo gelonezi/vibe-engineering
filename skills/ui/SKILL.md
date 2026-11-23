@@ -41,7 +41,7 @@ Run `bash scripts/check-auth.sh` and read its `KEY=value` lines.
 
 If the user named a board (its link, or its board, panel or project name), run
 `bash scripts/projects.sh board "<what they told you>"`. It prints one line
-per match: `<number>\t<id>\t<title>\t<url>`.
+per match: `<number>\t<id>\t<title>\t<public>\t<url>`.
 
 - **One match:** use it.
 - **Several matches:** show their URLs and ask which one.

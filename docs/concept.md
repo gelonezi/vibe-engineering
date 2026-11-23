@@ -58,7 +58,12 @@ refined concept, the decisions made along the way, and any open questions.
 `create-item` creates a draft issue, because an idea doesn't need a repository
 yet. `promote-backlog` turns it into a real issue once the repository is known,
 because only real issues can link to PRs. Draft issues have no number, so they
-are picked from a list.
+are picked from a list. A draft issue is only visible to people who can see the
+board, so if the board is public, `create-item` says so and asks before saving.
+
+In a cloud session `create-item` can't reach the board, so it offers two ways
+forward: continue in Claude Code on the user's computer, or shape the idea in
+the session and add it to the Draft column by hand, guided step by step.
 
 The Draft column and GitHub's draft issues are separate things. An item in the
 Draft column can be a real issue, and a draft issue can sit in any column.

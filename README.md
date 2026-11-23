@@ -170,7 +170,8 @@ The full plan, with the order and the decisions behind it, is in
 - [Claude Code](https://claude.ai/referral/tfCwEtgZHg)
 - Claude Code on your own computer for the board skills. Cloud sessions on
   claude.ai can't reach GitHub Projects, so there `create-board` guides you
-  through copying the board by hand.
+  through copying the board by hand, and `create-item` shapes the idea with you
+  and guides you through adding it to the board yourself.
 - Claude Code 2.1.287 or later for the side panel. Everything else works
   without it.
 - The [GitHub CLI](https://cli.github.com/), logged in with the `project` scope:

@@ -31,7 +31,7 @@ project name. If they haven't, ask and wait. Never choose one yourself, whether
 from the current repository, an earlier run or the only board you can find.
 
 Run `bash scripts/projects.sh board "<what they told you>"`. It prints one line
-per match: `<number>\t<id>\t<title>\t<url>`.
+per match: `<number>\t<id>\t<title>\t<public>\t<url>`.
 
 - **One match:** use it, and name it in your report.
 - **Several matches:** show their URLs and ask which one.

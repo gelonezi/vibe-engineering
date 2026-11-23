@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.4.0](https://img.shields.io/badge/version-0.4.0-5b4be6)
+![Version 0.4.1](https://img.shields.io/badge/version-0.4.1-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -155,7 +155,8 @@ The full plan, with the order and the decisions behind it, is in
 - [Claude Code](https://claude.ai/referral/tfCwEtgZHg)
 - Claude Code on your own computer for the board skills. Cloud sessions on
   claude.ai can't reach GitHub Projects, so there `create-board` guides you
-  through copying the board by hand.
+  through copying the board by hand, and `create-item` shapes the idea with you
+  and guides you through adding it to the board yourself.
 - The [GitHub CLI](https://cli.github.com/), logged in with the `project` scope:
 
   ```bash

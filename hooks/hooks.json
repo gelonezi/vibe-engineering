@@ -1,0 +1,5 @@
+{
+  "description": "The vibe-engineering side panel: the board beside the chat, with a button for each item's next step. Drawn by Claude Code 2.1.287 and later; older versions ignore it, and /vibe-engineering:ui guides in the chat instead.",
+  "hooks": {},
+  "modules": ["./panel.tsx"]
+}

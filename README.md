@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.10](https://img.shields.io/badge/version-0.5.10-5b4be6)
+![Version 0.5.11](https://img.shields.io/badge/version-0.5.11-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -171,7 +171,7 @@ software engineers.
 | **Start** | Repository templates that are set up correctly from day zero: a general one, .NET with Angular, TypeScript and Python. | 🗺️ Planned |
 | **Guide** | A guided path for people with no software engineering background. | 🚧 Started: the side panel |
 | **Team** | Iteration planning, status reports and retrospectives for a team of people and agents. | 🗺️ Planned |
-| **Trust** | Tests and evals that keep the plugin itself reliable. | 🗺️ Planned |
+| **Trust** | Tests and evals that keep the plugin itself reliable. | 🚧 Started: script tests on every pull request |
 
 The full plan, with the order and the decisions behind it, is in
 [docs/roadmap.md](docs/roadmap.md).
@@ -237,6 +237,9 @@ The full plan, with the order and the decisions behind it, is in
   plugin.json          plugin manifest: name, display name, description, icon
   marketplace.json     lets this repo be added as a plugin marketplace
   icon.png             plugin icon, 1024 px square
+.github/
+  workflows/
+    checks.yml         the checks GitHub runs on Linux, macOS and Windows
 docs/
   concept.md           how the delivery skills work together
   roadmap.md           where the plugin is going
@@ -253,6 +256,7 @@ skills/
     scripts/           helper scripts only this skill uses
     assets/            files the skill shows the user, such as the help page
 tests/
+  syntax.sh            every script parses: bash tests/syntax.sh
   panel.test.tsx       the side panel's tests: claude plugin test .
   next/                next.sh against a stand-in gh: bash tests/next/run.sh
   repo/                repo.sh's review thread commands: bash tests/repo/run.sh
@@ -263,15 +267,25 @@ tests/
 1. Bump `version` in `.claude-plugin/plugin.json` and in the version badge above.
    `vibe-engineering:update` reports the installed and published commits, and
    tells the user how to force a reinstall when a push didn't come with a bump.
+   An item's spec names "the next patch version after main", never a fixed
+   number: other items may merge first. Take the number when the item is
+   developed, and take it again if `main` got a release before the merge.
 2. Keep `README.md`, `docs/concept.md`, `docs/roadmap.md` and
    `skills/help/assets/help.html` in step: the help page is written by hand and
    says which skills exist.
 3. The plugin's `description` and `displayName` appear in both `plugin.json` and
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
-4. Run `claude plugin validate . --strict` before pushing, and
-   `claude plugin test .` when the side panel changed.
-5. The companion plugins are listed in two places that must agree: the default
+4. Run the script checks before pushing: `bash tests/syntax.sh`,
+   `bash tests/next/run.sh` and `bash tests/repo/run.sh`. None needs Claude
+   Code or a GitHub login. The two tests need `jq`, and on Windows jq 1.7 or
+   newer. GitHub runs the same three on Linux, macOS and Windows for every
+   pull request and every push to `main` (`.github/workflows/checks.yml`),
+   and its checks must pass before the merge.
+5. Run `claude plugin validate . --strict` before pushing, and
+   `claude plugin test .` when the side panel changed. These two run only by
+   hand: GitHub does not run them.
+6. The companion plugins are listed in two places that must agree: the default
    list in `scripts/companions.sh` and the table above. They are optional on
    purpose. A `dependencies` entry in `plugin.json` would install them
    automatically, but Claude Code then refuses to load this plugin whenever one

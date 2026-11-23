@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.6](https://img.shields.io/badge/version-0.5.6-5b4be6)
+![Version 0.5.7](https://img.shields.io/badge/version-0.5.7-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -119,8 +119,9 @@ name: describe what you want and Claude picks the skill.
 
 `/vibe-engineering:ui` opens a pane beside the chat that lists your board by
 column. Each item has a button for its next step: *Design it*, *Write the spec*,
-*Build it*, *Open the pull request*, *Review*, *Fix comments* or *Merge*. *Fix
-comments* shows only when a reviewer left something to fix. A
+*Build it*, *Open the pull request* (or *Update the pull request* once it's
+open), *Review*, *Fix comments* or *Merge*. *Fix comments* shows when someone
+left feedback that no commit has answered yet. A
 button starts that skill on that item, exactly as if you had typed it, so every
 skill still asks before anything that can't be undone. The panel only reads the
 board, and reads it again whenever Claude finishes. The column to act on first,

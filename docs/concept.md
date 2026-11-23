@@ -176,12 +176,22 @@ a button for each item's next step:
 
 The panel finds an item's pull request as the other skills do, by its branch
 `feature/<issueNumber>-<slug>`, and else by the `Closes` line `push` writes.
-Fix comments shows when someone left feedback that no commit has answered yet:
-a review that asks for changes or says something, an open review thread, or a
-comment on the pull request, made after its latest commit. Comments from bots
-don't count. Once `develop` fixes them and `push` sends the commit, the button
-goes away until the next review. If the panel can't find the pull request, it
-offers Fix comments anyway, because it can't tell.
+Fix comments follows the state the pull request shows on GitHub:
+
+- **A reviewer requested changes.** The button stays until that reviewer
+  reviews again, as GitHub's own merge box does.
+- **A review thread is unresolved.** After fixing review comments, `develop`
+  lists the threads it fixed and, if the user agrees, marks them resolved. A
+  thread it only answered stays open for the reviewer.
+- **Someone else wrote a review with only text, or a plain comment, after the
+  latest commit.** These can't be resolved, so the next commit counts as the
+  answer. The pull request's author's own comments and bots' comments don't
+  count: in a solo project the author is also the reviewer, and their
+  feedback arrives as review threads.
+
+If the panel can't find the pull request, it offers Fix comments anyway,
+because it can't tell. The panel reads all of this in at most three calls to
+GitHub, however many items are in review.
 
 A button sends an ordinary prompt, as the user's own words, that names the
 skill, the item and the board. The skill then runs as if the user had typed it,

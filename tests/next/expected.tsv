@@ -1,0 +1,14 @@
+An idea	promote-backlog:Design it
+Progress without a PR	push:Open the pull request
+Progress with a PR	push:Update the pull request
+Clean review	review:Review,approve:Merge
+Open thread	review:Review,develop:Fix comments,approve:Merge
+Changes requested, then a commit	review:Review,develop:Fix comments,approve:Merge
+Changes requested, then approved	review:Review,approve:Merge
+Reviewer text after the commit	review:Review,develop:Fix comments,approve:Merge
+Author replies and bot comments only	review:Review,approve:Merge
+Found by its Closes line	review:Review,develop:Fix comments,approve:Merge
+No PR at all	review:Review,develop:Fix comments,approve:Merge
+Reviewer text before the commit	review:Review,approve:Merge
+A PR on the board	-
+A parent	-

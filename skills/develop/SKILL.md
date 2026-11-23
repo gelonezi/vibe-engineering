@@ -85,6 +85,10 @@ Then run `bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per co
   whether they have comments of their own.
 - Pass a `WARN` line on in one sentence.
 
+Then run `bash scripts/repo.sh pr-threads <prNumber>`. It prints each open review
+thread as `<threadId>\t<path>\t<line>\t<author>\t<firstComment>` and ends with
+`THREADS=<n>`. Keep the IDs: step 8 offers to resolve the threads you fix.
+
 Also look for the checklist file from `vibe-engineering:review`. If
 `superpowers:receiving-code-review` is available, use it: it checks each comment
 against the code before anything changes, instead of applying comments blindly.
@@ -150,7 +154,15 @@ If the repository has no tests or linters, say so instead of calling the work ve
 2. Commit, following the repository's commit message style (look at
    `git log --oneline -10`). If it has none, use `<type>: <summary> (#<issueNumber>)`,
    where the type matches the work: `feat`, `fix`, `refactor`, `test` or `docs`.
-3. Report in a few lines:
+3. **Only when fixing review comments:** list the open threads this work fixed, by
+   their path, line and comment, and ask the user whether to mark them resolved
+   on GitHub. For each one they confirm, run
+   `bash scripts/repo.sh resolve-thread <threadId>`, which prints `RESOLVED=true`.
+   Leave a thread open when you only answered it or disagreed, so the reviewer
+   decides. Resolving is visible on the pull request, and the board's side panel
+   offers **Fix comments** until every thread is resolved. A review that requested
+   changes stays in force until its reviewer reviews again, whatever you resolve.
+4. Report in a few lines:
    - Branch name and commits created
    - Tests and checks verified
    - Current board item status: **In progress**

@@ -17,7 +17,7 @@ claude plugin validate . --strict      # run before every push (release checklis
 bash -n scripts/*.sh skills/*/scripts/*.sh   # syntax check the scripts
 bash scripts/projects.sh help          # prints the command reference from the header comment
 claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
-bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq)
+bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts where strace is installed)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
 
@@ -91,7 +91,10 @@ board, never on the template.
   column to the skill that moves an item out of it. The panel and the chat
   guide both read it. When the flow changes, change it with `docs/concept.md`.
   The panel runs it on every refresh, so keep `board` to its three GitHub
-  calls, and update `tests/next/` when a step's rule changes.
+  calls and start no process per item (no `$(...)` inside its loops: helpers
+  set a variable instead), and update `tests/next/` when a step's rule
+  changes. The rule for Fix comments is written in three places that must
+  agree: the script's header, `docs/concept.md` and `README.md`.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

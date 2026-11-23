@@ -178,20 +178,39 @@ The panel finds an item's pull request as the other skills do, by its branch
 `feature/<issueNumber>-<slug>`, and else by the `Closes` line `push` writes.
 Fix comments follows the state the pull request shows on GitHub:
 
-- **A reviewer requested changes.** The button stays until that reviewer
-  reviews again, as GitHub's own merge box does.
+- **A reviewer's latest verdict requests changes.** The button stays until
+  that reviewer reviews again, whatever is committed, as GitHub's own merge
+  box does. The panel reads GitHub's own list of each reviewer's latest
+  verdict, which is exact however many reviews came later. That list holds
+  only the reviewers who can push to the repository, so the panel also reads
+  the last 50 reviews for everyone else.
 - **A review thread is unresolved.** After fixing review comments, `develop`
   lists the threads it fixed and, if the user agrees, marks them resolved. A
   thread it only answered stays open for the reviewer.
-- **Someone else wrote a review with only text, or a plain comment, after the
-  latest commit.** These can't be resolved, so the next commit counts as the
-  answer. The pull request's author's own comments and bots' comments don't
-  count: in a solo project the author is also the reviewer, and their
-  feedback arrives as review threads.
+- **A review with only text was written after the latest commit.** This is a
+  review with no comments on lines, so it has no thread to resolve, and the
+  next commit counts as the answer. It counts whoever wrote it, except a bot.
+  In a solo project the author is also the reviewer, and when GitHub rejects
+  the lines of a review, `review` puts every comment in the review's text.
+- **Someone else wrote other text after the latest commit.** That is a review
+  that also has comments on lines, or a plain comment, from someone who is
+  not the pull request's author and not a bot. The next commit counts as the
+  answer here too.
+
+The author's plain comments and replies in threads never count, and neither
+does the text of the author's review when it also has comments on lines: its
+threads carry the feedback.
+
+One case is accepted as it is. When the author deletes every comment on a
+line from their own review, GitHub reports that review as one with only text,
+and no field tells the two apart. Its text then counts until the next commit,
+although nothing may be left to fix. The panel offers the button when it
+can't tell.
 
 If the panel can't find the pull request, it offers Fix comments anyway,
 because it can't tell. The panel reads all of this in at most three calls to
-GitHub, however many items are in review.
+GitHub, however many items are in review, and it starts no process for each
+item, so a refresh costs the same on a long board.
 
 A button sends an ordinary prompt, as the user's own words, that names the
 skill, the item and the board. The skill then runs as if the user had typed it,

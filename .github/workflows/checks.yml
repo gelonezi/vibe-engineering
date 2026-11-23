@@ -34,14 +34,17 @@ jobs:
           echo "Bash $BASH_VERSION"
           jq --version || echo "jq is not installed"
 
-      # Counting process starts needs strace, which exists only on Linux.
-      # NEED_STRACE=1 makes tests/next/run.sh fail if it could not count.
-      # On macOS and Windows that part is skipped, and its PASS line says so.
-      - name: Install strace
+      # Counting process starts needs the strace of Linux. NEED_STRACE=1
+      # makes tests/next/run.sh fail there if it could not count. macOS has
+      # no strace and the one in Git Bash can't make this count, so on those
+      # two that part is skipped, and the test's PASS line says so.
+      - name: Make sure strace is there
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y strace
+          if ! command -v strace > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y strace
+          fi
           echo "NEED_STRACE=1" >> "$GITHUB_ENV"
 
       # The two tests below run even when an earlier check failed, so one

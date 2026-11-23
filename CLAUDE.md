@@ -124,8 +124,9 @@ board, never on the template.
   same command. When a job fails on one system, fix the script or the test:
   never take the system out of the list. The tests need a `jq` binary and
   say so when it is missing; the plugin's own scripts still must not need
-  one. Only the Linux job counts process starts, because `strace` exists
-  only there.
+  one. Only the Linux job counts process starts: macOS has no `strace`, and
+  the one in Git Bash can't make this count. The macOS job runs Bash 3.2, so
+  keep the scripts and the tests to what that version can run.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

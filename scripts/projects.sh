@@ -521,6 +521,10 @@ case "$cmd" in
   create-sub-issue)
     [ $# -eq 5 ] || die "usage: create-sub-issue <projectId> <parentIssueId> <repoId> <title> <bodyFile>"
     [ -f "$5" ] || die "body file not found: $5"
+    # The add step further down keeps its error text in this file. It is made
+    # first, so that a failure to make it happens before any issue exists.
+    add_err_file="$(mktemp)" || die "couldn't create a temporary file, so nothing was created"
+    trap 'rm -f "$add_err_file"' EXIT
     issue_line="$(gql -f r="$3" -f t="$4" -F body=@"$5" -f query='
       mutation($r: ID!, $t: String!, $body: String) {
         createIssue(input: { repositoryId: $r, title: $t, body: $body }) {
@@ -546,17 +550,13 @@ case "$cmd" in
     # way, so a failed add is followed by a lookup instead of ending the command.
     # The add's error text goes to a file, apart from its answer, and is shown
     # only if the command fails in the end.
-    add_err_file="$(mktemp)"
-    if item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
+    if ! item_id="$(gql -f p="$1" -f c="$child_issue_id" -f query='
       mutation($p: ID!, $c: ID!) {
         addProjectV2ItemById(input: { projectId: $p, contentId: $c }) {
           item { id }
         }
       }' --jq '.data.addProjectV2ItemById.item.id' 2>"$add_err_file")"; then
-      rm -f "$add_err_file"
-    else
       add_err="$(tr '\n' ' ' <"$add_err_file")"
-      rm -f "$add_err_file"
       # The item this issue has on this board, if any. Items of the same issue
       # on other boards are left out. It only reads, so asking twice is safe.
       board_item() {

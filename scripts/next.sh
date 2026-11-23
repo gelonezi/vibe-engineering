@@ -26,8 +26,9 @@
 #     again, whatever is committed. It is read from GitHub's own list of each
 #     reviewer's latest verdict, which holds the reviewers who can push, and
 #     from the last 50 reviews for everyone else,
-#   - a review thread is unresolved (develop offers to resolve the ones it
-#     fixed),
+#   - a review thread is unresolved (push offers to resolve the ones develop
+#     fixed, once the fix is on the PR). The threads read are the newest 100,
+#     the same ones repo.sh pr-threads lists,
 #   - a review with only text, and no comments on lines, was written after the
 #     PR's latest commit by anyone but a bot. The PR's author counts here: when
 #     GitHub rejects the lines, the review skill puts every comment in the

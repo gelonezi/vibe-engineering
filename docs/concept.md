@@ -26,6 +26,14 @@ picks (see [The side panel](#the-side-panel-guides-only)).
 it back to In progress. `push` then updates the same PR and returns the item to
 In review.
 
+A review thread is marked resolved only once its fix is on the pull request.
+`develop` writes down the threads it fixed, in a file kept out of commits
+(`.vibe/fixed-threads-<prNumber>.txt`). After the push, `push` lists those
+threads, asks the user once, resolves the ones they confirm and deletes the
+file. If the user says no, nothing is resolved. Resolving right after the
+local commit was dropped: a reviewer would see a thread resolved on code that
+had not changed, for good if the push never happened.
+
 ## Rules
 
 - **One Ready item equals one PR.** `promote-ready` splits work until this is true.
@@ -86,6 +94,10 @@ them.
 `review` writes a Markdown file kept out of commits, with one `- [ ]` per
 comment showing the file, line and proposed text. The user ticks what to post,
 edits the wording if needed, and asks to post. The rest are discarded.
+
+When no comment is picked, `review` posts nothing and says so. A review with
+only its text would keep Fix comments on until the next commit, with nothing
+to fix.
 
 ### The board is a copy of a public template
 
@@ -185,8 +197,10 @@ Fix comments follows the state the pull request shows on GitHub:
   only the reviewers who can push to the repository, so the panel also reads
   the last 50 reviews for everyone else.
 - **A review thread is unresolved.** After fixing review comments, `develop`
-  lists the threads it fixed and, if the user agrees, marks them resolved. A
-  thread it only answered stays open for the reviewer.
+  writes down the threads it fixed. Once `push` has sent the fix, it lists
+  them and, if the user agrees, marks them resolved. A thread `develop` only
+  answered stays open for the reviewer. The panel and `push` read the same
+  threads, the newest 100 of the pull request.
 - **A review with only text was written after the latest commit.** This is a
   review with no comments on lines, so it has no thread to resolve, and the
   next commit counts as the answer. It counts whoever wrote it, except a bot.

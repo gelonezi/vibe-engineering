@@ -1,0 +1,131 @@
+{
+  "data": {
+    "repository": {
+      "pullRequest": {
+        "reviews": {
+          "pageInfo": {
+            "hasNextPage": false
+          },
+          "nodes": [
+            {
+              "author": {
+                "login": "ana"
+              },
+              "state": "CHANGES_REQUESTED",
+              "body": "Please fix the stock total."
+            },
+            {
+              "author": {
+                "login": "ana"
+              },
+              "state": "COMMENTED",
+              "body": ""
+            }
+          ]
+        },
+        "reviewThreads": {
+          "totalCount": 4,
+          "nodes": [
+            {
+              "id": "PRRT_1",
+              "isResolved": false,
+              "path": "src/stock.ts",
+              "line": 12,
+              "originalLine": 12,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "Use the warehouse id here."
+                  },
+                  {
+                    "author": {
+                      "login": "me"
+                    },
+                    "body": "Done."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "PRRT_2",
+              "isResolved": true,
+              "path": "src/stock.ts",
+              "line": null,
+              "originalLine": 30,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ana"
+                    },
+                    "body": "Typo."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "PRRT_3",
+              "isResolved": false,
+              "path": "src/stock.ts",
+              "line": null,
+              "originalLine": 44,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": null,
+                    "body": "First line\nsecond line"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "PRRT_4",
+              "isResolved": false,
+              "path": "docs/a.md",
+              "line": null,
+              "originalLine": null,
+              "comments": {
+                "pageInfo": {
+                  "hasNextPage": false
+                },
+                "nodes": [
+                  {
+                    "author": {
+                      "login": "ben"
+                    },
+                    "body": ""
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "comments": {
+          "pageInfo": {
+            "hasNextPage": false
+          },
+          "nodes": [
+            {
+              "author": {
+                "login": "ben"
+              },
+              "body": "Looks good overall."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

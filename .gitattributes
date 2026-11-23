@@ -3,3 +3,8 @@
 
 # Bash can't reliably run scripts with CRLF endings, so keep LF on every platform.
 *.sh text eol=lf
+
+# The tests' stand-in gh is a Bash script with no extension, and the expected
+# output is compared line by line: both need LF too.
+tests/*/gh text eol=lf
+tests/*/*.tsv text eol=lf

@@ -8,3 +8,6 @@
 # output is compared line by line: both need LF too.
 tests/*/gh text eol=lf
 tests/*/*.tsv text eol=lf
+
+# Git reads .gitignore line by line, and the tests copy it: keep LF there too.
+.gitignore text eol=lf

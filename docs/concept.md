@@ -146,6 +146,15 @@ board for itself:
 - `review` runs `code-review:code-review` without `--comment`, adds its findings
   to the checklist, and checks the PR against the spec itself.
 
+A hand-over names the repository's guide. Claude Code reads a project's rules
+from `CLAUDE.md` in the top folder or from `.claude/CLAUDE.md`, and a
+repository may keep them in either place. A companion may look in one place
+only: `code-review` looks for a `CLAUDE.md` in the top folder, and can check
+a pull request against no rules at all when the guide is in `.claude/`. So
+`develop` and `review` find the guide files with one script,
+`scripts/guide.sh`, read them, and give their paths to the companion they hand
+work to.
+
 `create-item` and `promote-ready` hand nothing over. Brainstorming moves on to a
 design, which an idea must not have yet, and a written plan is far longer than an
 issue body allows.

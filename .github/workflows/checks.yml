@@ -1,7 +1,7 @@
 # Runs the checks that need no Claude Code and no GitHub login, on the three
 # systems the scripts support. `claude plugin validate . --strict` and
 # `claude plugin test .` are not run here: they still run by hand, as
-# "Releasing a change" in CLAUDE.md says.
+# "Releasing a change" in .claude/CLAUDE.md says.
 name: Checks
 
 on:
@@ -47,7 +47,7 @@ jobs:
           fi
           echo "NEED_STRACE=1" >> "$GITHUB_ENV"
 
-      # The three tests below run even when an earlier check failed, so one
+      # The four tests below run even when an earlier check failed, so one
       # run shows every failure on a system.
       - name: Check that every script parses
         run: bash tests/syntax.sh
@@ -60,7 +60,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash tests/repo/run.sh
 
-      # This one needs git, which every runner has, and no jq.
+      # These two need git, which every runner has, and no jq.
       - name: Test vibe-dir.sh
         if: ${{ !cancelled() }}
         run: bash tests/vibe-dir/run.sh
+
+      # It also checks where this repository keeps its own guide.
+      - name: Test guide.sh
+        if: ${{ !cancelled() }}
+        run: bash tests/guide/run.sh

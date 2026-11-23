@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+It is `.claude/CLAUDE.md`, and it must stay there. The repository's top folder
+is also the plugin's root, and `claude plugin validate . --strict` fails on a
+`CLAUDE.md` in a plugin's root. Claude Code loads this file from `.claude/`
+just as it would from the top folder. Never add a `CLAUDE.md` to the top
+folder, even when a tool offers to: `tests/guide/run.sh` fails when there is
+one.
+
 ## What this repository is
 
 A Claude Code **plugin** (and its own marketplace), not an application. There is
@@ -20,6 +27,7 @@ claude plugin test .                   # runs the side panel's tests (tests/*.te
 bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts on Linux, where strace can trace, and NEED_STRACE=1 makes that a must)
 bash tests/repo/run.sh                 # runs repo.sh's review thread commands and pr-edit against a stand-in gh and fixtures (needs jq)
 bash tests/vibe-dir/run.sh             # runs vibe-dir.sh in real git repositories it makes in a temporary folder (needs git; no jq, no GitHub)
+bash tests/guide/run.sh                # runs guide.sh the same way, and checks that this file is in .claude/ and that .gitignore does not ignore it (needs git; no jq, no GitHub)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
 
@@ -46,6 +54,7 @@ board, never on the template.
   `scripts/companions.sh` reports which companion plugins are installed.
   `scripts/vibe-dir.sh` makes the `.vibe` folder and keeps it out of git; it
   calls only `git`.
+  `scripts/guide.sh` lists a repository's guide files; it calls only `git` too.
   Skills reach them as `bash <skill-dir>/../../scripts/<name>.sh`. Scripts that
   only one skill uses live in that skill's own `scripts/` folder.
 - **Script output contract.** Scripts print machine-readable lines that the
@@ -87,6 +96,29 @@ board, never on the template.
   then refuses to load the plugin when one is missing. `update` reports missing
   ones through `scripts/companions.sh`. Keep the list in step there, in
   `README.md` and in `docs/concept.md`.
+- **A project's guide is in one of two places.** Claude Code reads a
+  project's rules from `CLAUDE.md` in the top folder or from
+  `.claude/CLAUDE.md`, and this repository is one that uses the second. So a
+  skill never names `CLAUDE.md` as the place of a user's rules: it runs
+  `scripts/guide.sh`, which prints the path of each guide file (those two
+  names and `.claude/rules/*.md`, in the top folder or in a subfolder) and
+  then `GUIDES=<n>`. A companion may look in one place only:
+  `code-review:code-review` looks for "the root CLAUDE.md file", and the
+  examples of `claude-md-management:revise-claude-md` name `./CLAUDE.md`. So
+  `review` and `develop` give the companion the paths that `guide.sh`
+  printed. Write a new hand-over that needs the rules the same way. The
+  script lists what git tracks or would add, so a guide that git ignores is
+  left out, and it checks each path itself: git matches the plain name
+  `CLAUDE.md` to every file under a folder of that name.
+- **`.gitignore` is for a person's own Claude Code files.** `.claude/` is
+  tracked because the guide is in it, so `.gitignore` names the files there
+  that belong to one person or one computer, such as
+  `.claude/settings.local.json`. Add a new one by name. Never ignore
+  `.claude/` as a whole: a new file there that belongs to everyone, such as
+  a rules file, would then stay out of git with no one noticing.
+  `tests/guide/run.sh` checks both sides. The `.vibe` folder is not in
+  `.gitignore`: it is kept out through git's exclude file, in every
+  repository the plugin is used in.
 - **The side panel is a mod.** `hooks/hooks.json` lists `hooks/panel.tsx` under
   `modules`: a pane beside the chat with a button per item's next step. A button
   only sends a prompt (`$.prompt.submit`, as the user) that names the skill, the
@@ -140,8 +172,8 @@ board, never on the template.
   request has: that line links it to its issue, and the panel finds a pull
   request by it when the branch name does not match.
 - **GitHub runs the script checks.** `.github/workflows/checks.yml` runs
-  `tests/syntax.sh`, `tests/next/run.sh`, `tests/repo/run.sh` and
-  `tests/vibe-dir/run.sh` on Linux,
+  `tests/syntax.sh`, `tests/next/run.sh`, `tests/repo/run.sh`,
+  `tests/vibe-dir/run.sh` and `tests/guide/run.sh` on Linux,
   macOS and Windows (in Git Bash), for every pull request and every push to
   `main`. They need no Claude Code and no GitHub login, so the workflow has
   no secrets and can only read the repository. It does not run
@@ -152,7 +184,7 @@ board, never on the template.
   never take the system out of the list. The tests of `next.sh` and
   `repo.sh` need a `jq` binary
   and say so when it is missing; the plugin's own scripts still must not
-  need one. The test of `vibe-dir.sh` needs only git. A jq built for Windows ends each line with a carriage return,
+  need one. The tests of `vibe-dir.sh` and `guide.sh` need only git. A jq built for Windows ends each line with a carriage return,
   so there the tests run it in binary mode (`-b`), which needs jq 1.7 or
   newer. Never pass `-b` to every jq: jq 1.6, which older Linux systems
   still ship, stops at it, and the tests must keep passing with it. Only the
@@ -201,12 +233,13 @@ board, never on the template.
 3. `description`/`displayName` appear in both `plugin.json` and
    `marketplace.json`; the marketplace entry wins, so change both together.
 4. Run the script checks: `bash tests/syntax.sh`, `bash tests/next/run.sh`,
-   `bash tests/repo/run.sh` and `bash tests/vibe-dir/run.sh`. GitHub runs the
-   same four on Linux, macOS and Windows for the pull request, and its checks
-   must pass before the merge.
+   `bash tests/repo/run.sh`, `bash tests/vibe-dir/run.sh` and
+   `bash tests/guide/run.sh`. GitHub runs the same five on Linux, macOS and
+   Windows for the pull request, and its checks must pass before the merge.
 5. Run `claude plugin validate . --strict` and, when the panel changed,
    `claude plugin test .`. These two run only by hand: GitHub does not run
-   them.
+   them. The strict check must end in "Validation passed" with no warning.
+   If it warns, find the cause: never note a warning as known and go on.
 
 Commit messages follow the existing style: a short imperative summary, with
 `, release X.Y.Z` appended when the version is bumped.

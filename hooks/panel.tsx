@@ -9,11 +9,20 @@
 // (mcp__vibe-engineering__show_board). Where this module doesn't load
 // (Claude Code before 2.1.287, cloud sessions) that tool doesn't exist, and
 // the skill guides in the chat instead.
+//
+// Claude Code places a pane at any width only when the person asked for it
+// (their prompt, command or press); an open from a tool call waits for a
+// terminal 144 columns wide. So the pane also opens on the person's own prompt
+// for the panel, and on the /vibe-board command.
 import type { EngineInterface, Register } from 'claude-code'
 
 const PANE = 'vibe-board'
 const TOOL = 'show_board'
-const COLUMNS = ['Draft', 'Backlog', 'Ready', 'In progress', 'In review', 'Done']
+// Most urgent first: an item in review waits on the person, and a short pane
+// must show what to act on before what can wait. Done is a count, last.
+const COLUMNS = ['In review', 'In progress', 'Ready', 'Backlog', 'Draft', 'Done']
+// A background agent that never reports back stops counting as busy after this.
+const AGENT_STALE_MS = 30 * 60_000
 
 export type Board = { id: string; title: string; url: string }
 export type Step = { skill: string; label: string }
@@ -40,8 +49,22 @@ type View =
 let cwd = ''
 let board: Board | undefined
 let view: View = { kind: 'empty' }
-let isBusy = false
+let isTurnRunning = false
+const agents = new Map<string, number>()
 let loads = 0
+
+/** Claude is working: the main turn, or a background agent it started. */
+const isBusy = () => {
+  const now = Date.now()
+  for (const [id, since] of agents) if (now - since > AGENT_STALE_MS) agents.delete(id)
+  return isTurnRunning || agents.size > 0
+}
+
+/** Whether a prompt asks for the panel: the ui skill's command, or in words. */
+export const wantsPanel = (text: string, command?: string) =>
+  command === 'vibe-engineering:ui' ||
+  /(^|\s)\/vibe-engineering:ui\b/.test(text) ||
+  (/vibe[- ]?engineering/i.test(text) && /\b(ui|panel|dashboard)\b/i.test(text))
 
 /** Undoes the escapes gh's @tsv writes into a field. */
 const untsv = (field: string) =>
@@ -92,16 +115,27 @@ export const promptFor = (target: Board, step: Step, item?: Item): string => {
   return `Use ${skill} for ${named} ${where}.`
 }
 
-/** Groups items into the board's columns, in its order; unknown ones last. */
+/** Groups items by column, most urgent first; no status before Done. */
 export const columnsOf = (items: readonly Item[]) => {
-  const known = COLUMNS.map(name => ({
+  const named = (name: string) => ({
     name,
     items: items.filter(item => item.status.toLowerCase() === name.toLowerCase()),
-  }))
+  })
   const other = items.filter(
     item => !COLUMNS.some(name => name.toLowerCase() === item.status.toLowerCase()),
   )
-  return other.length > 0 ? [...known, { name: 'No status', items: other }] : known
+  const open = COLUMNS.filter(name => name !== 'Done').map(named)
+  return [...open, ...(other.length > 0 ? [{ name: 'No status', items: other }] : []), named('Done')]
+}
+
+/** Rows the pane's body needs, as drawn at that width. */
+export const rowsFor = (items: readonly Item[], columns: number) => {
+  const shown = columnsOf(items).filter(column => column.items.length > 0)
+  const perItem = columns >= 70 ? 1 : 2
+  const listed = shown
+    .filter(column => column.name !== 'Done')
+    .reduce((sum, column) => sum + 1 + column.items.length * perItem, 0)
+  return 2 + listed + (shown.some(column => column.name === 'Done') ? 1 : 0)
 }
 
 const storeKey = () => `board:${cwd}`
@@ -147,14 +181,21 @@ const load = async ($: EngineInterface) => {
   redraw($)
 }
 
+/** Opens the pane, asking for as many rows as the board needs. */
+const openPane = ($: EngineInterface) => {
+  const items = view.kind === 'ready' || view.kind === 'loading' ? view.items : []
+  const rows = Math.min(60, Math.max(8, rowsFor(items, 0) + 1))
+  return $.ui.open({ id: PANE, title: 'Vibe Engineering', rows })
+}
+
 /** Sends a step's prompt, unless Claude is already working. */
 const start = ($: EngineInterface, step: Step, item?: Item) => {
   if (!board) return
-  if (isBusy) {
+  if (isBusy()) {
     $.ui.toast('Claude is still working. Try again when it finishes.')
     return
   }
-  isBusy = true
+  isTurnRunning = true
   redraw($)
   void $.prompt.submit({ text: promptFor(board, step, item), asUser: true })
 }
@@ -195,7 +236,38 @@ export const register: Register = on => {
       },
       isDeferred: false,
     })
+    await $.command.register({
+      name: 'vibe-board',
+      description: 'Show the vibe-engineering board panel beside the chat',
+    })
     return started
+  })
+
+  // The person's own prompt for the panel: an open here is placed at any width.
+  on('prompt.submit', async ($, e, next) => {
+    if (wantsPanel(e.text, e.command?.name)) {
+      await openPane($)
+      if (board && view.kind === 'empty') void load($)
+    }
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
+  on('command.run', { command: 'vibe-board' }, async $ => {
+    const opened = await openPane($)
+    if (!board) return { text: 'No board yet. Run /vibe-engineering:ui and name your board.' }
+    void load($)
+    return {
+      text: opened.isPlaced
+        ? `Showing ${board.title} beside the chat.`
+        : `The panel couldn't be shown here: ${opened.reason}.`,
+    }
+  })
+
+  // The panel's own tool only reads the board: let it run without a prompt,
+  // unless the person's rules deny it.
+  on('tool.check', { tool: 'mcp__vibe-engineering__show_board' }, async ($, e, next) => {
+    const verdict = await next(e)
+    return verdict.decision === 'ask' ? { decision: 'allow' } : verdict
   })
 
   on('tool.run', { tool: 'mcp__vibe-engineering__show_board' }, async ($, e) => {
@@ -210,11 +282,11 @@ export const register: Register = on => {
           'NO_BOARD: no board was named and none was shown in this folder before. Ask the user which board to show.',
       }
     }
-    const opened = await $.ui.open({ id: PANE, title: 'Vibe Engineering' })
     await load($)
+    const opened = await openPane($)
     const shown = opened.isPlaced
       ? 'PANEL=shown'
-      : `PANEL=not_shown (${opened.reason}). Guide the user in the chat instead.`
+      : `PANEL=not_shown (${opened.reason}). Guide the user in the chat, and tell them /vibe-board opens the panel.`
     const items =
       view.kind === 'ready'
         ? summary(view.items) || 'The board has no items yet.'
@@ -226,22 +298,26 @@ export const register: Register = on => {
     result: 'PANEL=not_shown (the panel failed to open). Guide the user in the chat instead.',
   }))
 
+  // Busy while the main turn runs or any agent it started (a review's
+  // background agents run on after the main turn has ended).
   on('turn.start', async ($, e, next) => {
-    if (e.agentId === undefined) {
-      isBusy = true
-      redraw($)
-    }
+    if (e.agentId === undefined) isTurnRunning = true
+    else agents.set(e.agentId, Date.now())
+    redraw($)
     return next(e)
   })
 
   on('turn.complete', async ($, e, next) => {
     const done = await next(e)
-    if (e.agentId === undefined) {
-      isBusy = false
-      const open = (await $.ui.panes()).some(pane => pane.id === PANE)
-      if (open) void load($)
-      else redraw($)
+    if (e.agentId === undefined) isTurnRunning = false
+    else agents.delete(e.agentId)
+    if (isBusy()) {
+      redraw($)
+      return done
     }
+    const open = (await $.ui.panes()).some(pane => pane.id === PANE)
+    if (open) void load($)
+    else redraw($)
     return done
   })
 
@@ -252,45 +328,59 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column">
           <Text>No board is shown yet.</Text>
-          <Text dimColor>Run /vibe-engineering:ui and name your board.</Text>
+          <Text dimColor>Name your board in the chat, or run /vibe-engineering:ui.</Text>
         </Box>
       )
     }
 
-    const shown = board
-    const status = isBusy
-      ? 'Claude is working. The buttons wake up when it finishes.'
+    const busy = isBusy()
+    const status = busy
+      ? 'Claude is working'
       : view.kind === 'loading'
-        ? 'Reading the board...'
+        ? 'reading...'
         : view.kind === 'ready'
-          ? `Updated at ${view.at}`
+          ? `updated ${view.at}`
           : ''
     const items = view.kind === 'ready' || view.kind === 'loading' ? view.items : []
+    const wide = e.props.bodyColumns >= 70
+    const room = e.props.scroll?.bodyRows ?? 0
+    const isCut = room > 0 && rowsFor(items, e.props.bodyColumns) > room
+
+    const stepButtons = (item: Item) =>
+      item.steps.map(step => (
+        <Button key={`${item.id}-${step.skill}-${step.label}`} dimColor={busy} onPress={() => start($, step, item)}>
+          {step.label}
+        </Button>
+      ))
+    const name = (item: Item) => `${item.number === '-' ? '' : `#${item.number} `}${item.title}`
 
     return (
-      <Box flexDirection="column" gap={1}>
-        <Box flexDirection="column">
-          <Text bold>{shown.title}</Text>
+      <Box flexDirection="column">
+        <Box flexDirection="row" columnGap={1}>
+          <Text bold wrap="truncate-end">
+            {board.title}
+          </Text>
           {status !== '' && <Text dimColor>{status}</Text>}
         </Box>
         <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-          <Button key="new-idea" variant="primary" dimColor={isBusy} onPress={() => start($, { skill: 'create-item', label: 'New idea' })}>
+          <Button key="new-idea" variant="primary" dimColor={busy} onPress={() => start($, { skill: 'create-item', label: 'New idea' })}>
             New idea
           </Button>
-          <Button key="refresh" dimColor={isBusy} onPress={() => load($)}>
+          <Button key="refresh" dimColor={busy} onPress={() => load($)}>
             Refresh
           </Button>
-          <Button key="change-board" dimColor={isBusy} onPress={() => start($, { skill: 'ui', label: 'Change board' })}>
+          <Button key="change-board" dimColor={busy} onPress={() => start($, { skill: 'ui', label: 'Change board' })}>
             Change board
           </Button>
         </Box>
+        {isCut && <Text dimColor>More below: scroll the panel to see every column.</Text>}
         {view.kind === 'error' && (
           <Box flexDirection="column">
             <Text color="error">The board could not be read.</Text>
             <Text>{view.message}</Text>
           </Box>
         )}
-        {view.kind !== 'error' && items.length === 0 && view.kind === 'ready' && (
+        {view.kind === 'ready' && items.length === 0 && (
           <Text dimColor>The board has no items yet. Press New idea to add one.</Text>
         )}
         {columnsOf(items)
@@ -307,31 +397,31 @@ export const register: Register = on => {
                 <Text bold>
                   {column.name.toUpperCase()} ({column.items.length})
                 </Text>
-                {column.items.map(item => (
-                  <Box key={item.id} flexDirection="column" paddingLeft={1}>
-                    <Text wrap="truncate-end">
-                      {item.number === '-' ? '' : `#${item.number} `}
-                      {item.title}
-                    </Text>
-                    {item.subTotal > 0 ? (
+                {column.items.map(item => {
+                  const next =
+                    item.subTotal > 0 ? (
                       <Text dimColor>
                         {item.subDone} of {item.subTotal} sub-issues done
                       </Text>
                     ) : (
-                      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-                        {item.steps.map(step => (
-                          <Button
-                            key={`${item.id}-${step.skill}-${step.label}`}
-                            dimColor={isBusy}
-                            onPress={() => start($, step, item)}
-                          >
-                            {step.label}
-                          </Button>
-                        ))}
+                      stepButtons(item)
+                    )
+                  return wide ? (
+                    <Box key={item.id} flexDirection="row" columnGap={1} paddingLeft={1}>
+                      <Box flexShrink={1}>
+                        <Text wrap="truncate-end">{name(item)}</Text>
                       </Box>
-                    )}
-                  </Box>
-                ))}
+                      {next}
+                    </Box>
+                  ) : (
+                    <Box key={item.id} flexDirection="column" paddingLeft={1}>
+                      <Text wrap="truncate-end">{name(item)}</Text>
+                      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
+                        {next}
+                      </Box>
+                    </Box>
+                  )
+                })}
               </Box>
             ),
           )}

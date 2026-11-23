@@ -15,7 +15,9 @@ There are two ways to show it, and the user gets the same steps from both:
   each with a button for its next step. A button sends an ordinary prompt that
   names the skill, the item and the board. It's drawn by Claude Code 2.1.287
   and later, on the user's own computer, and the panel's tool,
-  `mcp__vibe-engineering__show_board`, exists only there.
+  `mcp__vibe-engineering__show_board`, exists only there. The panel also adds
+  the `/vibe-board` command, which opens it on the board it showed last, at
+  any terminal width.
 - **The chat guide.** The same board and steps as text, then a short list to
   pick the next step from. Used whenever the panel can't be shown.
 
@@ -69,8 +71,10 @@ board's `projectId`, `title` and `url` from step 2. Its result is plain text:
 - `PANEL=shown`: the panel is open. Tell the user in one or two lines: which
   board it shows, and the most useful next step (step 5 says which). Then
   stop: the buttons do the rest. Don't list the board in the chat as well.
-- `PANEL=not_shown`: the surface can't draw it. Continue with the chat guide,
-  using the items the result lists.
+- `PANEL=not_shown`: the panel couldn't be opened from here, often because
+  the terminal is narrow. Continue with the chat guide, using the items the
+  result lists, and tell the user in one line that typing `/vibe-board` opens
+  the panel at any width.
 - `ERROR=<text>`: the board couldn't be read. Pass the text on, in one
   sentence, and stop.
 
@@ -90,8 +94,9 @@ the board, or a parent whose sub-issues carry the work. The script is the one
 place that decides the next step, so take the steps from it and don't work
 them out yourself.
 
-Show the board by column, in this order: Draft, Backlog, Ready, In progress,
-In review, Done, then items with no status. For each item give its number
+Show the board by column, the column to act on first at the top, as the
+panel does: In review, In progress, Ready, Backlog, Draft, then items with no
+status, then Done. For each item give its number
 (or "draft"), its title and its step labels. For a parent, give its progress,
 such as "2 of 5 sub-issues done", instead. For Done, give the count only.
 Leave out empty columns.

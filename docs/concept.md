@@ -179,8 +179,16 @@ skill, the item and the board. The skill then runs as if the user had typed it,
 with its own checks and questions, and `approve` still asks before it merges.
 The panel never moves an item itself, and items can't be dragged between
 columns, because only a skill may move an item, after writing its section.
-Buttons wait while Claude is working, and the panel reads the board again when
-Claude finishes.
+Buttons wait while Claude is working, including while a skill's background
+agents finish, and the panel reads the board again when Claude is done.
+
+The columns are listed with the one to act on first at the top: In review, In
+progress, Ready, Backlog, Draft, then Done as a count. A pane can be short, so
+what needs the user most is what they see first, and the panel says when more
+is below. The panel opens when the user asks for it, through `ui` or the
+`/vibe-board` command, which opens it at any terminal width. Its own tool only
+reads the board, so it runs without a permission prompt; a rule that denies it
+still stands.
 
 The panel is a Claude Code mod, which needs Claude Code 2.1.287 or later on the
 user's computer. It needs no Node, no server and no browser. Where it can't be

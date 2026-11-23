@@ -69,7 +69,11 @@ board, never on the template.
   item and the board; the panel itself changes nothing on the board. It reads
   the board through `scripts/next.sh` with `$.process.run`, and
   `skills/ui/SKILL.md` opens it through the tool it registers,
-  `mcp__vibe-engineering__show_board`. Mods need Claude Code 2.1.287 or later,
+  `mcp__vibe-engineering__show_board`. The panel opens only from something the
+  person did (their prompt, the `/vibe-board` command it registers, a press):
+  Claude Code places an open from a tool call only on wide terminals. Its
+  `tool.check` hook turns an `ask` for its own read-only tool into `allow`,
+  and leaves a `deny` alone. Mods need Claude Code 2.1.287 or later,
   so keep it working without them: `ui` falls back to a chat guide when the
   tool is missing. Keep the empty `"hooks": {}` in `hooks.json`: older
   versions read that file as settings-style hooks and fail it without the key.

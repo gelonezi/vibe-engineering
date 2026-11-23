@@ -122,7 +122,12 @@ column. Each item has a button for its next step: *Design it*, *Write the spec*,
 *Build it*, *Open the pull request*, *Review*, *Fix comments* or *Merge*. A
 button starts that skill on that item, exactly as if you had typed it, so every
 skill still asks before anything that can't be undone. The panel only reads the
-board, and reads it again whenever Claude finishes.
+board, and reads it again whenever Claude finishes. The column to act on first,
+*In review*, is at the top.
+
+Type `/vibe-board` to open the panel again on the board it showed last. It
+works at any terminal width, also where asking in the chat can't place the
+panel because the window is narrow.
 
 It needs Claude Code 2.1.287 or later on your own computer, and nothing else to
 install. In a cloud session or an older Claude Code, `ui` shows the same board

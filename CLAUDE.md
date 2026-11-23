@@ -38,7 +38,7 @@ board, never on the template.
   `scripts/projects.sh` (the board: subcommands such as `owners`, `repos`, `copy`,
   `link`, `verify`, `board`, `items`, `draft-create`, `set-status`),
   `scripts/repo.sh` (pull requests and issues: `pr`, `checks`, `pr-create`,
-  `pr-review`, `merge`, `issue-parent`) and `scripts/check-auth.sh`.
+  `pr-comments`, `pr-review`, `merge`, `issue-parent`) and `scripts/check-auth.sh`.
   `scripts/companions.sh` reports which companion plugins are installed.
   Skills reach them as `bash <skill-dir>/../../scripts/<name>.sh`. Scripts that
   only one skill uses live in that skill's own `scripts/` folder.

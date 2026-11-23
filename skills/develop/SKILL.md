@@ -65,8 +65,27 @@ Extract:
 - `## High-level design`: Understanding the architectural decisions and boundaries.
 - `## Spec`: The exact requirements, affected files, edge cases, and test plan.
 
-If working on an **In review** item to address feedback, also inspect the open review
-comments or the checklist file from `vibe-engineering:review`. If
+If working on an **In review** item to address feedback, also read what the reviewers
+wrote. First find the item's pull request. If the user gave a PR, use it. Otherwise
+its branch is `feature/<issueNumber>-<slug>`: get the real name with
+`git branch -r --list 'origin/feature/<issueNumber>-*'`, then run
+`bash scripts/repo.sh pr-for-branch <branch>`, which prints `<number>\t<url>`. If
+there's no branch or it prints nothing, the item has no open pull request: tell the
+user, and ask for the PR.
+
+Then run `bash scripts/repo.sh pr-comments <prNumber>`. It prints one row per comment,
+`<kind>\t<author>\t<state>\t<path>\t<line>\t<body>`, and ends with `COMMENTS=<n>`:
+
+- `review` rows are whole reviews, with the reviewer's verdict as the state.
+- `inline` rows are comments on a line of the diff. The state is `open` or
+  `resolved`. Fix the `open` ones, and say how many were already resolved.
+- `general` rows are comments on the pull request as a whole.
+- A line break inside a comment is written as `\n`.
+- `COMMENTS=0`: tell the user there is nothing to fix on the pull request, and ask
+  whether they have comments of their own.
+- Pass a `WARN` line on in one sentence.
+
+Also look for the checklist file from `vibe-engineering:review`. If
 `superpowers:receiving-code-review` is available, use it: it checks each comment
 against the code before anything changes, instead of applying comments blindly.
 

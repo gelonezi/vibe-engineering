@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # A stand-in for gh, used by run.sh: answers next.sh's GraphQL calls from the
-# JSON files beside it, through jq, and logs one line per call.
-here="$(cd "$(dirname "$0")" && pwd)"
+# JSON files beside it, through jq, and logs one line per call. GH_STUB_DIR
+# names another folder to take the JSON files from.
+here="${GH_STUB_DIR:-$(cd "$(dirname "$0")" && pwd)}"
 query=""; filter=""
 while [ $# -gt 0 ]; do
   case "$1" in

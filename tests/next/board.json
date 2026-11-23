@@ -291,6 +291,132 @@
         "nodes": []
        }
       }
+     },
+     {
+      "id": "R13",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 13,
+       "title": "Author's text-only review after the commit",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R14",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 14,
+       "title": "Author's text-only review before the commit",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R15",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 15,
+       "title": "Author's review with threads, all resolved",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R16",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 16,
+       "title": "Changes requested, older than the last 50 reviews",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R17",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "In review"
+      },
+      "content": {
+       "number": 17,
+       "title": "Approved in GitHub's list of verdicts",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
+     },
+     {
+      "id": "R18",
+      "type": "ISSUE",
+      "fieldValueByName": {
+       "name": "IN REVIEW"
+      },
+      "content": {
+       "number": 18,
+       "title": "A status in capital letters",
+       "repository": {
+        "nameWithOwner": "me/shop"
+       },
+       "subIssuesSummary": {
+        "total": 0,
+        "completed": 0
+       },
+       "closedByPullRequestsReferences": {
+        "nodes": []
+       }
+      }
      }
     ]
    }

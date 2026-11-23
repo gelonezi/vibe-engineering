@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.8](https://img.shields.io/badge/version-0.5.8-5b4be6)
+![Version 0.5.9](https://img.shields.io/badge/version-0.5.9-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -121,8 +121,11 @@ name: describe what you want and Claude picks the skill.
 column. Each item has a button for its next step: *Design it*, *Write the spec*,
 *Build it*, *Open the pull request* (or *Update the pull request* once it's
 open), *Review*, *Fix comments* or *Merge*. *Fix comments* shows while a
-reviewer has requested changes or a review thread is still open, and when the
-panel can't find the item's pull request. A
+reviewer's latest verdict requests changes or a review thread is still open.
+Until the next commit, it also shows after a review with only text, whoever
+wrote it, and after a review with comments on lines or a plain comment from
+someone other than the pull request's author. A bot's text doesn't count. It
+shows too when the panel can't find the item's pull request. A
 button starts that skill on that item, exactly as if you had typed it, so every
 skill still asks before anything that can't be undone. The panel only reads the
 board, and reads it again whenever Claude finishes. The column to act on first,

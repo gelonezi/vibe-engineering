@@ -34,6 +34,19 @@ file. If the user says no, nothing is resolved. Resolving right after the
 local commit was dropped: a reviewer would see a thread resolved on code that
 had not changed, for good if the push never happened.
 
+A pull request's title and description are written when it is opened, for the
+first version of the branch. On every later push, `push` checks that they
+still describe the branch: the release number, what changed, and what was
+verified. If something no longer holds, it shows the new text and asks before
+changing it, as it does for a new pull request. The `Closes` line that links
+the pull request to its issue is never dropped: the script that changes the
+text refuses a description without it. `approve` uses the title for the merge
+commit, so a stale title would end up in the history.
+
+The files that `review` and `develop` keep under `.vibe/` are never committed.
+One script, `scripts/vibe-dir.sh`, makes the folder and makes sure git ignores
+it, through git's own exclude file and not the repository's `.gitignore`.
+
 ## Rules
 
 - **One Ready item equals one PR.** `promote-ready` splits work until this is true.

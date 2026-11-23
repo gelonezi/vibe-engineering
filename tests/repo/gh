@@ -6,6 +6,14 @@
 # (binary mode) where jq would otherwise end each line with a carriage
 # return, which the real gh --jq does not.
 #
+# For pr-edit it answers "pr view --json body" and "pr edit" without jq. The
+# pull request's number picks the answer. A successful "pr view" also writes
+# a hint on standard error, as the real gh can. "pr edit" keeps the title and
+# the description it was given in the folder GH_STUB_SENT, so that run.sh can
+# compare them with what it sent. A failure is written as the real gh writes
+# it for these commands: nothing on standard output, one message on standard
+# error, and exit 1.
+#
 # It refuses a query that reads review threads any other way than
 # reviewThreads(last: 100), so a script that reads another end of the list
 # fails its test. For resolve-thread, the thread id picks the answer, and a
@@ -15,8 +23,43 @@ here="$(cd "$(dirname "$0")" && pwd)"
 echo "${1:-} ${2:-}" >> "$GH_STUB_LOG"
 case "${1:-} ${2:-}" in
   "pr view")
+    case " $* " in
+      *" --json body "*)
+        # pr-edit asks for the description as it is now.
+        case "$3" in
+          21|24|25|26) printf 'Closes me/shop#12\n\n### Overview\nThe first version.\n\nBoard item: https://github.com/users/me/projects/1\n' ;;
+          # Written on GitHub's page: each line ends with a carriage return.
+          22) printf 'Some words first.\r\nCloses me/shop#12\r\n\r\nCloses the gap, with no issue named.\r\n' ;;
+          23) printf '### Overview\nNo closing line here. It mentions that it Closes me/shop#12 in the middle.\n' ;;
+          27) printf 'Closes me/shop#12\nCloses other/repo#3\n' ;;
+          *) echo "GraphQL: Could not resolve to a PullRequest with the number of $3. (repository.pullRequest)" >&2; exit 1 ;;
+        esac
+        echo "hint: if you need to wait for this pull request, use gh event listen" >&2
+        exit 0 ;;
+    esac
     # repo.sh asks for the pull request's number and link, as one row.
     printf '%s\thttps://github.com/me/shop/pull/%s\n' "$3" "$3"
+    exit 0 ;;
+  "pr edit")
+    number="$3"; title=""; body=""
+    shift 3
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --title) title="$2"; shift 2 ;;
+        --body-file) body="$2"; shift 2 ;;
+        *) echo "unexpected argument for pr edit: $1" >&2; exit 1 ;;
+      esac
+    done
+    [ -f "$body" ] || { echo "no description file: $body" >&2; exit 1; }
+    case "$number" in
+      24) echo "GraphQL: me does not have the correct permissions to execute \`UpdatePullRequest\` (updatePullRequest)" >&2; exit 1 ;;
+      # gh's message as Windows writes it.
+      25) printf 'GraphQL: Something went wrong while executing your query. (updatePullRequest)\r\n' >&2; exit 1 ;;
+      26) exit 0 ;;
+    esac
+    printf '%s' "$title" > "$GH_STUB_SENT/title"
+    cat "$body" > "$GH_STUB_SENT/body"
+    echo "https://github.com/me/shop/pull/$number"
     exit 0 ;;
   "api graphql") shift 2 ;;
   *) echo "unexpected gh call: $*" >&2; exit 1 ;;

@@ -8,6 +8,16 @@
 #   pr <number|link|branch>             "<number>\t<state>\t<isDraft>\t<mergeable>\t<mergeStateStatus>\t<reviewDecision>\t<headBranch>\t<baseBranch>\t<url>\t<title>"
 #   pr-for-branch <branch>              The open PR for a branch: "<number>\t<url>", or nothing
 #   pr-create <title> <bodyFile>        Open a PR from the current branch, prints its URL
+#   pr-edit <number|link> <titleFile> <bodyFile>
+#                                       Set the PR's title and description, both read from files, so
+#                                       that quotes, backticks and dollar signs arrive as written.
+#                                       The title file holds one line. Prints UPDATED=<prUrl>.
+#                                       Visible on the PR. It refuses a description that drops a
+#                                       "Closes <repo>#<number>" line the PR has now: that line links
+#                                       the PR to its issue.
+#                                       On failure it prints nothing on standard output and one
+#                                       "ERROR: ..." line on standard error, and exits 1.
+#                                       Safe to run again: the same title and description change nothing.
 #   pr-body <number|link>               The PR's description
 #   pr-diff <number|link>               The PR's diff
 #   pr-comments <number|link>           What reviewers wrote, one row per comment:
@@ -42,6 +52,17 @@ set -euo pipefail
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
+# Sets `why` to gh's message in the file $1: on one line, without its "gh: ",
+# without carriage returns and without spaces at the end. It sets a variable,
+# so that the caller needs no pipe.
+gh_reason() {
+  why="$(tr '\n' ' ' <"$1")"
+  why="${why//$'\r'/}"
+  why="${why#gh: }"
+  why="${why%"${why##*[! ]}"}"
+  why="${why:-GitHub gave no reason}"
+}
+
 cmd="${1:-}"; shift || true
 
 case "$cmd" in
@@ -60,6 +81,54 @@ case "$cmd" in
     [ $# -eq 2 ] || die "usage: pr-create <title> <bodyFile>"
     [ -f "$2" ] || die "body file not found: $2"
     gh pr create --title "$1" --body-file "$2"
+    ;;
+
+  pr-edit)
+    [ $# -eq 3 ] && [ -n "$1" ] || die "usage: pr-edit <number|link> <titleFile> <bodyFile>"
+    [ -f "$2" ] || die "title file not found: $2"
+    [ -f "$3" ] || die "body file not found: $3"
+    # The title is the file's text, without the line breaks, carriage returns
+    # and spaces at its end.
+    title="$(<"$2")"
+    title="${title%"${title##*[![:space:]]}"}"
+    [ -n "$title" ] || die "the title file is empty: $2"
+    case "$title" in *$'\n'*) die "the title must be one line: $2" ;; esac
+    # As in resolve-thread: gh's own messages go to a file, made before GitHub
+    # is called, and never reach the caller as they are. That also keeps away
+    # what gh writes on standard error when a call succeeds.
+    err_file="$(mktemp 2>/dev/null)" || die "couldn't create a temporary file, so nothing was changed"
+    trap 'rm -f "$err_file"' EXIT
+    if ! current="$(gh pr view "$1" --json body --jq '.body' 2>"$err_file")"; then
+      gh_reason "$err_file"
+      die "couldn't read pull request $1: $why"
+    fi
+    # The line "Closes <repo>#<number>", which push writes, links the pull
+    # request to its issue. Each such line of the description as it is now
+    # must be a line of the new one. Spaces and a carriage return at the end
+    # of a line don't count. Both texts are read with Bash, without a pipe.
+    while IFS= read -r line || [ -n "$line" ]; do
+      line="${line%"${line##*[![:space:]]}"}"
+      case "$line" in
+        "Closes "*"#"[0-9]*)
+          kept=no
+          while IFS= read -r new_line || [ -n "$new_line" ]; do
+            new_line="${new_line%"${new_line##*[![:space:]]}"}"
+            if [ "$new_line" = "$line" ]; then kept=yes; fi
+          done <"$3"
+          [ "$kept" = yes ] || die "the new description drops the line \"$line\", which links the pull request to its issue: keep that line. Nothing was changed"
+          ;;
+      esac
+    done <<<"$current"
+    # Both texts go in one change. The description's path is an argument of
+    # its own, as in pr-create.
+    if url="$(gh pr edit "$1" --title "$title" --body-file "$3" 2>"$err_file")"; then
+      url="${url%$'\r'}"
+      [ -n "$url" ] || die "gh did not confirm the change to pull request $1"
+      echo "UPDATED=$url"
+    else
+      gh_reason "$err_file"
+      die "couldn't update pull request $1: $why"
+    fi
     ;;
 
   pr-body)
@@ -167,12 +236,8 @@ case "$cmd" in
       [ "$resolved" = "true" ] || die "GitHub did not mark thread $1 as resolved"
       echo "RESOLVED=true"
     else
-      # gh's message, on one line, without its "gh: " and without spaces at the end.
-      why="$(tr '\n' ' ' <"$err_file")"
-      why="${why//$'\r'/}"
-      why="${why#gh: }"
-      why="${why%"${why##*[! ]}"}"
-      die "couldn't resolve thread $1: ${why:-GitHub gave no reason}"
+      gh_reason "$err_file"
+      die "couldn't resolve thread $1: $why"
     fi
     ;;
 

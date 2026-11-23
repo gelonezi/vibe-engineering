@@ -47,7 +47,7 @@ jobs:
           fi
           echo "NEED_STRACE=1" >> "$GITHUB_ENV"
 
-      # The two tests below run even when an earlier check failed, so one
+      # The three tests below run even when an earlier check failed, so one
       # run shows every failure on a system.
       - name: Check that every script parses
         run: bash tests/syntax.sh
@@ -59,3 +59,8 @@ jobs:
       - name: Test repo.sh
         if: ${{ !cancelled() }}
         run: bash tests/repo/run.sh
+
+      # This one needs git, which every runner has, and no jq.
+      - name: Test vibe-dir.sh
+        if: ${{ !cancelled() }}
+        run: bash tests/vibe-dir/run.sh

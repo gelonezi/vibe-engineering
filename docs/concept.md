@@ -16,6 +16,10 @@ idea to merged code. Everything a later skill needs is saved in the item itself.
 | `review`          | In review item or PR link        | In review   | The inline comments the user selected         |
 | `approve`         | In review item                   | Done        | The merge                                     |
 
+The next step for each column is decided in one place, `scripts/next.sh`.
+`ui` shows it beside the chat or in the chat, and starts the skill the user
+picks (see [The side panel](#the-side-panel-guides-only)).
+
 ### Fixing review comments
 
 `develop` also accepts an In review item with open review comments, and moves
@@ -144,6 +148,43 @@ or project name. A skill asks if it wasn't told, and never chooses one itself,
 whether from the current repository, an earlier run or the only board it can
 find. There is no config file.
 
+The side panel is the one exception. It remembers the board the user named
+last in that folder, shows its name at the top with a **Change board** button,
+and still names the board in every prompt it sends, so the skill that runs is
+always told which board to use.
+
+### The side panel guides, only
+
+Some people find it hard to run a process through skill names alone. `ui` shows
+the board beside the chat, in a pane that Claude Code draws for the plugin, with
+a button for each item's next step:
+
+| Column | Button | Skill |
+| --- | --- | --- |
+| Any time | New idea | `create-item` |
+| Draft | Design it | `promote-backlog` |
+| Backlog | Write the spec | `promote-ready` |
+| Ready | Build it | `develop` |
+| In progress | Open the pull request | `push` |
+| In review | Review, Fix comments, Merge | `review`, `develop`, `approve` |
+| A parent with sub-issues | None: it shows its progress | |
+
+A button sends an ordinary prompt, as the user's own words, that names the
+skill, the item and the board. The skill then runs as if the user had typed it,
+with its own checks and questions, and `approve` still asks before it merges.
+The panel never moves an item itself, and items can't be dragged between
+columns, because only a skill may move an item, after writing its section.
+Buttons wait while Claude is working, and the panel reads the board again when
+Claude finishes.
+
+The panel is a Claude Code mod, which needs Claude Code 2.1.287 or later on the
+user's computer. It needs no Node, no server and no browser. Where it can't be
+drawn (an older Claude Code, a cloud session, an organization that turned mods
+off), `ui` shows the same board and steps in the chat and offers them as a
+pick list. A web page was considered and dropped: a browser has no dependable
+way to hand a click back to the chat, and it would add Node and a server to a
+plugin that otherwise needs only `gh`.
+
 ## GitHub limits to design around
 
 - **You can't approve your own PR.** GitHub blocks both approving and requesting
@@ -166,8 +207,9 @@ find. There is no config file.
 ## Status
 
 Built: all delivery skills (`create-board`, `create-item`, `promote-backlog`,
-`promote-ready`, `develop`, `push`, `review`, `approve`), plus two utilities
-outside the flow: `help`, which shows an illustrated page of this document, and
+`promote-ready`, `develop`, `push`, `review`, `approve`), plus three utilities
+outside the flow: `ui`, which shows the board and each item's next step beside
+the chat, `help`, which shows an illustrated page of this document, and
 `update`, which updates the installed plugin.
 
 This document covers the delivery flow only. What comes after it, such as

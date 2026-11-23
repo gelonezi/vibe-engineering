@@ -5,9 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this repository is
 
 A Claude Code **plugin** (and its own marketplace), not an application. There is
-no build, no package manager and no test suite. The product is Markdown
-instructions (`skills/*/SKILL.md`) plus Bash helper scripts that call GitHub
-Projects (v2) through the GitHub CLI.
+no build and no package manager. The product is Markdown instructions
+(`skills/*/SKILL.md`) plus Bash helper scripts that call GitHub Projects (v2)
+through the GitHub CLI, and one TypeScript hooks module, the side panel
+(`hooks/panel.tsx`), which Claude Code loads as it is.
 
 ## Commands
 
@@ -15,6 +16,7 @@ Projects (v2) through the GitHub CLI.
 claude plugin validate . --strict      # run before every push (release checklist)
 bash -n scripts/*.sh skills/*/scripts/*.sh   # syntax check the scripts
 bash scripts/projects.sh help          # prints the command reference from the header comment
+claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
 
@@ -61,6 +63,24 @@ board, never on the template.
   then refuses to load the plugin when one is missing. `update` reports missing
   ones through `scripts/companions.sh`. Keep the list in step there, in
   `README.md` and in `docs/concept.md`.
+- **The side panel is a mod.** `hooks/hooks.json` lists `hooks/panel.tsx` under
+  `modules`: a pane beside the chat with a button per item's next step. A button
+  only sends a prompt (`$.prompt.submit`, as the user) that names the skill, the
+  item and the board; the panel itself changes nothing on the board. It reads
+  the board through `scripts/next.sh` with `$.process.run`, and
+  `skills/ui/SKILL.md` opens it through the tool it registers,
+  `mcp__vibe-engineering__show_board`. Mods need Claude Code 2.1.287 or later,
+  so keep it working without them: `ui` falls back to a chat guide when the
+  tool is missing. Keep the empty `"hooks": {}` in `hooks.json`: older
+  versions read that file as settings-style hooks and fail it without the key.
+  The panel keeps its state in module variables and `$.store`, so it needs no
+  `$.state` contract (`types` in `plugin.json`). The API reference is the `plugin-authoring`
+  skill's `types/claude-code.d.ts`; it moves between releases, so check it
+  rather than memory. Cloud sessions draw no panes and can't reach boards, so
+  try the panel on your own computer with `claude --plugin-dir .`.
+- **`scripts/next.sh` decides the next step.** It is the one place that maps a
+  column to the skill that moves an item out of it. The panel and the chat
+  guide both read it. When the flow changes, change it with `docs/concept.md`.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as
@@ -77,7 +97,7 @@ board, never on the template.
 - **Plain words first:** a skill explains itself in language a person without
   an engineering background can follow. Docs and skills are written in plain,
   short sentences without em dashes.
-- All eight delivery skills exist, plus `help` and `update`. The skills after
+- All eight delivery skills exist, plus `ui`, `help` and `update`. The skills after
   `create-item` find an item's pull request by its branch name,
   `feature/<issueNumber>-<slug>`, which `develop` creates: keep that pattern.
 - Check a changed skill with Skill Creator's validator, from the skill-creator
@@ -91,7 +111,8 @@ board, never on the template.
    `skills/help/assets/help.html` consistent with which skills exist.
 3. `description`/`displayName` appear in both `plugin.json` and
    `marketplace.json`; the marketplace entry wins, so change both together.
-4. Run `claude plugin validate . --strict`.
+4. Run `claude plugin validate . --strict` and, when the panel changed,
+   `claude plugin test .`.
 
 Commit messages follow the existing style: a short imperative summary, with
 `, release X.Y.Z` appended when the version is bumped.

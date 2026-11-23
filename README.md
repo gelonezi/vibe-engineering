@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.4.0](https://img.shields.io/badge/version-0.4.0-5b4be6)
+![Version 0.5.0](https://img.shields.io/badge/version-0.5.0-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -81,7 +81,8 @@ engineering.**
 3. Bring an idea: *"I think we should…"*
 
 Not sure where to start? Ask *"How does vibe-engineering work?"* for the
-illustrated guide.
+illustrated guide, or *"Open the vibe-engineering panel"* to see your board
+beside the chat with a button for each item's next step.
 
 ### A taste
 
@@ -101,6 +102,7 @@ illustrated guide.
 | --- | --- | --- |
 | `create-board` | Sets up your GitHub Projects board from a ready-made template: six columns, priorities, estimates and five views. | ✅ Available |
 | `create-item` | Talks your idea through with you, using your codebase as context, and saves it as a Draft item. | ✅ Available |
+| `ui` | Shows your board beside the chat, with a button for each item's next step. Without the side panel, it lists the next steps in the chat. | ✅ Available |
 | `help` | Opens an illustrated guide to the flow, the skills and the rules. | ✅ Available |
 | `update` | Updates the plugin and lists what changed. | ✅ Available |
 | `promote-backlog` | Writes the high-level design and moves the item to Backlog. | ✅ Available |
@@ -112,6 +114,19 @@ illustrated guide.
 
 Every skill is called as `vibe-engineering:<skill>`, but you rarely need the
 name: describe what you want and Claude picks the skill.
+
+### The side panel
+
+`/vibe-engineering:ui` opens a pane beside the chat that lists your board by
+column. Each item has a button for its next step: *Design it*, *Write the spec*,
+*Build it*, *Open the pull request*, *Review*, *Fix comments* or *Merge*. A
+button starts that skill on that item, exactly as if you had typed it, so every
+skill still asks before anything that can't be undone. The panel only reads the
+board, and reads it again whenever Claude finishes.
+
+It needs Claude Code 2.1.287 or later on your own computer, and nothing else to
+install. In a cloud session or an older Claude Code, `ui` shows the same board
+and steps in the chat.
 
 ### Companion plugins
 
@@ -143,7 +158,7 @@ software engineers.
 | **Assess** | A report of what your repository is missing to work well with agents. | 🗺️ Planned |
 | **Set up** | A project configured for agents: `CLAUDE.md`, rules, hooks, its own skills, a recorded architecture and quality checks. | 🗺️ Planned |
 | **Start** | Repository templates that are set up correctly from day zero: a general one, .NET with Angular, TypeScript and Python. | 🗺️ Planned |
-| **Guide** | A guided path for people with no software engineering background. | 🗺️ Planned |
+| **Guide** | A guided path for people with no software engineering background. | 🚧 Started: the side panel |
 | **Team** | Iteration planning, status reports and retrospectives for a team of people and agents. | 🗺️ Planned |
 | **Trust** | Tests and evals that keep the plugin itself reliable. | 🗺️ Planned |
 
@@ -156,6 +171,8 @@ The full plan, with the order and the decisions behind it, is in
 - Claude Code on your own computer for the board skills. Cloud sessions on
   claude.ai can't reach GitHub Projects, so there `create-board` guides you
   through copying the board by hand.
+- Claude Code 2.1.287 or later for the side panel. Everything else works
+  without it.
 - The [GitHub CLI](https://cli.github.com/), logged in with the `project` scope:
 
   ```bash
@@ -213,6 +230,9 @@ docs/
   roadmap.md           where the plugin is going
   images/              README banner and flow diagram
     src/               their sources, the icon's source, and render.py
+hooks/
+  hooks.json           lists the side panel's module
+  panel.tsx            the side panel: the board beside the chat
 scripts/               GitHub helper scripts shared by the skills
 skills/
   <skill-name>/
@@ -220,6 +240,8 @@ skills/
     references/        specs and docs the skill reads when needed
     scripts/           helper scripts only this skill uses
     assets/            files the skill shows the user, such as the help page
+tests/
+  panel.test.tsx       the side panel's tests: claude plugin test .
 ```
 
 ### Releasing a change
@@ -233,7 +255,8 @@ skills/
 3. The plugin's `description` and `displayName` appear in both `plugin.json` and
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
-4. Run `claude plugin validate . --strict` before pushing.
+4. Run `claude plugin validate . --strict` before pushing, and
+   `claude plugin test .` when the side panel changed.
 5. The companion plugins are listed in two places that must agree: the default
    list in `scripts/companions.sh` and the table above. They are optional on
    purpose. A `dependencies` entry in `plugin.json` would install them

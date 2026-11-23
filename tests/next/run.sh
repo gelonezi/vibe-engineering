@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 # Runs scripts/next.sh board against a stand-in gh and checks the steps it
 # offers for each kind of item, the number of GitHub calls, and that a longer
-# board starts no more processes. Needs jq, and no GitHub. The last check also
-# needs strace, and is skipped without it: the PASS line then says so. With
+# board starts no more processes. Needs jq (1.7 or newer on Windows), and no
+# GitHub. The last check also needs a strace that can trace, which Linux
+# has. Elsewhere it is skipped, and the PASS line says so. With
 # NEED_STRACE=1, a run that could not count process starts fails instead.
 # Run: bash tests/next/run.sh
 set -euo pipefail
 command -v jq > /dev/null 2>&1 || { echo "FAIL: this test needs jq, and jq is not installed"; exit 1; }
+# A jq built for Windows ends each line with a carriage return, which the
+# real gh --jq does not. jq's binary mode (-b, in jq 1.7 and newer) stops
+# that. The stand-in gh passes $GH_STUB_JQ to jq: -b where this jq needs it,
+# and nothing anywhere else, so an older jq still works there. The bytes are
+# counted, "1" and a line break being two, because Git Bash drops a carriage
+# return at the end of a $(...).
+export GH_STUB_JQ=""
+if [ "$(jq -n 1 | wc -c | tr -d ' ')" = 3 ]; then
+  [ "$(jq -b -n 1 2> /dev/null | wc -c | tr -d ' ')" = 2 ] || { echo "FAIL: this jq ends each line with a carriage return and has no binary mode (-b) to stop that: here the test needs jq 1.7 or newer"; exit 1; }
+  GH_STUB_JQ=-b
+fi
 here="$(cd "$(dirname "$0")" && pwd)"
 export GH_STUB_LOG; GH_STUB_LOG="$(mktemp)"
 long="$(mktemp -d)"; trace="$(mktemp)"
@@ -69,6 +81,8 @@ if command -v strace > /dev/null 2>&1; then
   elif [ "$many" -gt "$few" ]; then
     echo "FAIL: next.sh starts a process per item, repository or pull request: $few process starts for the fixture board, $many for ten times as many"
     fail=1
+    # The count was made, so the NEED_STRACE check below has nothing to say.
+    cost="$few process starts, and $many for ten times as many"
   else
     cost="$few process starts, and as many for ten times the items, repositories and pull requests"
   fi

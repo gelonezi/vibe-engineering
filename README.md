@@ -277,11 +277,11 @@ tests/
    the entry in `marketplace.json`. The marketplace entry wins where they differ,
    so change both together.
 4. Run the script checks before pushing: `bash tests/syntax.sh`,
-   `bash tests/next/run.sh` and `bash tests/repo/run.sh`. They need `jq`, and
-   no Claude Code or GitHub login. GitHub runs the same three on Linux, macOS
-   and Windows for every pull request and every push to `main`
-   (`.github/workflows/checks.yml`), and its checks must pass before the
-   merge.
+   `bash tests/next/run.sh` and `bash tests/repo/run.sh`. None needs Claude
+   Code or a GitHub login. The two tests need `jq`, and on Windows jq 1.7 or
+   newer. GitHub runs the same three on Linux, macOS and Windows for every
+   pull request and every push to `main` (`.github/workflows/checks.yml`),
+   and its checks must pass before the merge.
 5. Run `claude plugin validate . --strict` before pushing, and
    `claude plugin test .` when the side panel changed. These two run only by
    hand: GitHub does not run them.

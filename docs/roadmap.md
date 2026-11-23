@@ -122,8 +122,8 @@ A template is the project standard applied before the first commit.
   thread commands.
 - [ ] Tests for the shared scripts that have none: `projects.sh`,
   `check-auth.sh`, `companions.sh`, `update.sh` and the rest of `repo.sh`.
-- [ ] The side panel's tests on GitHub too. It has its first tests, run by
-  hand with `claude plugin test .`, which needs Claude Code.
+  The side panel has its first tests, run by hand with
+  `claude plugin test .`.
 - [ ] An eval suite that runs each skill against a throwaway board.
 - [ ] A changelog, and a rule for what a version number means.
 - [ ] A listing in Anthropic's plugin directory.

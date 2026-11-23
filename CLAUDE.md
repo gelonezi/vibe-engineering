@@ -17,7 +17,7 @@ claude plugin validate . --strict      # run before every push (release checklis
 bash tests/syntax.sh                   # syntax check of every script: bash -n on each one (bash -n with several files checks only the first)
 bash scripts/projects.sh help          # prints the command reference from the header comment
 claude plugin test .                   # runs the side panel's tests (tests/*.test.tsx); no GitHub needed
-bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts where strace is installed, and NEED_STRACE=1 makes that a must)
+bash tests/next/run.sh                 # runs next.sh board against a stand-in gh and fixtures (needs jq; counts process starts on Linux, where strace can trace, and NEED_STRACE=1 makes that a must)
 bash tests/repo/run.sh                 # runs repo.sh's review thread commands against a stand-in gh and fixtures (needs jq)
 python docs/images/src/render.py [banner] [flow] [icon]   # re-render images after editing their sources (needs Chrome/Edge + Pillow)
 ```
@@ -122,11 +122,15 @@ board, never on the template.
   Each check ends in a `PASS:` line, which a job's log shows. Add a new
   script test as one more step there, and keep it runnable by hand with the
   same command. When a job fails on one system, fix the script or the test:
-  never take the system out of the list. The tests need a `jq` binary and
-  say so when it is missing; the plugin's own scripts still must not need
-  one. Only the Linux job counts process starts: macOS has no `strace`, and
-  the one in Git Bash can't make this count. The macOS job runs Bash 3.2, so
-  keep the scripts and the tests to what that version can run.
+  never take the system out of the list. The two tests need a `jq` binary
+  and say so when it is missing; the plugin's own scripts still must not
+  need one. A jq built for Windows ends each line with a carriage return,
+  so there the tests run it in binary mode (`-b`), which needs jq 1.7 or
+  newer. Never pass `-b` to every jq: jq 1.6, which older Linux systems
+  still ship, stops at it, and the tests must keep passing with it. Only the
+  Linux job counts process starts: macOS has no `strace`, and the one in Git
+  Bash can't make this count. The macOS job runs Bash 3.2, so keep the
+  scripts and the tests to what that version can run.
 - **Mutations are not idempotent.** `copy`, `draft-create`, `convert-draft`,
   `create-sub-issue` and `pr-create` create a new
   object each run; skills must never retry them, only follow-up steps such as

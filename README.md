@@ -7,7 +7,7 @@
 a workflow worth following.
 
 ![Status: beta](https://img.shields.io/badge/status-beta-f0883e)
-![Version 0.5.3](https://img.shields.io/badge/version-0.5.3-5b4be6)
+![Version 0.5.4](https://img.shields.io/badge/version-0.5.4-5b4be6)
 [![MIT license](https://img.shields.io/badge/license-MIT-5b4be6)](LICENSE)
 
 [Quick start](#quick-start) ·
@@ -251,6 +251,9 @@ tests/
 ```
 
 ### Releasing a change
+
+The guide for people and for Claude Code working on this plugin is in
+[`.claude/CLAUDE.md`](.claude/CLAUDE.md).
 
 1. Bump `version` in `.claude-plugin/plugin.json` and in the version badge above.
    `vibe-engineering:update` reports the installed and published commits, and

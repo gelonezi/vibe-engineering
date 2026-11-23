@@ -48,6 +48,9 @@ board, never on the template.
   the user verbatim. If you change an output format, update every SKILL.md that
   reads it. Scripts must depend only on `gh` (no `jq`; use `gh --jq`) and stay
   LF-only (`.gitattributes`), as they run on Windows Git Bash, macOS and Linux.
+  Under `pipefail`, check text a script already holds with Bash itself, and
+  never end a pipe in a command that stops reading early (`grep -q`, `head`,
+  `awk` with `exit`): the answer then changes from run to run.
 - **`create-board` copies a template project** (`gh project copy` of
   `users/gelonezi/projects/6`, overridable with
   `VIBE_ENGINEERING_TEMPLATE_OWNER` / `_NUMBER`). Boards are always created

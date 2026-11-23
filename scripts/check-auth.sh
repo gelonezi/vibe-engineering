@@ -72,14 +72,18 @@ echo "TOKEN_SOURCE=$token_source"
 
 # Classic tokens and OAuth logins report their scopes in X-OAuth-Scopes.
 # Fine-grained tokens and GitHub App tokens send no such header.
+# awk reads to the end instead of exiting at the first match, so nothing
+# before it in the pipe is cut off.
 scopes="$(gh api -i user --hostname "$host" 2>/dev/null \
   | tr -d '\r' \
-  | awk -F': ' 'tolower($1)=="x-oauth-scopes" {print $2; exit}')"
+  | awk -F': ' 'tolower($1)=="x-oauth-scopes" && !seen {print $2; seen=1}')"
 
 if [ -n "$scopes" ]; then
   echo "TOKEN_KIND=classic_or_oauth"
   echo "SCOPES=$scopes"
-  has_scope() { printf '%s' "$scopes" | tr -d ' ' | tr ',' '\n' | grep -qx "$1"; }
+  # Bash only, no pipe: under pipefail, a pipe that ends in `grep -q` fails
+  # whenever grep leaves before the command feeding it has finished writing.
+  has_scope() { case ",${scopes// /}," in *",$1,"*) return 0 ;; esac; return 1; }
   if ! has_scope project; then
     echo "STATUS=missing_project_scope"
     if [ "$token_source" = "env_var" ]; then

@@ -233,6 +233,13 @@
     </article>
 
     <article class="card">
+      <header><h3>ui</h3><span class="badge ok">Available</span></header>
+      <p>Shows your board beside the chat, with a button for each item's next step, so you don't have to remember which skill comes next. A button starts that skill on that item. Where the side panel can't be drawn, it lists the board and the next steps in the chat instead.</p>
+      <dl><dt>Picks up</dt><dd>The board you name</dd><dt>Writes</dt><dd>Nothing: the skill you pick does</dd></dl>
+      <p class="ask">Ask: <span>"Open the vibe-engineering panel for Planner"</span> or <span>"What's next on my board?"</span></p>
+    </article>
+
+    <article class="card">
       <header><h3>help</h3><span class="badge ok">Available</span></header>
       <p>Opens this page, and answers questions about how the system works.</p>
       <p class="ask">Ask: <span>"How does vibe-engineering work?"</span></p>
@@ -258,7 +265,8 @@
 /plugin install vibe-engineering@vibe-engineering</code></pre>
       It works best with four companion plugins: <code>superpowers</code>, <code>code-review</code>, <code>claude-md-management</code> and <code>skill-creator</code>. Ask <code>update</code> for the commands that install them.</li>
     <li><b>Create a board.</b> Ask for one with <code>create-board</code>. It asks where the board goes, from a list of your account, organizations and repositories. An existing board works too, if it has the six columns above.</li>
-    <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you.</li>
+    <li><b>Name the board every time.</b> Every skill asks which board to use. Give its link, or its name. A skill never picks one for you. The side panel is the one exception: it shows the board you named last in that folder, with a button to change it.</li>
+    <li><b>Open the panel.</b> Ask <code>ui</code> to show your board beside the chat. Each item gets a button for its next step. Type <code>/vibe-board</code> to open it again on the same board. It needs Claude Code 2.1.287 or later on your computer; anywhere else, <code>ui</code> lists the next steps in the chat.</li>
     <li><b>Start with an idea.</b> Say what you want in plain words, and <code>create-item</code> takes it from there.</li>
   </ol>
 </section>

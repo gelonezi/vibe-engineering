@@ -38,7 +38,7 @@ Each track is a group of skills. Skill names are working names.
 | **2. Assess** | A report of what a repository is missing to work well with agents. | Planned |
 | **3. Set up** | A project configured for agents: instructions, rules, hooks, architecture, quality checks. | Planned |
 | **4. Start** | A new repository that is set up correctly from day zero. | Planned |
-| **5. Guide** | A guided path for people with no software engineering background. | Planned |
+| **5. Guide** | A guided path for people with no software engineering background. | Started: `ui` |
 | **6. Team** | Planning, status and learning for a team of people and agents. | Planned |
 | **7. Trust** | Tests and checks that keep the plugin itself reliable. | Planned, starts with Deliver |
 
@@ -93,6 +93,9 @@ A template is the project standard applied before the first commit.
 
 ### 5. Guide: no engineering background needed
 
+- [x] `ui`: the board beside the chat, in a side panel Claude Code draws, with
+  a button for each item's next step. Where the panel can't be drawn, the same
+  steps in the chat. `start-here` can open it once the first item exists.
 - [ ] `start-here`: one skill that walks a person from "I have an idea for an
   app" to a repository, a board and a first item. It drives the other skills
   step by step, explains each concept the first time it appears and picks safe
@@ -114,7 +117,8 @@ A template is the project standard applied before the first commit.
 ### 7. Trust: a plugin you can rely on
 
 - [ ] Automated tests for the shared scripts, run on every push to this
-  repository.
+  repository. The side panel has its first tests, run with
+  `claude plugin test .`.
 - [ ] An eval suite that runs each skill against a throwaway board.
 - [ ] A changelog, and a rule for what a version number means.
 - [ ] A listing in Anthropic's plugin directory.
@@ -141,6 +145,15 @@ A template is the project standard applied before the first commit.
 - The plugin is listed in Anthropic's directory.
 
 ## Decisions
+
+Made on 23 November 2026.
+
+- **The UI is a side panel inside Claude Code, not a web app.** It needs no
+  Node and no browser, and a button starts the right skill in the same chat. A
+  web page couldn't hand a click back to the chat dependably. Where the panel
+  can't be drawn, `ui` guides in the chat.
+- **The panel remembers the board** shown last in a folder, the one exception
+  to "the user always names the board". Every prompt it sends still names it.
 
 Made on 14 November 2026.
 

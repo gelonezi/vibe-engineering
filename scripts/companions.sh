@@ -33,12 +33,15 @@ flat="$(printf '%s' "$list" | tr -d '\n' | awk '{ gsub(/"id":/, "\n\"id\":"); pr
 status="ok"
 for name in $COMPANIONS; do
   # Any marketplace counts, and so does a copy synced from claude.ai.
-  line="$(printf '%s\n' "$flat" | grep -E "^\"id\": *\"$name@" | head -n 1)"
+  # Here-strings, not pipes, and the first line is cut with Bash itself:
+  # under pipefail, a pipe fails when its last command stops reading early.
+  line="$(grep -E "^\"id\": *\"$name@" <<<"$flat")"
+  line="${line%%$'\n'*}"
   if [ -z "$line" ]; then
     echo "COMPANION=$name missing"
     echo "FIX=claude plugin install $name@$MARKETPLACE"
     status="missing"
-  elif printf '%s' "$line" | grep -Eq '"enabled": *false'; then
+  elif grep -Eq '"enabled": *false' <<<"$line"; then
     echo "COMPANION=$name disabled"
     id="$(printf '%s' "$line" | sed -E 's/^"id": *"([^"]*)".*/\1/')"
     echo "FIX=claude plugin enable $id"

@@ -290,12 +290,14 @@ case "$cmd" in
 
   set-status)
     [ $# -eq 3 ] || die "usage: set-status <projectId> <itemId> <status>"
+    # awk takes the first match but reads to the end: under pipefail, leaving
+    # early can cut off the command before it and fail the whole pipe.
     status_line="$(gql -f p="$1" -f query='
       query($p: ID!) {
         node(id: $p) { ... on ProjectV2 { field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } } } }
       }' \
       --jq '.data.node.field | .id as $f | .options[] | [$f, .id, .name] | @tsv' \
-      | awk -F'\t' -v s="$3" '$3 == s { print $1 "\t" $2; exit }')"
+      | awk -F'\t' -v s="$3" '$3 == s && !seen { print $1 "\t" $2; seen = 1 }')"
     [ -n "$status_line" ] || die "this board's Status field has no option named: $3"
     IFS=$'\t' read -r status_field status_option <<<"$status_line"
     gql -f p="$1" -f i="$2" -f f="$status_field" -f o="$status_option" -f query='
@@ -478,11 +480,13 @@ case "$cmd" in
         }
       }' \
       --jq '.data.node.field | if . == null then error("field not found") else (if .options then (.id as $f | .dataType as $dt | .options[] | [$f, $dt, .id, .name] | @tsv) else [.id, .dataType, "", ""] | @tsv end) end')"
-    first_line="$(printf '%s\n' "$field_lines" | head -n 1)"
+    # The text is already in a variable, so Bash and a here-string read it:
+    # no pipe that a command could leave early.
+    first_line="${field_lines%%$'\n'*}"
     IFS=$'\t' read -r fid ftype _ _ <<<"$first_line"
     case "$ftype" in
       SINGLE_SELECT)
-        opt_id="$(printf '%s\n' "$field_lines" | awk -F'\t' -v v="$4" 'tolower($4) == tolower(v) { print $3; exit }')"
+        opt_id="$(awk -F'\t' -v v="$4" 'tolower($4) == tolower(v) && !seen { print $3; seen = 1 }' <<<"$field_lines")"
         [ -n "$opt_id" ] || die "field $3 has no option named: $4"
         gql -f p="$1" -f i="$2" -f f="$fid" -f o="$opt_id" -f query='
           mutation($p: ID!, $i: ID!, $f: ID!, $o: String!) {

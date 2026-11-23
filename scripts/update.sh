@@ -24,11 +24,13 @@ RECORD="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
 # First string value of a key in a one-line JSON result. The value may contain
 # escaped quotes (the updater writes \"plugin\" in its message), so skip over
 # backslash pairs and then unescape \" and \\.
+# Both sed commands read to the end, and Bash cuts the first line itself.
 json_field() {
-  printf '%s' "$2" \
+  local value
+  value="$(printf '%s' "$2" \
     | sed -nE "s/.*\"$1\":\"((\\\\.|[^\"\\\\])*)\".*/\1/p" \
-    | sed -E 's/\\(["\\])/\1/g' \
-    | head -n 1
+    | sed -E 's/\\(["\\])/\1/g')"
+  if [ -n "$value" ]; then printf '%s\n' "${value%%$'\n'*}"; fi
 }
 
 # The commit the installed copy was built from, read from this plugin's block only.

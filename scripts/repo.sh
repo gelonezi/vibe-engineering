@@ -64,7 +64,8 @@ case "$cmd" in
     case "$code" in
       0) echo "CHECKS=pass" ;;
       8) echo "CHECKS=pending" ;;
-      *) if printf '%s' "$out" | grep -qi "no checks"; then echo "CHECKS=none"; else echo "CHECKS=fail"; fi ;;
+      # A here-string, not a pipe: no command is left writing when grep stops.
+      *) if grep -qi "no checks" <<<"$out"; then echo "CHECKS=none"; else echo "CHECKS=fail"; fi ;;
     esac
     ;;
 

@@ -170,9 +170,13 @@ a button for each item's next step:
 | Draft | Design it | `promote-backlog` |
 | Backlog | Write the spec | `promote-ready` |
 | Ready | Build it | `develop` |
-| In progress | Open the pull request | `push` |
+| In progress | Open the pull request, or Update the pull request once it's open | `push` |
 | In review | Review, Fix comments, Merge | `review`, `develop`, `approve` |
 | A parent with sub-issues | None: it shows its progress | |
+
+Fix comments shows only when the item's pull request has comments to fix: a
+reviewer asked for changes, or a review thread is still open. The pull request
+is the one that closes the issue, as `push` writes it.
 
 A button sends an ordinary prompt, as the user's own words, that names the
 skill, the item and the board. The skill then runs as if the user had typed it,

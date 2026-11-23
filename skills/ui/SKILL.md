@@ -117,6 +117,7 @@ and that board, as if they had asked for it:
 | Write the spec | `vibe-engineering:promote-ready` | The item |
 | Build it | `vibe-engineering:develop` | The item |
 | Open the pull request | `vibe-engineering:push` | The item |
+| Update the pull request | `vibe-engineering:push` | The item |
 | Review | `vibe-engineering:review` | The item |
 | Fix comments | `vibe-engineering:develop` | The review comments on the item |
 | Merge | `vibe-engineering:approve` | The item |
